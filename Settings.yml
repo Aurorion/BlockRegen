@@ -1,0 +1,25 @@
+# BlockRegen 3.0
+# 
+# Developer: Aurorion
+# Version: 3.0
+
+# If you have Vault installed and wish to use it to reward players money set this to true
+Use-Economy: false
+
+# If you have WorldEdit installed and wish to make and use regions then set this to true
+Use-Regions: false
+
+# Set this to true if you dont want blocks to be regenerated in Towny towns.
+Towny-Support: false
+
+# If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
+Disable-Other-Break: false
+
+# If you wish to cancel all other blocks broken in the region then set this to true
+Disable-Other-Break-Region: false
+
+# Add the worlds you wish to use BlockRegen in to this list
+Worlds-Enabled:
+    - world
+    - world_nether
+    

@@ -1,0 +1,27 @@
+# BlockRegen 3.0
+# 
+# Developer: Aurorion
+# Version: 3.0
+
+Messages:
+    Prefix: "&6&l[&3BlockRegen&6&l] &f"
+    Insufficient-Permission: "&cYou don't have the permissions to do this!"
+    Console-Sender-Error: "&cI'm sorry but the console can not perform this command!"
+    Reload: "&a&lSuccesfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"
+    Bypass-On: "&aBypass toggled on!"
+    Bypass-Off: "&cByppas toggled off!"
+    Invalid-Command: "&cThis is not a valid command!"
+    Data-Check: "&eThe correct name to enter in the config is: &d%block%"
+    Data-Check-On: "&aEnterd Data-Check mode!"
+    Data-Check-Off: "&cLeft Data-Check mode!"
+    No-Region-Selected: "&cI'm sorry but you need to select a CUBOID region first!"
+    Duplicated-Region: "&cThere is already a region with that name!"
+    Set-Region: "&aRegion succesfully saved!"
+    Remove-Region: "&aRegion succesfully removed!"
+    Unknown-Region: "&cThere is no region with that name!"
+    Activate-Event: "&aYou activated the event: &2%event%"
+    De-Activate-Event: "&cYou de-activated the event: &4%event%"
+    Event-Not-Found: "&cThis event is not found in the system. Reminder: event names are case sensitive!"
+    Event-Already-Active: "&cThis event is already active!"
+    Event-Not-Active: "&cThis event is currently not active!"
+    Tool-Required-Error: "&cYou can only break this block with a &b%tool%&c."
