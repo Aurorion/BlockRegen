@@ -17,7 +17,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
-import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
+import com.sk89q.worldedit.bukkit.BukkitPlayer;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.World;
 
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Messages;
@@ -30,8 +35,6 @@ public class Commands implements CommandExecutor, Listener {
 	public Commands(Main main){
 		this.main = main;
 	}
-	
-	private Selection s;
 	
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args) {
@@ -126,16 +129,21 @@ public class Commands implements CommandExecutor, Listener {
 					if(args.length == 3){
 						if(args[1].equalsIgnoreCase("set")){
 							
-							s = main.getWorldEdit().getSelection(player);
+							BukkitPlayer p = BukkitAdapter.adapt(player);
+							World w = p.getWorld();
+							LocalSession ls = main.getWorldEdit().getSession(player);
+							Region s = null;
 							
-							if(s == null){
+							try {
+								s = ls.getSelection(w);
+							} catch (IncompleteRegionException e) {
 								player.sendMessage(main.getMessages().noregion);
-								return true;
 							}
 							
 							if(main.getFiles().getRegions().getString("Regions") == null){
-								main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(s.getMinimumPoint()));
-								main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(s.getMaximumPoint()));
+								main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.vectorToString(s.getMinimumPoint()));
+								main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.vectorToString(s.getMaximumPoint()));
+								main.getFiles().getRegions().set("Regions." + args[2] + ".World", s.getWorld().getName());
 								main.getFiles().saveRegions();
 								player.sendMessage(main.getMessages().setregion);
 							}else{
@@ -144,8 +152,9 @@ public class Commands implements CommandExecutor, Listener {
 								if(setregions.contains(args[2])){
 									player.sendMessage(main.getMessages().dupregion);
 								}else{
-									main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(s.getMinimumPoint()));
-									main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(s.getMaximumPoint()));
+									main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.vectorToString(s.getMinimumPoint()));
+									main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.vectorToString(s.getMaximumPoint()));
+									main.getFiles().getRegions().set("Regions." + args[2] + ".World", s.getWorld().getName());
 									main.getFiles().saveRegions();
 									player.sendMessage(main.getMessages().setregion);
 								}
@@ -215,38 +224,36 @@ public class Commands implements CommandExecutor, Listener {
 								if(Utils.events.get(allArgs) == false){
 									Utils.events.put(allArgs, true);
 									player.sendMessage(main.getMessages().activateEvent.replace("%event%", allArgs));
-									if(Utils.getVersion() == 9){
-										String barName = null;
-										BarColor barColor = BarColor.BLUE;
-										FileConfiguration blocklist = main.getFiles().getBlocklist();
-										ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
-										Set<String> setblocks = blocks.getKeys(false);
-										for(String loopBlocks : setblocks){
-											String eventName = blocklist.getString("Blocks." + loopBlocks + ".event.event-name");
-											if(eventName.equalsIgnoreCase(allArgs)){
-												if(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name") == null){
-													barName = "Event " + allArgs + " is now active!";
-												}else{
-													barName = blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name");
-												}
-												if(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color") == null){
-													barColor = BarColor.YELLOW;
-												}else{
-													barColor = BarColor.valueOf(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color").toUpperCase());
-												}
-												
-												break;
+									String barName = null;
+									BarColor barColor = BarColor.BLUE;
+									FileConfiguration blocklist = main.getFiles().getBlocklist();
+									ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
+									Set<String> setblocks = blocks.getKeys(false);
+									for(String loopBlocks : setblocks){
+										String eventName = blocklist.getString("Blocks." + loopBlocks + ".event.event-name");
+										if(eventName.equalsIgnoreCase(allArgs)){
+											if(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name") == null){
+												barName = "Event " + allArgs + " is now active!";
 											}else{
-												continue;
+												barName = blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name");
 											}
+											if(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color") == null){
+												barColor = BarColor.YELLOW;
+											}else{
+												barColor = BarColor.valueOf(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color").toUpperCase());
+											}
+											
+											break;
+										}else{
+											continue;
 										}
-										BossBar bossbar = Bukkit.createBossBar(null, BarColor.BLUE, BarStyle.SOLID);
-										Utils.bars.put(allArgs, bossbar);
-										bossbar.setTitle(ChatColor.translateAlternateColorCodes('&', barName));
-										bossbar.setColor(barColor);
-										for(Player online : Bukkit.getOnlinePlayers()){
-											bossbar.addPlayer(online);
-										}
+									}
+									BossBar bossbar = Bukkit.createBossBar(null, BarColor.BLUE, BarStyle.SOLID);
+									Utils.bars.put(allArgs, bossbar);
+									bossbar.setTitle(ChatColor.translateAlternateColorCodes('&', barName));
+									bossbar.setColor(barColor);
+									for(Player online : Bukkit.getOnlinePlayers()){
+										bossbar.addPlayer(online);
 									}
 								}else{
 									player.sendMessage(main.getMessages().eventActive);
@@ -270,11 +277,9 @@ public class Commands implements CommandExecutor, Listener {
 								if(Utils.events.get(allArgs) == true){
 									Utils.events.put(allArgs, false);
 									player.sendMessage(main.getMessages().deActivateEvent.replace("%event%", allArgs));
-									if(Utils.getVersion() == 9){
-										BossBar bossbar = Utils.bars.get(allArgs);
-										bossbar.removeAll();
-										Utils.bars.remove(allArgs);
-									}
+									BossBar bossbar = Utils.bars.get(allArgs);
+									bossbar.removeAll();
+									Utils.bars.remove(allArgs);
 								}else{
 									player.sendMessage(main.getMessages().eventNotActive);
 								}
@@ -294,12 +299,10 @@ public class Commands implements CommandExecutor, Listener {
 	@EventHandler
 	public void onJoin(PlayerJoinEvent event){
 		Player player = event.getPlayer();
-		if(Utils.getVersion() == 9){
-			if(!Utils.bars.isEmpty()){
-				for(String bars : Utils.bars.keySet()){
-					BossBar bar = Utils.bars.get(bars);
-					bar.addPlayer(player);
-				}
+		if(!Utils.bars.isEmpty()){
+			for(String bars : Utils.bars.keySet()){
+				BossBar bar = Utils.bars.get(bars);
+				bar.addPlayer(player);
 			}
 		}
 	}

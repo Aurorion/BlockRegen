@@ -26,7 +26,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Utils;
@@ -103,30 +104,33 @@ public class BlockBreak implements Listener {
 				ConfigurationSection regionsection = main.getFiles().getRegions().getConfigurationSection("Regions");
 				Set<String> regionset = regionsection.getKeys(false);
 				for(String regionloop : regionset){
-					Location locA = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
-					Location locB = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-					CuboidSelection selection = new CuboidSelection(bworld, locA, locB);
-					if(selection.contains(block.getLocation())){
-						isinregion = true;
-						break;
+					World world = Bukkit.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
+					if(world == bworld) {
+						Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
+						Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
+						CuboidRegion selection = new CuboidRegion(locA, locB);
+						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()), Double.valueOf(block.getZ()));
+						if(selection.contains(vec)){
+							isinregion = true;
+							break;
+						}
 					}
 				}
 			}
 			
 			if(setblocks.contains(blockname)){
-				if(blocklist.getString("Blocks." + blockname + ".tool-required") != null){
-					Material tool = Material.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
-					if(Utils.getHand(player).getType() != tool){
-						event.setCancelled(true);
-						player.sendMessage(main.getMessages().toolRequired.replace("%tool%", tool.toString().toLowerCase().replace("_", " ")));
-						return;
-					}
-				}
 				
 				int expToDrop = event.getExpToDrop();
 				
 				if(isinregion){
-					//event.setCancelled(true);
+					if(blocklist.getString("Blocks." + blockname + ".tool-required") != null){
+						Material tool = Material.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
+						if(player.getInventory().getItemInMainHand().getType() != tool){
+							event.setCancelled(true);
+							player.sendMessage(main.getMessages().toolRequired.replace("%tool%", tool.toString().toLowerCase().replace("_", " ")));
+							return;
+						}
+					}
 					event.setDropItems(false);
 					event.setExpToDrop(0);
 					this.blockBreak(player, block, blockname, bworld, expToDrop);
@@ -134,7 +138,14 @@ public class BlockBreak implements Listener {
 					if(useregions){
 						return;
 					}else{
-						//event.setCancelled(true);
+						if(blocklist.getString("Blocks." + blockname + ".tool-required") != null){
+							Material tool = Material.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
+							if(player.getInventory().getItemInMainHand().getType() != tool){
+								event.setCancelled(true);
+								player.sendMessage(main.getMessages().toolRequired.replace("%tool%", tool.toString().toLowerCase().replace("_", " ")));
+								return;
+							}
+						}
 						event.setDropItems(false);
 						event.setExpToDrop(0);
 						this.blockBreak(player, block, blockname, bworld, event.getExpToDrop());
@@ -201,6 +212,7 @@ public class BlockBreak implements Listener {
 		}
 		
 		//Drop Section-----------------------------------------------------------------------------------------
+		ItemStack item = player.getInventory().getItemInMainHand();
 		boolean naturalbreak;
 		if(blocklist.get("Blocks." + blockname + ".natural-break") == null){
 			naturalbreak = true;
@@ -266,8 +278,9 @@ public class BlockBreak implements Listener {
 					if(doubleDrops){
 						amount = amount * 2;
 					}
-					if(Utils.getHand(player).hasItemMeta() && Utils.getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)){
-						int enchantLevel = Utils.getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+					
+					if(item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)){
+						int enchantLevel = item.getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
 						amount = amount + enchantLevel;
 					}
 					ItemStack dropitem = new ItemStack(dropmaterial, amount);
@@ -328,16 +341,16 @@ public class BlockBreak implements Listener {
 		
 		//Tool damage -----------------------------------------------------------------------------------------
 		int tooldamage	    = blocklist.getInt("Blocks." + blockname + ".tool-damage");
-		int durability		= Utils.getHand(player).getDurability();
-		int maxdurability	= Utils.getHand(player).getType().getMaxDurability();
+		int durability		= item.getDurability();
+		int maxdurability	= item.getType().getMaxDurability();
 		int diff			= maxdurability - durability;
 		int diff2			= diff - tooldamage;
 		
 		if(tooldamage != 0){
 			if(diff2 > 0){
-				Utils.getHand(player).setDurability((short) (Utils.getHand(player).getDurability() + tooldamage));
+				item.setDurability((short) (durability + tooldamage));
 			}else{
-				player.getInventory().remove(Utils.getHand(player));
+				player.getInventory().remove(item);
 			}	
 			player.updateInventory();
 		}
