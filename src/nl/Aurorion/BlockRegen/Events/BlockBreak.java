@@ -213,6 +213,7 @@ public class BlockBreak implements Listener {
 		
 		//Drop Section-----------------------------------------------------------------------------------------
 		ItemStack item = player.getInventory().getItemInMainHand();
+		
 		boolean naturalbreak;
 		if(blocklist.get("Blocks." + blockname + ".natural-break") == null){
 			naturalbreak = true;
@@ -356,7 +357,7 @@ public class BlockBreak implements Listener {
 		}
 		
 		//Particles  ------------------------------------------------------------------------------------------
-		//Disabled ATM
+		//Disabled ATM - Will be in an particle update
 		/*if(blocklist.getString("Blocks." + blockname + ".particle-effect") != null){
 			String particleName = blocklist.getString("Blocks." + blockname + ".particle-effect");
 			main.getParticles().check(particleName);
