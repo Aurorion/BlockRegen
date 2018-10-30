@@ -27,17 +27,7 @@ Blocks:
         tool-damage: 100
         # This option allows you to set a tool that people need to have to break the block.
         # If they don't have this tool they get an error message (Messages.yml)
-<<<<<<< HEAD
         tool-required: DIAMOND_PICKAXE, IRON_PICKAXE
-=======
-        tool-required: DIAMOND_PICKAXE
-        # For particle effects on break.
-        # A list with available particle names can be found here:
-        particle-effect: flame_crown
-<<<<<<< HEAD
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
         # Give drops, exp and amount as it would be in vanilla
         # Set this to false to use the other options
         natural-break: false

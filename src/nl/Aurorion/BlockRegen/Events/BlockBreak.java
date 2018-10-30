@@ -36,30 +36,12 @@ import nl.Aurorion.BlockRegen.Utils;
 @SuppressWarnings("deprecation")
 public class BlockBreak implements Listener {
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 	private Main main;
-=======
-	Main main;
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-	Main main;
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 
 	public BlockBreak(Main main) {
 		this.main = main;
 	}
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-	private ArrayList<Location> regenBlocks = new ArrayList<Location>();
-
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-	private ArrayList<Location> regenBlocks = new ArrayList<Location>();
-
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 	public static Block block;
 
 	@EventHandler(priority = EventPriority.MONITOR)
@@ -71,15 +53,7 @@ public class BlockBreak implements Listener {
 
 		block = event.getBlock();
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 		if (Utils.regenBlocks.contains(block.getLocation())) {
-=======
-		if (regenBlocks.contains(block.getLocation())) {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-		if (regenBlocks.contains(block.getLocation())) {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 			event.setCancelled(true);
 			return;
 		}
@@ -132,13 +106,6 @@ public class BlockBreak implements Listener {
 					World world = Bukkit
 							.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
 					if (world == bworld) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-						Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-						Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
-						CuboidRegion selection = new CuboidRegion(locA, locB);
-						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),	Double.valueOf(block.getZ()));
-=======
 						Vector locA = Utils.stringToVector(
 								main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
 						Vector locB = Utils.stringToVector(
@@ -146,16 +113,6 @@ public class BlockBreak implements Listener {
 						CuboidRegion selection = new CuboidRegion(locA, locB);
 						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),
 								Double.valueOf(block.getZ()));
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-						Vector locA = Utils.stringToVector(
-								main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-						Vector locB = Utils.stringToVector(
-								main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
-						CuboidRegion selection = new CuboidRegion(locA, locB);
-						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),
-								Double.valueOf(block.getZ()));
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 						if (selection.contains(vec)) {
 							isinregion = true;
 							break;
@@ -169,27 +126,9 @@ public class BlockBreak implements Listener {
 				int expToDrop = event.getExpToDrop();
 
 				if (isinregion) {
-					if (blocklist.getString("Blocks." + blockname + ".tool-required") != null) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-						if(!this.toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player)){
-							event.setCancelled(true);
-=======
-						Material tool = Material
-								.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
-						if (player.getInventory().getItemInMainHand().getType() != tool) {
-							event.setCancelled(true);
-=======
-						Material tool = Material
-								.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
-						if (player.getInventory().getItemInMainHand().getType() != tool) {
-							event.setCancelled(true);
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-							player.sendMessage(main.getMessages().toolRequired.replace("%tool%",
-									tool.toString().toLowerCase().replace("_", " ")));
-							return;
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-						}
+					if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null)
+							&& (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+						event.setCancelled(true);
 					}
 					event.setDropItems(false);
 					event.setExpToDrop(0);
@@ -198,23 +137,9 @@ public class BlockBreak implements Listener {
 					if (useregions) {
 						return;
 					} else {
-						if (blocklist.getString("Blocks." + blockname + ".tool-required") != null) {
-<<<<<<< HEAD
-<<<<<<< HEAD
-							if(!this.toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player)){
-								event.setCancelled(true);
-=======
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-							Material tool = Material.valueOf(
-									blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
-							if (player.getInventory().getItemInMainHand().getType() != tool) {
-								event.setCancelled(true);
-								player.sendMessage(main.getMessages().toolRequired.replace("%tool%",
-										tool.toString().toLowerCase().replace("_", " ")));
-								return;
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-							}
+						if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null)
+								&& (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+							event.setCancelled(true);
 						}
 						event.setDropItems(false);
 						event.setExpToDrop(0);
@@ -237,8 +162,6 @@ public class BlockBreak implements Listener {
 			}
 		}
 	}
-<<<<<<< HEAD
-<<<<<<< HEAD
 	
 	private boolean toolCheck(String string, Player player) {
 		String[] tools = string.split(", ");
@@ -252,15 +175,10 @@ public class BlockBreak implements Listener {
 		}
 		if (check) {
 			return true;
-		}else {
-			player.sendMessage(main.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
-			return false;
 		}
+		player.sendMessage(this.main.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
+		return false;
 	}
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 
 	private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {
 		FileConfiguration blocklist = main.getFiles().getBlocklist();
@@ -348,46 +266,22 @@ public class BlockBreak implements Listener {
 				Material dropmaterial = Material.valueOf(blocklist.getString("Blocks." + blockname + ".drop-item.material"));
 
 				String itemname = blocklist.getString("Blocks." + blockname + ".drop-item.name");
-<<<<<<< HEAD
-<<<<<<< HEAD
-				boolean customname = false;
-				if (itemname != null) {
-=======
 				if (itemname == null) {
 					itemname = dropmaterial.name();
 				} else {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-				if (itemname == null) {
-					itemname = dropmaterial.name();
-				} else {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 					itemname = blocklist.getString("Blocks." + blockname + ".drop-item.name");
-					customname = true;
 				}
 
 				ArrayList<String> lores = new ArrayList<String>();
-<<<<<<< HEAD
-<<<<<<< HEAD
-				boolean customlores = false;
-				if (!blocklist.getStringList("Blocks." + blockname + ".drop-item.lores").isEmpty() || blocklist.getStringList("Blocks." + blockname + ".drop-item.lores") != null) {
-=======
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 				if (itemname.equalsIgnoreCase("§4§l[§cError§4§l]")) {
 					lores.add(" ");
 					lores.add(ChatColor.translateAlternateColorCodes('&', "&aYou forgot to name this item"));
 					lores.add(ChatColor.translateAlternateColorCodes('&', "&aPlease specify a name in your Blocklist.yml"));
 					lores.add("  ");
 				} else {
-<<<<<<< HEAD
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 					for (String lorelist : blocklist.getStringList("Blocks." + blockname + ".drop-item.lores")) {
 						lores.add(ChatColor.translateAlternateColorCodes('&', lorelist));
 					}
-					customlores = true;
 				}
 
 				boolean dropnaturally = blocklist.getBoolean("Blocks." + blockname + ".drop-item.drop-naturally");
@@ -409,12 +303,8 @@ public class BlockBreak implements Listener {
 					}
 					ItemStack dropitem = new ItemStack(dropmaterial, amount);
 					ItemMeta dropmeta = dropitem.getItemMeta();
-					if (customname) {
-						dropmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemname));
-					}
-					if (customlores) {
-						dropmeta.setLore(lores);
-					}
+					dropmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemname));
+					dropmeta.setLore(lores);
 					dropitem.setItemMeta(dropmeta);
 
 					if (dropnaturally) {
@@ -493,14 +383,7 @@ public class BlockBreak implements Listener {
 		}*/
 
 		// Replacing the block ---------------------------------------------------------------------------------
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
 
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 		new BukkitRunnable() {
 
 			@Override
@@ -511,38 +394,21 @@ public class BlockBreak implements Listener {
 
 		}.runTaskLater(main, 2l);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
 		Utils.regenBlocks.add(loc);
-=======
-		regenBlocks.add(loc);
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-		regenBlocks.add(loc);
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 
 		// Actual Regening -------------------------------------------------------------------------------------
 		int regendelay = 3;
 		if (blocklist.get("Blocks." + blockname + ".regen-delay") != null) {
 			regendelay = blocklist.getInt("Blocks." + blockname + ".regen-delay");
 		}
-<<<<<<< HEAD
-<<<<<<< HEAD
+		
 		BukkitTask task = new BukkitRunnable() {
-=======
-		new BukkitRunnable() {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-=======
-		new BukkitRunnable() {
->>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
-
-			@Override
 			public void run() {
 				state.update(true);
 				Utils.regenBlocks.remove(loc);
 			}
-
-		}.runTaskLater(main, regendelay * 20);
+		}.runTaskLater(this.main, regendelay * 20);
+		
 		Utils.tasks.put(loc, task);
 		return;
 	}
