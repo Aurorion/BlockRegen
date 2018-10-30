@@ -1,7 +1,7 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
-# Version: 3.0
+# Version: 3.1
 # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
 Blocks:
@@ -28,6 +28,9 @@ Blocks:
         # This option allows you to set a tool that people need to have to break the block.
         # If they don't have this tool they get an error message (Messages.yml)
         tool-required: DIAMOND_PICKAXE
+        # For particle effects on break.
+        # A list with available particle names can be found here:
+        particle-effect: flame_crown
         # Give drops, exp and amount as it would be in vanilla
         # Set this to false to use the other options
         natural-break: false

@@ -1,6 +1,6 @@
 name: BlockRegen
 main: nl.Aurorion.BlockRegen.Main
-version: 3.0
+version: 3.1
 author: [Aurorion]
 load: STARTUP
 softdepend: [Vault, WorldEdit, Towny]
