@@ -34,6 +34,9 @@ Blocks:
         # For particle effects on break.
         # A list with available particle names can be found here:
         particle-effect: flame_crown
+<<<<<<< HEAD
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
+=======
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
         # Give drops, exp and amount as it would be in vanilla
         # Set this to false to use the other options

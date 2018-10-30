@@ -37,7 +37,11 @@ import nl.Aurorion.BlockRegen.Utils;
 public class BlockBreak implements Listener {
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 	private Main main;
+=======
+	Main main;
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 	Main main;
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
@@ -47,6 +51,11 @@ public class BlockBreak implements Listener {
 	}
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+	private ArrayList<Location> regenBlocks = new ArrayList<Location>();
+
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 	private ArrayList<Location> regenBlocks = new ArrayList<Location>();
 
@@ -63,7 +72,11 @@ public class BlockBreak implements Listener {
 		block = event.getBlock();
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		if (Utils.regenBlocks.contains(block.getLocation())) {
+=======
+		if (regenBlocks.contains(block.getLocation())) {
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 		if (regenBlocks.contains(block.getLocation())) {
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
@@ -120,10 +133,20 @@ public class BlockBreak implements Listener {
 							.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
 					if (world == bworld) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 						Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
 						Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
 						CuboidRegion selection = new CuboidRegion(locA, locB);
 						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),	Double.valueOf(block.getZ()));
+=======
+						Vector locA = Utils.stringToVector(
+								main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
+						Vector locB = Utils.stringToVector(
+								main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
+						CuboidRegion selection = new CuboidRegion(locA, locB);
+						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),
+								Double.valueOf(block.getZ()));
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 						Vector locA = Utils.stringToVector(
 								main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
@@ -148,6 +171,7 @@ public class BlockBreak implements Listener {
 				if (isinregion) {
 					if (blocklist.getString("Blocks." + blockname + ".tool-required") != null) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 						if(!this.toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player)){
 							event.setCancelled(true);
 =======
@@ -155,6 +179,12 @@ public class BlockBreak implements Listener {
 								.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
 						if (player.getInventory().getItemInMainHand().getType() != tool) {
 							event.setCancelled(true);
+=======
+						Material tool = Material
+								.valueOf(blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
+						if (player.getInventory().getItemInMainHand().getType() != tool) {
+							event.setCancelled(true);
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 							player.sendMessage(main.getMessages().toolRequired.replace("%tool%",
 									tool.toString().toLowerCase().replace("_", " ")));
 							return;
@@ -170,9 +200,12 @@ public class BlockBreak implements Listener {
 					} else {
 						if (blocklist.getString("Blocks." + blockname + ".tool-required") != null) {
 <<<<<<< HEAD
+<<<<<<< HEAD
 							if(!this.toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player)){
 								event.setCancelled(true);
 =======
+=======
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 							Material tool = Material.valueOf(
 									blocklist.getString("Blocks." + blockname + ".tool-required").toUpperCase());
 							if (player.getInventory().getItemInMainHand().getType() != tool) {
@@ -205,6 +238,7 @@ public class BlockBreak implements Listener {
 		}
 	}
 <<<<<<< HEAD
+<<<<<<< HEAD
 	
 	private boolean toolCheck(String string, Player player) {
 		String[] tools = string.split(", ");
@@ -223,6 +257,8 @@ public class BlockBreak implements Listener {
 			return false;
 		}
 	}
+=======
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 
@@ -313,8 +349,14 @@ public class BlockBreak implements Listener {
 
 				String itemname = blocklist.getString("Blocks." + blockname + ".drop-item.name");
 <<<<<<< HEAD
+<<<<<<< HEAD
 				boolean customname = false;
 				if (itemname != null) {
+=======
+				if (itemname == null) {
+					itemname = dropmaterial.name();
+				} else {
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 				if (itemname == null) {
 					itemname = dropmaterial.name();
@@ -326,15 +368,21 @@ public class BlockBreak implements Listener {
 
 				ArrayList<String> lores = new ArrayList<String>();
 <<<<<<< HEAD
+<<<<<<< HEAD
 				boolean customlores = false;
 				if (!blocklist.getStringList("Blocks." + blockname + ".drop-item.lores").isEmpty() || blocklist.getStringList("Blocks." + blockname + ".drop-item.lores") != null) {
 =======
+=======
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 				if (itemname.equalsIgnoreCase("§4§l[§cError§4§l]")) {
 					lores.add(" ");
 					lores.add(ChatColor.translateAlternateColorCodes('&', "&aYou forgot to name this item"));
 					lores.add(ChatColor.translateAlternateColorCodes('&', "&aPlease specify a name in your Blocklist.yml"));
 					lores.add("  ");
 				} else {
+<<<<<<< HEAD
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
+=======
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 					for (String lorelist : blocklist.getStringList("Blocks." + blockname + ".drop-item.lores")) {
 						lores.add(ChatColor.translateAlternateColorCodes('&', lorelist));
@@ -446,6 +494,10 @@ public class BlockBreak implements Listener {
 
 		// Replacing the block ---------------------------------------------------------------------------------
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
@@ -460,7 +512,11 @@ public class BlockBreak implements Listener {
 		}.runTaskLater(main, 2l);
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 		Utils.regenBlocks.add(loc);
+=======
+		regenBlocks.add(loc);
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 		regenBlocks.add(loc);
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
@@ -471,7 +527,11 @@ public class BlockBreak implements Listener {
 			regendelay = blocklist.getInt("Blocks." + blockname + ".regen-delay");
 		}
 <<<<<<< HEAD
+<<<<<<< HEAD
 		BukkitTask task = new BukkitRunnable() {
+=======
+		new BukkitRunnable() {
+>>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
 =======
 		new BukkitRunnable() {
 >>>>>>> 03e9c057f156daaa8341aa42867de49326febfe7
