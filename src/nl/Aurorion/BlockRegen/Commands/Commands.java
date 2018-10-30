@@ -46,11 +46,11 @@ public class Commands implements CommandExecutor, Listener {
 			Player player = (Player) sender;
 			if(args.length == 0){
 				player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
-						+ "\n&3/blockregen reload &7: Reload the Settings.yml, main.getMessages().yml and Blocklist.yml."
-						+ "\n&3/blockregen bypass &7: Bypass the events."
-						+ "\n&3/blockregen check &7: Check the name + data of the block to put in the blocklist."
-						+ "\n&3/blockregen region &7: All the info to set a region."
-						+ "\n&3/blockregen events &7: Check all your events."
+						+ "\n&3/" + label + " reload &7: Reload the Settings.yml, main.getMessages().yml and Blocklist.yml."
+						+ "\n&3/" + label + " bypass &7: Bypass the events."
+						+ "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
+						+ "\n&3/" + label + " region &7: All the info to set a region."
+						+ "\n&3/" + label + " events &7: Check all your events."
 						+ "\nCurrently using BlockRegen v" + main.getDescription().getVersion()
 						+ "\n&6&m-----------------------"));
 				return true;
@@ -105,9 +105,9 @@ public class Commands implements CommandExecutor, Listener {
 					}
 					if(args.length == 1 || args.length > 3){
 						player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
-								+ "\n&3/blockregen region set <name> &7: set a region."
-								+ "\n&3/blockregen region remove <name> &7: remove a region."
-								+ "\n&3/blockregen region list &7: a list of all your regions."
+								+ "\n&3/" + label + "  region set <name> &7: set a region."
+								+ "\n&3/" + label + "  region remove <name> &7: remove a region."
+								+ "\n&3/" + label + "  region list &7: a list of all your regions."
 								+ "\n&6&m-----------------------"));
 						return true;
 					}
@@ -205,8 +205,8 @@ public class Commands implements CommandExecutor, Listener {
 								player.sendMessage(ChatColor.AQUA + "- " + events + " " + state);
 							}
 							player.sendMessage(" ");
-							player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/blockregen events activate <event name> &eto activate it."));
-							player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/blockregen events deactivate <event name> &eto de-activate it."));
+							player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events activate <event name> &eto activate it."));
+							player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events deactivate <event name> &eto de-activate it."));
 							player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----------------------"));
 						}
 					}else{

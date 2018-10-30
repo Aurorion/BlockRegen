@@ -1,7 +1,7 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
-# Version: 3.0
+# Version: 3.1
 
 Messages:
     Prefix: "&6&l[&3BlockRegen&6&l] &f"
@@ -24,4 +24,4 @@ Messages:
     Event-Not-Found: "&cThis event is not found in the system. Reminder: event names are case sensitive!"
     Event-Already-Active: "&cThis event is already active!"
     Event-Not-Active: "&cThis event is currently not active!"
-    Tool-Required-Error: "&cYou can only break this block with a &b%tool%&c."
+    Tool-Required-Error: "&cYou can only break this block with the following tool(s): &b%tool%&c."

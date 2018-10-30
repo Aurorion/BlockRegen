@@ -16,6 +16,7 @@ import net.milkbowl.vault.economy.Economy;
 import nl.Aurorion.BlockRegen.Commands.Commands;
 import nl.Aurorion.BlockRegen.Configurations.Files;
 import nl.Aurorion.BlockRegen.Events.BlockBreak;
+import nl.Aurorion.BlockRegen.Events.PlayerInteract;
 import nl.Aurorion.BlockRegen.Particles.ParticleUtil;
 
 public class Main extends JavaPlugin {
@@ -52,6 +53,7 @@ public class Main extends JavaPlugin {
 		files = new Files(this);
 		messages = new Messages(files);
 		particleUtil = new ParticleUtil(this);
+		new Metrics(this);
 	}
 
 	private void registerCommands(){
@@ -60,8 +62,9 @@ public class Main extends JavaPlugin {
 
 	private void registerEvents(){
 		PluginManager pm = this.getServer().getPluginManager();
-		pm.registerEvents(new BlockBreak(this), this);
 		pm.registerEvents(new Commands(this), this);
+		pm.registerEvents(new BlockBreak(this), this);
+		pm.registerEvents(new PlayerInteract(this), this);
 	}
 	
 	private boolean setupEconomy(){

@@ -8,6 +8,8 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BossBar;
+import org.bukkit.scheduler.BukkitTask;
+
 import com.sk89q.worldedit.Vector;
 
 public class Utils {
@@ -15,8 +17,10 @@ public class Utils {
 	public static ArrayList<String> bypass = new ArrayList<String>();
 	public static ArrayList<String> itemcheck = new ArrayList<String>();
 	public static ArrayList<Color> colors = new ArrayList<Color>();
+	public static ArrayList<Location> regenBlocks = new ArrayList<Location>();
 	public static HashMap<String, Boolean> events = new HashMap<String, Boolean>();
 	public static HashMap<String, BossBar> bars = new HashMap<String, BossBar>();
+	public static HashMap<Location, BukkitTask> tasks = new HashMap<Location, BukkitTask>();
 	
 	public static Chunk stringToChunk(String string) {
         String[] splits = string.split(";");

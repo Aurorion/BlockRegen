@@ -10,6 +10,7 @@ import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Events.BlockBreak;
 import nl.Aurorion.BlockRegen.Particles.breaking.FireWorks;
 import nl.Aurorion.BlockRegen.Particles.breaking.FlameCrown;
+import nl.Aurorion.BlockRegen.Particles.breaking.WitchSpell;
 
 public class ParticleUtil {
 	
@@ -30,10 +31,13 @@ public class ParticleUtil {
 		BukkitTask task = null;
 		
 		if(particleName.equalsIgnoreCase("flame_crown")){
-			task = Bukkit.getScheduler().runTaskTimerAsynchronously(main, new FlameCrown(), 0l, 20l);
+			task = Bukkit.getScheduler().runTaskAsynchronously(main, new FlameCrown());
 		}
 		if(particleName.equalsIgnoreCase("fireworks")){
 			task = Bukkit.getScheduler().runTask(main, new FireWorks(main));
+		}
+		if(particleName.equalsIgnoreCase("witch_spell")){
+			task = Bukkit.getScheduler().runTask(main, new WitchSpell());
 		}
 		
 		tasks.put(block, task);
