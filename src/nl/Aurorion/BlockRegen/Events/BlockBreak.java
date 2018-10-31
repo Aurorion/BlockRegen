@@ -33,7 +33,6 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Utils;
 
-@SuppressWarnings("deprecation")
 public class BlockBreak implements Listener {
 
 	private Main main;
@@ -358,22 +357,24 @@ public class BlockBreak implements Listener {
 		}
 
 		// Tool damage -----------------------------------------------------------------------------------------
-		int maxdurability = item.getType().getMaxDurability();
-		if (!(maxdurability <= 0)) {
+		// CURRENTLY NOT IN USE
+		/*if (item.getType().getMaxDurability() > 0) {
+			ItemMeta meta = item.getItemMeta();
 			int tooldamage = blocklist.getInt("Blocks." + blockname + ".tool-damage");
-			int durability = item.getDurability();
-			int diff = maxdurability - durability;
-			int diff2 = diff - tooldamage;
+			int max = item.getType().getMaxDurability();
+			int damage = ((Damageable) meta).getDamage();
+			Bukkit.broadcastMessage("" + damage);
+			int durability = max - damage;
 
 			if (tooldamage != 0) {
-				if (diff2 > 0) {
-					item.setDurability((short) (durability + tooldamage));
+				if (durability > 0) {
+					((Damageable) meta).setDamage(durability - tooldamage);
 				} else {
 					player.getInventory().remove(item);
 				}
 				player.updateInventory();
 			}
-		}
+		}*/
 
 		// Particles ------------------------------------------------------------------------------------------
 		// Disabled ATM - Will be in an particle update

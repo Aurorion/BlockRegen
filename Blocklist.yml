@@ -1,7 +1,7 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
-# Version: 3.1
+# Version: 3.1.1
 # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
 Blocks:
@@ -22,9 +22,6 @@ Blocks:
         # Example: console-command: "me I, %player%, executed this command"
         # Leave empty to ignore this function
         player-command: "me I, %player%, executed this command"
-        # The amount of durability that is taken from the item used to break the block.
-        # Set this to 0 to ignore the function
-        tool-damage: 100
         # This option allows you to set a tool that people need to have to break the block.
         # If they don't have this tool they get an error message (Messages.yml)
         tool-required: DIAMOND_PICKAXE, IRON_PICKAXE
@@ -82,8 +79,6 @@ Blocks:
         regen-delay: 3
         money: 5
         console-command: "say %player% is a badass lumberjack.."
-        player-command: 
-        tool-damage: 100
         natural-break: false
         drop-item:
             material: APPLE
