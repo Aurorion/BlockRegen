@@ -38,10 +38,12 @@ public class Main extends JavaPlugin {
 		this.fillEvents();
 		this.setupEconomy();
 		this.setupWorldEdit();
+		this.checkForPlugins();
 		Utils.fillFireworkColors();
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bYou are using version " + this.getDescription().getVersion()));
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bReport bugs or suggestions to discord only please."));
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bAlways backup if you are not sure about things."));
+		this.enableMetrics();
 	}
 
 	@Override
@@ -53,7 +55,6 @@ public class Main extends JavaPlugin {
 		files = new Files(this);
 		messages = new Messages(files);
 		particleUtil = new ParticleUtil(this);
-		new Metrics(this);
 	}
 
 	private void registerCommands(){
@@ -93,6 +94,12 @@ public class Main extends JavaPlugin {
 		return worldedit != null;
 	}
 	
+	private void checkForPlugins() {
+		if (this.getJobs()) {
+			this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &eJobs found! &aEnabling Jobs fuctions."));
+		}
+	}
+	
 	public void fillEvents(){
     	FileConfiguration blocklist = files.getBlocklist();
 		ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
@@ -112,6 +119,11 @@ public class Main extends JavaPlugin {
 		}
     }
 	
+	public void enableMetrics() {
+		new MetricsLite(this);
+		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &8MetricsLite enabled"));
+	}
+	
 	//-------------------- Getters --------------------------
 	public Economy getEconomy(){
 		return this.econ;
@@ -120,6 +132,13 @@ public class Main extends JavaPlugin {
 	public WorldEditPlugin getWorldEdit() {
         return this.worldedit;
     }
+	
+	public boolean getJobs() {
+		if (this.getServer().getPluginManager().getPlugin("Jobs") != null) {
+			return true;
+		}
+		return false;
+	}
 	
 	public Files getFiles(){
 		return this.files;

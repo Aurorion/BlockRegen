@@ -49,6 +49,7 @@ public class Commands implements CommandExecutor, Listener {
 						+ "\n&3/" + label + " reload &7: Reload the Settings.yml, main.getMessages().yml and Blocklist.yml."
 						+ "\n&3/" + label + " bypass &7: Bypass the events."
 						+ "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
+						+ "\n&3/" + label + " convert &7: Converts you regions to 3.0 compatibility."
 						+ "\n&3/" + label + " region &7: All the info to set a region."
 						+ "\n&3/" + label + " events &7: Check all your events."
 						+ "\nCurrently using BlockRegen v" + main.getDescription().getVersion()
@@ -97,6 +98,10 @@ public class Commands implements CommandExecutor, Listener {
 						player.sendMessage(main.getMessages().datacheckoff);
 					}
 					return true;
+				}
+				if(args[0].equalsIgnoreCase("convert")) {
+					this.convert();
+					player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&a&lConverted your regions to BlockRegen 3.0 compatibility!"));
 				}
 				if(args[0].equalsIgnoreCase("region")){
 					if(!player.hasPermission("blockregen.admin")){
@@ -305,6 +310,26 @@ public class Commands implements CommandExecutor, Listener {
 				bar.addPlayer(player);
 			}
 		}
+	}
+	
+	private void convert() {
+		FileConfiguration regions = main.getFiles().getRegions();
+		
+		String[] locA;
+		String[] locB;
+		
+		ConfigurationSection regionsection = regions.getConfigurationSection("Regions");
+		Set<String> regionset = regionsection.getKeys(false);
+		for (String regionloop : regionset) {
+			locA = regions.getString("Regions." + regionloop + ".Max").split(";");
+			locB = regions.getString("Regions." + regionloop + ".Min").split(";");
+			regions.set("Regions." + regionloop + ".Max", locA[1] + ";" + locA[2] + ";" + locA[3]);
+			regions.set("Regions." + regionloop + ".Min", locB[1] + ";" + locB[2] + ";" + locB[3]);
+			regions.set("Regions." + regionloop + ".World", locA[0]);
+		}
+		
+		main.getFiles().saveRegions();
+		
 	}
 
 }

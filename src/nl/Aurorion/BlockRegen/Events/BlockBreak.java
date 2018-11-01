@@ -26,6 +26,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
+import com.gamingmesh.jobs.Jobs;
+import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -102,16 +104,12 @@ public class BlockBreak implements Listener {
 				ConfigurationSection regionsection = main.getFiles().getRegions().getConfigurationSection("Regions");
 				Set<String> regionset = regionsection.getKeys(false);
 				for (String regionloop : regionset) {
-					World world = Bukkit
-							.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
+					World world = Bukkit.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
 					if (world == bworld) {
-						Vector locA = Utils.stringToVector(
-								main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-						Vector locB = Utils.stringToVector(
-								main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
+						Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
+						Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
 						CuboidRegion selection = new CuboidRegion(locA, locB);
-						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()),
-								Double.valueOf(block.getZ()));
+						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()), Double.valueOf(block.getZ()));
 						if (selection.contains(vec)) {
 							isinregion = true;
 							break;
@@ -125,9 +123,15 @@ public class BlockBreak implements Listener {
 				int expToDrop = event.getExpToDrop();
 
 				if (isinregion) {
-					if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null)
-							&& (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+					if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null) && (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
 						event.setCancelled(true);
+						return;
+					}
+					if (blocklist.getString("Blocks." + blockname + ".jobs-check") != null) {
+						if(!this.jobsCheck(blocklist.getString("Blocks." + blockname + ".jobs-check"), player)) {
+							event.setCancelled(true);
+							return;
+						}
 					}
 					event.setDropItems(false);
 					event.setExpToDrop(0);
@@ -136,13 +140,19 @@ public class BlockBreak implements Listener {
 					if (useregions) {
 						return;
 					} else {
-						if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null)
-								&& (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+						if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null) && (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
 							event.setCancelled(true);
+							return;
+						}
+						if (blocklist.getString("Blocks." + blockname + ".jobs-check") != null) {
+							if(!this.jobsCheck(blocklist.getString("Blocks." + blockname + ".jobs-check"), player)) {
+								event.setCancelled(true);
+								return;
+							}
 						}
 						event.setDropItems(false);
 						event.setExpToDrop(0);
-						this.blockBreak(player, block, blockname, bworld, event.getExpToDrop());
+						this.blockBreak(player, block, blockname, bworld, expToDrop);
 					}
 				}
 			} else {
@@ -177,6 +187,29 @@ public class BlockBreak implements Listener {
 		}
 		player.sendMessage(this.main.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
 		return false;
+	}
+	
+	private boolean jobsCheck(String string, Player player) {
+		String job = null;
+		int level = 0;
+		String[] jobCheckString = string.split(";");
+		List<JobProgression> jobs = Jobs.getPlayerManager().getJobsPlayer(player).getJobProgression();
+		for (JobProgression OneJob : jobs) {
+			if(OneJob.getJob().equals(Jobs.getJob(jobCheckString[0]))) {
+				job = OneJob.getJob().getName();
+				level = OneJob.getLevel();
+				break;
+			}
+		}
+		if(job == null || !job.equals(jobCheckString[0])) {
+			player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+			return false;
+		} else if (level < Integer.valueOf(jobCheckString[1])){
+			player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+			return false;
+		} else {
+			return true;
+		}
 	}
 
 	private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {

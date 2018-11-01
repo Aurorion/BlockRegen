@@ -1,7 +1,7 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
-# Version: 3.1.1
+# Version: 3.2.0
 
 Messages:
     Prefix: "&6&l[&3BlockRegen&6&l] &f"
@@ -25,3 +25,4 @@ Messages:
     Event-Already-Active: "&cThis event is already active!"
     Event-Not-Active: "&cThis event is currently not active!"
     Tool-Required-Error: "&cYou can only break this block with the following tool(s): &b%tool%&c."
+    Jobs-Error: "&cYou need to be a level &b%level% %job% &cto break this block."
