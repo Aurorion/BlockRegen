@@ -1,8 +1,10 @@
 package nl.Aurorion.BlockRegen;
 
+import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -16,8 +18,13 @@ import net.milkbowl.vault.economy.Economy;
 import nl.Aurorion.BlockRegen.Commands.Commands;
 import nl.Aurorion.BlockRegen.Configurations.Files;
 import nl.Aurorion.BlockRegen.Events.BlockBreak;
+import nl.Aurorion.BlockRegen.Events.BlockExplode;
+import nl.Aurorion.BlockRegen.Events.BlockPlace;
 import nl.Aurorion.BlockRegen.Events.PlayerInteract;
+import nl.Aurorion.BlockRegen.Events.PlayerJoin;
 import nl.Aurorion.BlockRegen.Particles.ParticleUtil;
+import nl.Aurorion.BlockRegen.System.Getters;
+import nl.Aurorion.BlockRegen.System.UpdateCheck;
 
 public class Main extends JavaPlugin {
 
@@ -28,6 +35,10 @@ public class Main extends JavaPlugin {
 	private Files files;
 	private Messages messages;
 	private ParticleUtil particleUtil;
+	private Getters getters;
+	private Random random;
+	
+	public String newVersion = null;
 
 	@Override
 	public void onEnable(){
@@ -44,10 +55,29 @@ public class Main extends JavaPlugin {
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bReport bugs or suggestions to discord only please."));
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bAlways backup if you are not sure about things."));
 		this.enableMetrics();
+		if (this.getGetters().updateChecker()) {
+			this.getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
+	            UpdateCheck updater = new UpdateCheck(this, 9885);
+	            try {
+	                if (updater.checkForUpdates()) {
+	                    this.newVersion = updater.getLatestVersion();
+	                }
+	            } catch (Exception e) {
+	                plugin.getLogger().warning("[BlockRegen] Could not check for updates! Stacktrace:");
+	                e.printStackTrace();
+	            }
+	        }, 20L);
+		}
 	}
 
 	@Override
 	public void onDisable(){
+		this.getServer().getScheduler().cancelTasks(this);
+		if(!Utils.regenBlocks.isEmpty()) {
+			for (Location loc : Utils.persist.keySet()) {
+				loc.getBlock().setType(Utils.persist.get(loc));
+			}
+		}
 		plugin = null;
 	}
 
@@ -55,6 +85,8 @@ public class Main extends JavaPlugin {
 		files = new Files(this);
 		messages = new Messages(files);
 		particleUtil = new ParticleUtil(this);
+		getters = new Getters(this);
+		random = new Random();
 	}
 
 	private void registerCommands(){
@@ -65,7 +97,10 @@ public class Main extends JavaPlugin {
 		PluginManager pm = this.getServer().getPluginManager();
 		pm.registerEvents(new Commands(this), this);
 		pm.registerEvents(new BlockBreak(this), this);
+		pm.registerEvents(new BlockExplode(), this);
+		pm.registerEvents(new BlockPlace(this), this);
 		pm.registerEvents(new PlayerInteract(this), this);
+		pm.registerEvents(new PlayerJoin(this), this);
 	}
 	
 	private boolean setupEconomy(){
@@ -150,6 +185,14 @@ public class Main extends JavaPlugin {
 	
 	public ParticleUtil getParticles(){
 		return this.particleUtil;
+	}
+	
+	public Getters getGetters() {
+		return this.getters;
+	}
+	
+	public Random getRandom() {
+		return this.random;
 	}
 
 }

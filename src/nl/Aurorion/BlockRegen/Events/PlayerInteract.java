@@ -14,16 +14,16 @@ import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Utils;
 
 public class PlayerInteract implements Listener {
-	
+
 	private Main main;
-	
+
 	public PlayerInteract(Main instance) {
 		this.main = instance;
 	}
 
 	@EventHandler
 	public void onInteract(PlayerInteractEvent event) {
-		if(main.getFiles().getSettings().getBoolean("Bone-Meal-Override")) {
+		if (main.getFiles().getSettings().getBoolean("Bone-Meal-Override")) {
 			if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
 				Player player = event.getPlayer();
 				if (player.getInventory().getItemInMainHand().getType().equals(Material.BONE_MEAL)) {
@@ -38,7 +38,7 @@ public class PlayerInteract implements Listener {
 					}
 				}
 			}
-			
+
 		}
 	}
 

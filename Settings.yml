@@ -1,15 +1,18 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
-# Version: 3.2.0
+# Version: 3.3.0
 
-# If you have Vault installed and wish to use it to reward players money set this to true
-Use-Economy: false
+# Get notified when there is a new version available
+Update-Checker: true
+
+# Use the build in nature restorer
+Use-Restorer: false
 
 # If you have WorldEdit installed and wish to make and use regions then set this to true
 Use-Regions: false
 
-# Set this to true if you dont want blocks to be regenerated in Towny towns.
+# Set this to true if you dont want blocks to be regenerated in Towny towns
 Towny-Support: false
 
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true

@@ -4,6 +4,7 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -52,6 +53,7 @@ public class Commands implements CommandExecutor, Listener {
 						+ "\n&3/" + label + " convert &7: Converts you regions to 3.0 compatibility."
 						+ "\n&3/" + label + " region &7: All the info to set a region."
 						+ "\n&3/" + label + " events &7: Check all your events."
+						+ "\n&3/" + label + " restore <amount> &7: Restore the nature around the player in x amount of blocks around."
 						+ "\nCurrently using BlockRegen v" + main.getDescription().getVersion()
 						+ "\n&6&m-----------------------"));
 				return true;
@@ -295,6 +297,29 @@ public class Commands implements CommandExecutor, Listener {
 						}
 					}
 					return true;
+				}
+				
+				if (args[0].equalsIgnoreCase("restore")) {
+					if (main.getGetters().useRestorer()) {
+						if (args.length == 2) {
+							Location pLoc = player.getLocation();
+							double region = Double.valueOf(args[1]);
+							for (double x = Math.round(pLoc.getX() - region); x < Math.round(pLoc.getX() + region); x++) {
+								for (double y = Math.round(pLoc.getY() - region); y < Math.round(pLoc.getY() + region); y++) {
+									for (double z = Math.round(pLoc.getZ() - region); z < Math.round(pLoc.getZ() + region); z++) {
+										Location loc = new Location(pLoc.getWorld(),x,y,z);
+										if (Utils.restorer.containsKey(loc)) {
+											loc.getBlock().setType(Utils.restorer.get(loc));
+										}
+									}
+								}
+							}
+						} else {
+							player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&cSpecify the amount of blocks to be restored around you."));
+						}
+					} else {
+						player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&cYou have not enabled the restorer."));
+					}
 				}
 			}
 		}

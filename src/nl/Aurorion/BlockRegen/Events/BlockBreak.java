@@ -1,12 +1,9 @@
 package nl.Aurorion.BlockRegen.Events;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -14,7 +11,6 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -34,6 +30,7 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Utils;
+import nl.Aurorion.BlockRegen.System.Getters;
 
 public class BlockBreak implements Listener {
 
@@ -48,11 +45,10 @@ public class BlockBreak implements Listener {
 	@EventHandler(priority = EventPriority.MONITOR)
 	public void onBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
+		block = event.getBlock();
 		if (Utils.bypass.contains(player.getName())) {
 			return;
 		}
-
-		block = event.getBlock();
 
 		if (Utils.regenBlocks.contains(block.getLocation())) {
 			event.setCancelled(true);
@@ -123,12 +119,12 @@ public class BlockBreak implements Listener {
 				int expToDrop = event.getExpToDrop();
 
 				if (isinregion) {
-					if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null) && (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+					if ((main.getGetters().toolRequired(blockname) != null) && (!toolCheck(main.getGetters().toolRequired(blockname), player))) {
 						event.setCancelled(true);
 						return;
 					}
-					if (blocklist.getString("Blocks." + blockname + ".jobs-check") != null) {
-						if(!this.jobsCheck(blocklist.getString("Blocks." + blockname + ".jobs-check"), player)) {
+					if (main.getGetters().jobsCheck(blockname) != null) {
+						if(!jobsCheck(main.getGetters().jobsCheck(blockname), player)) {
 							event.setCancelled(true);
 							return;
 						}
@@ -140,12 +136,12 @@ public class BlockBreak implements Listener {
 					if (useregions) {
 						return;
 					} else {
-						if ((blocklist.getString("Blocks." + blockname + ".tool-required") != null) && (!toolCheck(blocklist.getString("Blocks." + blockname + ".tool-required"), player))) {
+						if ((main.getGetters().toolRequired(blockname) != null) && (!toolCheck(main.getGetters().toolRequired(blockname), player))) {
 							event.setCancelled(true);
 							return;
 						}
-						if (blocklist.getString("Blocks." + blockname + ".jobs-check") != null) {
-							if(!this.jobsCheck(blocklist.getString("Blocks." + blockname + ".jobs-check"), player)) {
+						if (main.getGetters().jobsCheck(blockname) != null) {
+							if(!jobsCheck(main.getGetters().jobsCheck(blockname), player)) {
 								event.setCancelled(true);
 								return;
 							}
@@ -162,11 +158,18 @@ public class BlockBreak implements Listener {
 					} else if (disablebreak) {
 						event.setCancelled(true);
 					} else {
+						if(!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer()) {
+							Utils.restorer.put(block.getLocation(), block.getType());
+						}
 						return;
 					}
 				}
 				if (disablebreak) {
 					event.setCancelled(true);
+				} else {
+					if(!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer()) {
+						Utils.restorer.put(block.getLocation(), block.getType());
+					}
 				}
 			}
 		}
@@ -213,64 +216,39 @@ public class BlockBreak implements Listener {
 	}
 
 	private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {
-		FileConfiguration blocklist = main.getFiles().getBlocklist();
+		Getters getters = main.getGetters();
 		BlockState state = block.getState();
 		Location loc = block.getLocation();
 
 		// Events ---------------------------------------------------------------------------------------------
-		String eventName;
 		boolean doubleDrops = false;
 		boolean doubleExp = false;
 		ItemStack eventItem = null;
 		boolean dropEventItem = false;
 		int rarity = 0;
 
-		if (blocklist.getString("Blocks." + blockname + ".event.event-name") != null) {
-			eventName = blocklist.getString("Blocks." + blockname + ".event.event-name");
-			if (Utils.events.get(eventName) == true) {
-				doubleDrops = blocklist.getBoolean("Blocks." + blockname + ".event.double-drops");
-				doubleExp = blocklist.getBoolean("Blocks." + blockname + ".event.double-exp");
-				if (blocklist.getBoolean("Blocks." + blockname + ".event.custom-item.enabled") == true
-						&& blocklist.getString("Blocks." + blockname + ".event.custom-item.material") != null) {
-					eventItem = new ItemStack(Material.valueOf(
-							blocklist.getString("Blocks." + blockname + ".event.custom-item.material").toUpperCase()),
-							1);
+		if (getters.eventName(blockname) != null) {
+			if (Utils.events.get(getters.eventName(blockname))) {
+				doubleDrops = getters.eventDoubleDrops(blockname);
+				doubleExp = getters.eventDoubleExp(blockname);
+				if (getters.eventItemMaterial(blockname) != null) {
+					eventItem = new ItemStack(getters.eventItemMaterial(blockname), 1);
 					ItemMeta meta = eventItem.getItemMeta();
-					ArrayList<String> lores = new ArrayList<String>();
-					if (blocklist.getString("Blocks." + blockname + ".event.custom-item.name") != null) {
-						meta.setDisplayName(ChatColor.translateAlternateColorCodes('&',
-								blocklist.getString("Blocks." + blockname + ".event.custom-item.name")));
-						for (String lorelist : blocklist
-								.getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
-							lores.add(ChatColor.translateAlternateColorCodes('&', lorelist));
-						}
-					} else {
-						meta.setDisplayName(ChatColor.translateAlternateColorCodes('&', "&4&l[&cError&4&l]"));
-						lores.add(" ");
-						lores.add(ChatColor.translateAlternateColorCodes('&', "&aYou forgot to name this item"));
-						lores.add(ChatColor.translateAlternateColorCodes('&',
-								"&aPlease specify a name in your Blocklist.yml"));
-						lores.add("  ");
+					if (getters.eventItemName(blockname) != null) {
+						meta.setDisplayName(getters.eventItemName(blockname));
 					}
-					meta.setLore(lores);
+					if (!getters.eventItemLores(blockname).isEmpty()) {
+						meta.setLore(getters.eventItemLores(blockname));
+					}
 					eventItem.setItemMeta(meta);
-					dropEventItem = blocklist.getBoolean("Blocks." + blockname + ".event.custom-item.drop-naturally");
-					rarity = blocklist.getInt("Blocks." + blockname + ".event.custom-item.rarity");
+					dropEventItem = getters.eventItemDropNaturally(blockname);
+					rarity = getters.eventItemRarity(blockname);
 				}
 			}
 		}
 
 		// Drop Section-----------------------------------------------------------------------------------------
-		ItemStack item = player.getInventory().getItemInMainHand();
-
-		boolean naturalbreak;
-		if (blocklist.get("Blocks." + blockname + ".natural-break") == null) {
-			naturalbreak = true;
-		} else {
-			naturalbreak = blocklist.getBoolean("Blocks." + blockname + ".natural-break");
-		}
-
-		if (naturalbreak) {
+		if (getters.naturalBreak(blockname)) {
 			for (ItemStack drops : block.getDrops()) {
 				Material mat = drops.getType();
 				int amount;
@@ -287,79 +265,45 @@ public class BlockBreak implements Listener {
 			} else {
 				((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop);
 			}
-		} else {
-			if (blocklist.getString("Blocks." + blockname + ".drop-item.material") == null) {
-				if (!player.hasPermission("blockregen.admin")) {
-					player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&l[&3BlockRegen&6&l] &cThere is something wrong with BlockRegen. Please contact an admin to report this issue."));
+		} else if (getters.dropItemMaterial(blockname) != null) {
+			if (getters.dropItemAmount(blockname, player) > 0) {
+				int itemAmount = getters.dropItemAmount(blockname, player);
+				if(doubleDrops) {
+					itemAmount = itemAmount * 2;
+				}
+				ItemStack dropitem = new ItemStack(getters.dropItemMaterial(blockname), itemAmount);
+				ItemMeta dropmeta = dropitem.getItemMeta();
+				if(getters.dropItemName(blockname) != null) {
+					dropmeta.setDisplayName(getters.dropItemName(blockname));
+				}
+				if(!getters.dropItemLores(blockname).isEmpty()) {
+					dropmeta.setLore(getters.dropItemLores(blockname));
+				}
+				dropitem.setItemMeta(dropmeta);
+
+				if (getters.dropItemDropNaturally(blockname)) {
+					bworld.dropItem(loc, dropitem);
 				} else {
-					player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&l[&3BlockRegen&6&l] &cThe drop-item section of the block is not propperly set up."));
+					player.getInventory().addItem(dropitem);
+					player.updateInventory();
 				}
-			} else {
-				Material dropmaterial = Material.valueOf(blocklist.getString("Blocks." + blockname + ".drop-item.material"));
+			}
 
-				String itemname = blocklist.getString("Blocks." + blockname + ".drop-item.name");
-				if (itemname == null) {
-					itemname = dropmaterial.name();
+			if (getters.dropItemExpAmount(blockname) > 0) {
+				int expAmount = getters.dropItemExpAmount(blockname);
+				if (doubleExp) {
+					expAmount = expAmount * 2;
+				}
+				if (getters.dropItemExpDrop(blockname)) {
+					((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(expAmount);
 				} else {
-					itemname = blocklist.getString("Blocks." + blockname + ".drop-item.name");
-				}
-
-				ArrayList<String> lores = new ArrayList<String>();
-				if (itemname.equalsIgnoreCase("§4§l[§cError§4§l]")) {
-					lores.add(" ");
-					lores.add(ChatColor.translateAlternateColorCodes('&', "&aYou forgot to name this item"));
-					lores.add(ChatColor.translateAlternateColorCodes('&', "&aPlease specify a name in your Blocklist.yml"));
-					lores.add("  ");
-				} else {
-					for (String lorelist : blocklist.getStringList("Blocks." + blockname + ".drop-item.lores")) {
-						lores.add(ChatColor.translateAlternateColorCodes('&', lorelist));
-					}
-				}
-
-				boolean dropnaturally = blocklist.getBoolean("Blocks." + blockname + ".drop-item.drop-naturally");
-				boolean expdrop = blocklist.getBoolean("Blocks." + blockname + ".drop-item.exp.drop-naturally");
-				int expamount = blocklist.getInt("Blocks." + blockname + ".drop-item.exp.amount");
-				int amounthigh = blocklist.getInt("Blocks." + blockname + ".drop-item.amount.high");
-				int amountlow = blocklist.getInt("Blocks." + blockname + ".drop-item.amount.low");
-				Random random = new Random();
-				int amount = random.nextInt((amounthigh - amountlow) + 1) + amountlow;
-
-				if (amount > 0) {
-					if (doubleDrops) {
-						amount = amount * 2;
-					}
-
-					if (item.hasItemMeta() && item.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-						int enchantLevel = item.getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
-						amount = amount + enchantLevel;
-					}
-					ItemStack dropitem = new ItemStack(dropmaterial, amount);
-					ItemMeta dropmeta = dropitem.getItemMeta();
-					dropmeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', itemname));
-					dropmeta.setLore(lores);
-					dropitem.setItemMeta(dropmeta);
-
-					if (dropnaturally) {
-						bworld.dropItem(loc, dropitem);
-					} else {
-						player.getInventory().addItem(dropitem);
-						player.updateInventory();
-					}
-				}
-
-				if (expamount > 0) {
-					if (expdrop) {
-						((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(expamount);
-					} else {
-						player.giveExp(expamount);
-					}
+					player.giveExp(expAmount);
 				}
 			}
 		}
 
 		if (eventItem != null) {
-			int random = new Random().nextInt(rarity);
-			if (random == 1) {
+			if (main.getRandom().nextInt(rarity) == 1) {
 				if (dropEventItem) {
 					bworld.dropItemNaturally(loc, eventItem);
 				} else {
@@ -369,45 +313,18 @@ public class BlockBreak implements Listener {
 		}
 
 		// Vault money -----------------------------------------------------------------------------------------
-		boolean usevault = main.getFiles().getSettings().getBoolean("Use-Economy");
-		int money = 0;
-		if (blocklist.get("Blocks." + blockname + ".money") != null) {
-			money = blocklist.getInt("Blocks." + blockname + ".money");
-		}
-		if (main.getEconomy() != null && usevault && money > 0) {
-			main.getEconomy().depositPlayer(player, money);
+		if (main.getEconomy() != null && getters.money(blockname) > 0) {
+			main.getEconomy().depositPlayer(player, getters.money(blockname));
 		}
 
 		// Command execution -----------------------------------------------------------------------------------
-		String consoleCommand = blocklist.getString("Blocks." + blockname + ".console-command");
-		if (consoleCommand != null) {
-			Bukkit.dispatchCommand(Bukkit.getConsoleSender(), consoleCommand.replace("%player%", player.getName()));
+		if (getters.consoleCommand(blockname) != null) {
+			Bukkit.dispatchCommand(Bukkit.getConsoleSender(),getters.consoleCommand(blockname).replace("%player%", player.getName()));
 		}
-
-		String playerCommand = blocklist.getString("Blocks." + blockname + ".player-command");
-		if (playerCommand != null) {
-			Bukkit.dispatchCommand(player, playerCommand.replace("%player%", player.getName()));
+		
+		if (getters.playerCommand(blockname) != null) {
+			Bukkit.dispatchCommand(player, getters.playerCommand(blockname).replace("%player%", player.getName()));
 		}
-
-		// Tool damage -----------------------------------------------------------------------------------------
-		// CURRENTLY NOT IN USE
-		/*if (item.getType().getMaxDurability() > 0) {
-			ItemMeta meta = item.getItemMeta();
-			int tooldamage = blocklist.getInt("Blocks." + blockname + ".tool-damage");
-			int max = item.getType().getMaxDurability();
-			int damage = ((Damageable) meta).getDamage();
-			Bukkit.broadcastMessage("" + damage);
-			int durability = max - damage;
-
-			if (tooldamage != 0) {
-				if (durability > 0) {
-					((Damageable) meta).setDamage(durability - tooldamage);
-				} else {
-					player.getInventory().remove(item);
-				}
-				player.updateInventory();
-			}
-		}*/
 
 		// Particles ------------------------------------------------------------------------------------------
 		// Disabled ATM - Will be in an particle update
@@ -417,13 +334,12 @@ public class BlockBreak implements Listener {
 		}*/
 
 		// Replacing the block ---------------------------------------------------------------------------------
-
+		Utils.persist.put(loc, block.getType());
 		new BukkitRunnable() {
 
 			@Override
 			public void run() {
-				String replaceName = blocklist.getString("Blocks." + blockname + ".replace-block");
-				block.setType(Material.valueOf(replaceName));
+				block.setType(getters.replaceBlock(blockname));
 			}
 
 		}.runTaskLater(main, 2l);
@@ -432,16 +348,18 @@ public class BlockBreak implements Listener {
 
 		// Actual Regening -------------------------------------------------------------------------------------
 		int regendelay = 3;
-		if (blocklist.get("Blocks." + blockname + ".regen-delay") != null) {
-			regendelay = blocklist.getInt("Blocks." + blockname + ".regen-delay");
+		if (getters.replaceDelay(blockname) != null) {
+			regendelay = getters.replaceDelay(blockname);
 		}
 		
 		BukkitTask task = new BukkitRunnable() {
 			public void run() {
 				state.update(true);
+				Utils.persist.remove(loc);
 				Utils.regenBlocks.remove(loc);
+				Utils.tasks.remove(loc);
 			}
-		}.runTaskLater(this.main, regendelay * 20);
+		}.runTaskLater(main, regendelay * 20);
 		
 		Utils.tasks.put(loc, task);
 		return;
