@@ -4,7 +4,6 @@ import java.util.Set;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Location;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -19,12 +18,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import com.sk89q.worldedit.IncompleteRegionException;
-import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.bukkit.BukkitPlayer;
 import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.world.World;
-
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Messages;
 import nl.Aurorion.BlockRegen.Utils;
@@ -50,10 +45,8 @@ public class Commands implements CommandExecutor, Listener {
 						+ "\n&3/" + label + " reload &7: Reload the Settings.yml, main.getMessages().yml and Blocklist.yml."
 						+ "\n&3/" + label + " bypass &7: Bypass the events."
 						+ "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
-						+ "\n&3/" + label + " convert &7: Converts you regions to 3.0 compatibility."
 						+ "\n&3/" + label + " region &7: All the info to set a region."
 						+ "\n&3/" + label + " events &7: Check all your events."
-						+ "\n&3/" + label + " restore <amount> &7: Restore the nature around the player in x amount of blocks around."
 						+ "\nCurrently using BlockRegen v" + main.getDescription().getVersion()
 						+ "\n&6&m-----------------------"));
 				return true;
@@ -103,7 +96,7 @@ public class Commands implements CommandExecutor, Listener {
 				}
 				if(args[0].equalsIgnoreCase("convert")) {
 					this.convert();
-					player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&a&lConverted your regions to BlockRegen 3.0 compatibility!"));
+					player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));
 				}
 				if(args[0].equalsIgnoreCase("region")){
 					if(!player.hasPermission("blockregen.admin")){
@@ -136,21 +129,17 @@ public class Commands implements CommandExecutor, Listener {
 					if(args.length == 3){
 						if(args[1].equalsIgnoreCase("set")){
 							
-							BukkitPlayer p = BukkitAdapter.adapt(player);
-							World w = p.getWorld();
-							LocalSession ls = main.getWorldEdit().getSession(player);
 							Region s = null;
-							
 							try {
-								s = ls.getSelection(w);
+								s = main.getWorldEdit().getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
 							} catch (IncompleteRegionException e) {
 								player.sendMessage(main.getMessages().noregion);
+								e.printStackTrace();
 							}
 							
 							if(main.getFiles().getRegions().getString("Regions") == null){
-								main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.vectorToString(s.getMinimumPoint()));
-								main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.vectorToString(s.getMaximumPoint()));
-								main.getFiles().getRegions().set("Regions." + args[2] + ".World", s.getWorld().getName());
+								main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMinimumPoint())));
+								main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
 								main.getFiles().saveRegions();
 								player.sendMessage(main.getMessages().setregion);
 							}else{
@@ -159,9 +148,8 @@ public class Commands implements CommandExecutor, Listener {
 								if(setregions.contains(args[2])){
 									player.sendMessage(main.getMessages().dupregion);
 								}else{
-									main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.vectorToString(s.getMinimumPoint()));
-									main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.vectorToString(s.getMaximumPoint()));
-									main.getFiles().getRegions().set("Regions." + args[2] + ".World", s.getWorld().getName());
+									main.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMinimumPoint())));
+									main.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
 									main.getFiles().saveRegions();
 									player.sendMessage(main.getMessages().setregion);
 								}
@@ -299,28 +287,6 @@ public class Commands implements CommandExecutor, Listener {
 					return true;
 				}
 				
-				if (args[0].equalsIgnoreCase("restore")) {
-					if (main.getGetters().useRestorer()) {
-						if (args.length == 2) {
-							Location pLoc = player.getLocation();
-							double region = Double.valueOf(args[1]);
-							for (double x = Math.round(pLoc.getX() - region); x < Math.round(pLoc.getX() + region); x++) {
-								for (double y = Math.round(pLoc.getY() - region); y < Math.round(pLoc.getY() + region); y++) {
-									for (double z = Math.round(pLoc.getZ() - region); z < Math.round(pLoc.getZ() + region); z++) {
-										Location loc = new Location(pLoc.getWorld(),x,y,z);
-										if (Utils.restorer.containsKey(loc)) {
-											loc.getBlock().setType(Utils.restorer.get(loc));
-										}
-									}
-								}
-							}
-						} else {
-							player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&cSpecify the amount of blocks to be restored around you."));
-						}
-					} else {
-						player.sendMessage(main.getMessages().prefix + ChatColor.translateAlternateColorCodes('&', "&cYou have not enabled the restorer."));
-					}
-				}
 			}
 		}
 		return false;
@@ -342,15 +308,19 @@ public class Commands implements CommandExecutor, Listener {
 		
 		String[] locA;
 		String[] locB;
+		String world;
 		
 		ConfigurationSection regionsection = regions.getConfigurationSection("Regions");
 		Set<String> regionset = regionsection.getKeys(false);
 		for (String regionloop : regionset) {
-			locA = regions.getString("Regions." + regionloop + ".Max").split(";");
-			locB = regions.getString("Regions." + regionloop + ".Min").split(";");
-			regions.set("Regions." + regionloop + ".Max", locA[1] + ";" + locA[2] + ";" + locA[3]);
-			regions.set("Regions." + regionloop + ".Min", locB[1] + ";" + locB[2] + ";" + locB[3]);
-			regions.set("Regions." + regionloop + ".World", locA[0]);
+			if(regions.get("Regions." + regionloop + ".World") != null) {
+				locA = regions.getString("Regions." + regionloop + ".Max").split(";");
+				locB = regions.getString("Regions." + regionloop + ".Min").split(";");
+				world = regions.getString("Regions." + regionloop + ".World");
+				regions.set("Regions." + regionloop + ".Max", world + ";" + locA[0] + ";" + locA[1] + ";" + locA[2]);
+				regions.set("Regions." + regionloop + ".Min", world + ";" + locB[0] + ";" + locB[1] + ";" + locB[2]);
+				regions.set("Regions." + regionloop + ".World", null);
+			}
 		}
 		
 		main.getFiles().saveRegions();

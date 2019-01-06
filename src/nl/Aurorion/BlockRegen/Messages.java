@@ -28,6 +28,7 @@ public class Messages {
 	public String eventActive;
 	public String eventNotActive;
 	public String toolRequired;
+	public String enchantRequired;
 	public String jobsError;
 	
 	public Messages(Files files){
@@ -53,6 +54,7 @@ public class Messages {
 		eventActive		= prefix + ChatColor.translateAlternateColorCodes('&', messages.getString("Messages.Event-Already-Active"));
 		eventNotActive	= prefix + ChatColor.translateAlternateColorCodes('&', messages.getString("Messages.Event-Not-Active"));
 		toolRequired	= prefix + ChatColor.translateAlternateColorCodes('&', messages.getString("Messages.Tool-Required-Error"));
+		enchantRequired	= prefix + ChatColor.translateAlternateColorCodes('&', messages.getString("Messages.Enchant-Required-Error"));
 		jobsError		= prefix + ChatColor.translateAlternateColorCodes('&', messages.getString("Messages.Jobs-Error"));
 	}
 

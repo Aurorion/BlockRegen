@@ -14,20 +14,16 @@ import org.bukkit.block.Block;
 import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitTask;
 
-import com.sk89q.worldedit.Vector;
-
 public class Utils {
 	
 	public static List<String> bypass = new ArrayList<String>();
 	public static List<String> itemcheck = new ArrayList<String>();
 	public static List<Color> colors = new ArrayList<Color>();
 	public static List<Location> regenBlocks = new ArrayList<Location>();
-	public static List<Block> explode = new ArrayList<Block>();
 	public static Map<String, Boolean> events = new HashMap<String, Boolean>();
 	public static Map<String, BossBar> bars = new HashMap<String, BossBar>();
 	public static Map<Location, BukkitTask> tasks = new HashMap<Location, BukkitTask>();
 	public static Map<Location, Material> persist = new HashMap<Location, Material>();
-	public static Map<Location, Material> restorer = new HashMap<Location, Material>();
 	
 	public static Chunk stringToChunk(String string) {
         String[] splits = string.split(";");
@@ -39,24 +35,13 @@ public class Utils {
     }
  
     public static String locationToString(Location loc) {
-        return loc.getWorld().getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ() + ";" + loc.getYaw() + ";" + loc.getPitch();
+        return loc.getWorld().getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
     }
     
     public static Location stringToLocation(String str) {
         String[] strar = str.split(";");
-        Location newLoc = new Location(Bukkit.getWorld(strar[0]), Double.valueOf(strar[1]).doubleValue(), Double.valueOf(strar[2]).doubleValue(), Double.valueOf(strar[3]).doubleValue(), Float.valueOf(strar[4]).floatValue(), Float.valueOf(strar[5]).floatValue());
+        Location newLoc = new Location(Bukkit.getWorld(strar[0]), Double.valueOf(strar[1]).doubleValue(), Double.valueOf(strar[2]).doubleValue(), Double.valueOf(strar[3]).doubleValue());
         return newLoc.clone();
-    }
-    
-    public static String vectorToString(Vector vec) {
-    	String str = vec.toString().replaceAll(" ", "").replaceAll(",", ";").replace("(", "").replace(")", "");
-        return str;
-    }
-    
-    public static Vector stringToVector(String str) {
-        String[] strar = str.split(";");
-        Vector newVec = new Vector(Double.valueOf(strar[0]), Double.valueOf(strar[1]), Double.valueOf(strar[2]));
-        return newVec;
     }
     
 	public static String blockToString(Block block){

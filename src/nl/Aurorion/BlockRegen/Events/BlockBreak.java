@@ -6,11 +6,13 @@ import java.util.Set;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,7 +27,7 @@ import org.bukkit.scheduler.BukkitTask;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
-import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 
 import nl.Aurorion.BlockRegen.Main;
@@ -42,7 +44,7 @@ public class BlockBreak implements Listener {
 
 	public static Block block;
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.LOWEST)
 	public void onBreak(BlockBreakEvent event) {
 		Player player = event.getPlayer();
 		block = event.getBlock();
@@ -100,16 +102,12 @@ public class BlockBreak implements Listener {
 				ConfigurationSection regionsection = main.getFiles().getRegions().getConfigurationSection("Regions");
 				Set<String> regionset = regionsection.getKeys(false);
 				for (String regionloop : regionset) {
-					World world = Bukkit.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
-					if (world == bworld) {
-						Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-						Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
-						CuboidRegion selection = new CuboidRegion(locA, locB);
-						Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()), Double.valueOf(block.getZ()));
-						if (selection.contains(vec)) {
-							isinregion = true;
-							break;
-						}
+					Location locA = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
+					Location locB = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
+					CuboidRegion selection = new CuboidRegion(BukkitAdapter.asBlockVector(locA), BukkitAdapter.asBlockVector(locB));
+					if (selection.contains(BukkitAdapter.asBlockVector(block.getLocation()))) {
+						isinregion = true;
+						break;
 					}
 				}
 			}
@@ -120,6 +118,10 @@ public class BlockBreak implements Listener {
 
 				if (isinregion) {
 					if ((main.getGetters().toolRequired(blockname) != null) && (!toolCheck(main.getGetters().toolRequired(blockname), player))) {
+						event.setCancelled(true);
+						return;
+					}
+					if ((main.getGetters().enchantRequired(blockname) != null) && (!enchantCheck(main.getGetters().enchantRequired(blockname), player))) {
 						event.setCancelled(true);
 						return;
 					}
@@ -140,6 +142,10 @@ public class BlockBreak implements Listener {
 							event.setCancelled(true);
 							return;
 						}
+						if ((main.getGetters().enchantRequired(blockname) != null) && (!enchantCheck(main.getGetters().enchantRequired(blockname), player))) {
+							event.setCancelled(true);
+							return;
+						}
 						if (main.getGetters().jobsCheck(blockname) != null) {
 							if(!jobsCheck(main.getGetters().jobsCheck(blockname), player)) {
 								event.setCancelled(true);
@@ -157,19 +163,10 @@ public class BlockBreak implements Listener {
 						event.setCancelled(true);
 					} else if (disablebreak) {
 						event.setCancelled(true);
-					} else {
-						if(!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer()) {
-							Utils.restorer.put(block.getLocation(), block.getType());
-						}
-						return;
 					}
 				}
 				if (disablebreak) {
 					event.setCancelled(true);
-				} else {
-					if(!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer()) {
-						Utils.restorer.put(block.getLocation(), block.getType());
-					}
 				}
 			}
 		}
@@ -189,6 +186,24 @@ public class BlockBreak implements Listener {
 			return true;
 		}
 		player.sendMessage(this.main.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
+		return false;
+	}
+	
+	private boolean enchantCheck(String string, Player player) {
+		String[] enchants = string.split(", ");
+		boolean check = false;
+		for (String all : enchants) {
+			Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(all.toLowerCase()));
+			ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
+			if (meta.hasEnchant(enchant)) {
+				check = true;
+				break;
+			}
+		}
+		if (check) {
+			return true;
+		}
+		player.sendMessage(this.main.getMessages().enchantRequired.replace("%enchant%", string.toLowerCase().replace("_", " ")));
 		return false;
 	}
 	
@@ -303,7 +318,7 @@ public class BlockBreak implements Listener {
 		}
 
 		if (eventItem != null) {
-			if (main.getRandom().nextInt(rarity) == 1) {
+			if ((main.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
 				if (dropEventItem) {
 					bworld.dropItemNaturally(loc, eventItem);
 				} else {
@@ -325,13 +340,11 @@ public class BlockBreak implements Listener {
 		if (getters.playerCommand(blockname) != null) {
 			Bukkit.dispatchCommand(player, getters.playerCommand(blockname).replace("%player%", player.getName()));
 		}
-
-		// Particles ------------------------------------------------------------------------------------------
-		// Disabled ATM - Will be in an particle update
-		/*if (blocklist.getString("Blocks." + blockname + ".particle-effect") != null) {
-			String particleName = blocklist.getString("Blocks." + blockname + ".particle-effect");
-			main.getParticles().check(particleName);
-		}*/
+		
+		// Particles -------------------------------------------------------------------------------------------
+		if (getters.particleCheck(blockname) != null) {
+			main.getParticles().check(getters.particleCheck(blockname).toLowerCase());
+		}
 
 		// Replacing the block ---------------------------------------------------------------------------------
 		Utils.persist.put(loc, block.getType());

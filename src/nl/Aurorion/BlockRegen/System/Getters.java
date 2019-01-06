@@ -33,10 +33,6 @@ public class Getters {
 		return true;
 	}
 	
-	public boolean useRestorer() {
-		return main.getFiles().getSettings().getBoolean("Use-Restorer");
-	}
-	
 	public boolean useRegions() {
 		return main.getFiles().getSettings().getBoolean("Use-Regions");
 	}
@@ -85,8 +81,16 @@ public class Getters {
 		return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".tool-required");
 	}
 	
+	public String enchantRequired(String blockname) {
+		return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".enchant-required");
+	}
+	
 	public String jobsCheck(String blockname) {
 		return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".jobs-check");
+	}
+	
+	public String particleCheck(String blockname) {
+		return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".particles");
 	}
 	
 	public boolean naturalBreak(String blockname) {
