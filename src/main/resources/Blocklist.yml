@@ -1,0 +1,122 @@
+# BlockRegen 3.0
+# 
+# Developer: Aurorion
+# Version: 3.3.0
+# Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+
+Blocks:
+    # The block that gets broken
+    block1:
+        # The block to replace it with.
+        replace-block: STONE
+        # The block to look for.
+        block-type: DIAMOND_ORE
+        # The delay in which this block regens to its original state
+        # In seconds
+        regen-delay: 5
+        # If you installed Vault you can give players money. Set to 0 to disable
+        money: 10
+        # You can specify a command that is executed by the console
+        console-commands:
+        - 'say The console-command function is working!'
+        # You can specify commands that are executed by the player itself
+        player-commands:
+        - 'me I, %player%, executed this command'
+        # JOBS-SUPPORT
+        # You can check what job and what level a player needs to be.
+        # Format: Job;Level
+        # Remove [hashtag] for it to function
+        #jobs-check: Farmer;2
+        # Give drops, exp and amount as it would be in vanilla
+        # Set this to false to use the other options
+        natural-break: false
+        # If natural-break set to false then the drop-item section is used
+        drop-item:
+            # The material of the dropped item.
+            material: DIAMOND
+            # The name that is given to the dropped item
+            name: "&6&l[&3BlockRegen&6&l]"
+            # The lores that are given to the dropped item
+            lores:
+                - "&fThese are some lores"
+                - "&cAnd &6they &eeven &asupport &dcolors!"
+            # The list of enchants to apply on the dropped item.
+            # Seperate enchantName;enchantLevel
+            enchants:
+                - DAMAGE_ALL;1
+            flags:
+                - HIDE_ATTRIBUTES
+            # drop-naturally to false sends it directly to the players inventory if there is place (drops it otherwise)
+            # Setting it to true drops it on the ground as it would in vanilla
+            drop-naturally: false
+            exp:
+                # drop-naturally to false gives the player the amount of exp directly
+                # Setting it to true drops it on the ground as it would in vanilla
+                drop-naturally: true
+                # The amount of exp it gives
+                amount: 100
+            # How many should the player get?
+            # This generates a random number between, in this case, 0 and 5
+            amount:
+                high: 5
+                low: 0
+    block2:
+        # The block to replace it with.
+        replace-block: PLANK
+        # The block to look for.
+        block-type: LOG
+        # The delay in which this block regens to its original state
+        # In seconds
+        regen-delay: 3
+        # If you installed Vault you can give players money. Set to 0 to disable
+        money: 100
+        # This option allows you to set a tool that people need to have to break the block.
+        # If they don't have this tool they get an error message (Messages.yml)
+        tool-required:
+            type: DIAMOND_PICKAXE
+            amount: 1
+            name: 'Superpick'
+            enchants:
+                - DAMAGE_ALL;1
+            flags:
+                - HIDE_ATTRIBUTES
+            lores:
+                - "&fThese are some lores"
+                - "&cAnd &6they &eeven &asupport &dcolors!"
+        # JOBS-SUPPORT
+        # You can check what job and what level a player needs to be.
+        # Format: Job;Level
+        #jobs-check: Farmer;2
+        # Give drops, exp and amount as it would be in vanilla
+        # Set this to false to use the other options
+        natural-break: false
+        # If natural-break set to false then the drop-item section is used
+        drop-item:
+            # The material of the dropped item.
+            material: REDSTONE
+            # The name that is given to the dropped item
+            name: "&6&l[&3BlockRegen&6&l]"
+            # The lores that are given to the dropped item
+            lores:
+                - "&fThese are some lores"
+                - "&cAnd &6they &eeven &asupport &dcolors!"
+            # The list of enchants to apply on the dropped item.
+            # Seperate enchantName;enchantLevel
+            enchants:
+                - DAMAGE_ALL;1
+            flags:
+                - HIDE_ATTRIBUTES
+            # drop-naturally to false sends it directly to the players inventory if there is place (drops it otherwise)
+            # Setting it to true drops it on the ground as it would in vanilla
+            drop-naturally: false
+            exp:
+                # drop-naturally to false gives the player the amount of exp directly
+                # Setting it to true drops it on the ground as it would in vanilla
+                drop-naturally: true
+                # The amount of exp it gives
+                amount: 100
+            # How many should the player get?
+            # This generates a random number between, in this case, 0 and 5
+            amount:
+                high: 5
+                low: 0

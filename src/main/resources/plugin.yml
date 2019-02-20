@@ -1,0 +1,11 @@
+name: BlockRegen
+main: nl.Aurorion.BlockRegen.Main
+version: 3.3.0
+author: [Aurorion]
+load: STARTUP
+softdepend: [Vault, WorldEdit, Jobs]
+api-version: 1.13
+
+commands:
+  blockregen:
+    aliases: [br]

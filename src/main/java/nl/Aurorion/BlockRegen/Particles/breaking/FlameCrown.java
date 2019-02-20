@@ -1,0 +1,32 @@
+package nl.Aurorion.BlockRegen.Particles.breaking;
+
+import org.bukkit.Location;
+import org.bukkit.Particle;
+import org.bukkit.World;
+import org.bukkit.block.Block;
+
+import nl.Aurorion.BlockRegen.Events.BlockBreak;
+
+public class FlameCrown implements Runnable {
+	
+	int time;
+	int points = 15;
+    double radius = 0.5d;
+	Block block = BlockBreak.block;
+
+	@Override
+	public void run() {
+		
+		Location loc = block.getLocation();
+		loc.add(0.5,1.2,0.5);
+		World world = block.getWorld();
+		for (int i = 0; i < points; i++) {
+            double angle = 2 * Math.PI * i / points;
+            Location point = loc.clone().add(radius * Math.sin(angle), 0.0d, radius * Math.cos(angle));
+            world.spawnParticle(Particle.FLAME, point, 1, 0,0,0, 0.0D);
+        }
+		loc.subtract(0.5,1.2,0.5);
+		
+	}
+
+}
