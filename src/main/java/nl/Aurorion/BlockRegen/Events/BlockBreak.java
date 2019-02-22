@@ -115,12 +115,12 @@ public class BlockBreak implements Listener {
             List<String> list1 = new ArrayList<>();
 
             if (isInRegion) {
-                for (String blockName : blockNames) {
+                for (String blockName : blockNames)
                     if (!main.getGetters().regionBlocks(regionName).contains(blockName)) {
                         list1.add(blockName);
                     }
-                }
             }
+
             blockNames.removeAll(list1);
 
             String blockName;
@@ -160,6 +160,7 @@ public class BlockBreak implements Listener {
                     event.setCancelled(true);
                     return;
                 }
+
                 // Jobs require check
                 if (main.getGetters().jobsCheck(blockName) != null) {
                     if (!jobsCheck(main.getGetters().jobsCheck(blockName), player)) {
@@ -167,28 +168,32 @@ public class BlockBreak implements Listener {
                         return;
                     }
                 }
+
                 // Proceed
                 event.setDropItems(false);
                 event.setExpToDrop(0);
-                this.blockBreak(player, block, blockName, world, expToDrop);
+                blockBreak(player, block, blockName, world, expToDrop);
             } else {
                 // Out of an region, if enabled.
                 if (useRegions)
                     return;
                 else {
+
                     if ((main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockName + ".tool-required") != null) && (!toolCheck(blockName, player))) {
                         event.setCancelled(true);
                         return;
                     }
+
                     if (main.getGetters().jobsCheck(blockName) != null) {
                         if (!jobsCheck(main.getGetters().jobsCheck(blockName), player)) {
                             event.setCancelled(true);
                             return;
                         }
                     }
+
                     event.setDropItems(false);
                     event.setExpToDrop(0);
-                    this.blockBreak(player, block, blockName, world, expToDrop);
+                    blockBreak(player, block, blockName, world, expToDrop);
                 }
             }
         }
@@ -289,67 +294,68 @@ public class BlockBreak implements Listener {
                 else
                     bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop);
             }
-        } else if (getters.dropItemMaterial(blockname) != null) {
-            if (getters.dropItemAmount(blockname, player) > 0) {
-                if (!player.getGameMode().equals(GameMode.SURVIVAL)) {
 
-                    // CUSTOM DROP ITEMSTACK -----------------------------------------------------------
+            for (String subName : main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockname + ".drop-items").getKeys(false)) {
 
-                    int dropAmount = getters.dropItemAmount(blockname, player);
+                if (getters.dropItemMaterial(blockname, subName) != null) {
+                    if (getters.dropItemAmount(blockname, subName, player) > 0) {
 
-                    if (doubleDrops)
-                        dropAmount = dropAmount * 2;
+                        // CUSTOM DROP ITEMSTACK -----------------------------------------------------------
 
-                    ItemStack dropItemStack = new ItemStack(getters.dropItemMaterial(blockname), dropAmount, getters.dropItemData(blockname));
-                    ItemMeta dropMeta = dropItemStack.getItemMeta();
+                        int dropAmount = getters.dropItemAmount(blockname, subName, player);
 
-                    if (getters.dropItemName(blockname) != null)
-                        dropMeta.setDisplayName(getters.dropItemName(blockname));
+                        if (doubleDrops)
+                            dropAmount = dropAmount * 2;
 
-                    if (!getters.dropItemLores(blockname).isEmpty())
-                        dropMeta.setLore(getters.dropItemLores(blockname));
+                        ItemStack dropItemStack = new ItemStack(getters.dropItemMaterial(blockname, subName), dropAmount, getters.dropItemData(blockname, subName));
+                        ItemMeta dropMeta = dropItemStack.getItemMeta();
 
-                    if (!getters.dropEnchants(blockname).isEmpty())
-                        getters.dropEnchants(blockname).forEach(enchant -> dropMeta.addEnchant(enchant.getEnchantment(), enchant.getLevel(), true));
+                        if (getters.dropItemName(blockname, subName) != null)
+                            dropMeta.setDisplayName(getters.dropItemName(blockname, subName));
 
-                    if (!getters.dropFlags(blockname).isEmpty())
-                        getters.dropFlags(blockname).forEach(flag -> dropMeta.addItemFlags(flag));
+                        if (!getters.dropItemLores(blockname, subName).isEmpty())
+                            dropMeta.setLore(getters.dropItemLores(blockname, subName));
 
-                    dropItemStack.setItemMeta(dropMeta);
+                        if (!getters.dropEnchants(blockname, subName).isEmpty())
+                            getters.dropEnchants(blockname, subName).forEach(enchant -> dropMeta.addEnchant(enchant.getEnchantment(), enchant.getLevel(), true));
 
-                    if (getters.dropItemDropNaturally(blockname))
-                        bworld.dropItem(loc, dropItemStack);
-                    else {
-                        player.getInventory().addItem(dropItemStack);
-                        player.updateInventory();
+                        if (!getters.dropFlags(blockname, subName).isEmpty())
+                            getters.dropFlags(blockname, subName).forEach(flag -> dropMeta.addItemFlags(flag));
+
+                        dropItemStack.setItemMeta(dropMeta);
+
+                        if (getters.dropItemDropNaturally(blockname, subName))
+                            bworld.dropItem(loc, dropItemStack);
+                        else {
+                            player.getInventory().addItem(dropItemStack);
+                            player.updateInventory();
+                        }
+                    }
+
+                    // EXP -------------------------------------------
+
+                    if (getters.dropItemExpAmount(blockname, subName) > 0) {
+                        if (!player.getGameMode().equals(GameMode.CREATIVE)) {
+                            int expAmount = getters.dropItemExpAmount(blockname, subName);
+
+                            if (doubleExp)
+                                expAmount = expAmount * 2;
+
+                            if (getters.dropItemExpDrop(blockname, subName))
+                                bworld.spawn(loc, ExperienceOrb.class).setExperience(expAmount);
+                            else
+                                player.giveExp(expAmount);
+                        }
                     }
                 }
-            }
 
-            // EXP -------------------------------------------
-
-            if (getters.dropItemExpAmount(blockname) > 0) {
-                if (!player.getGameMode().equals(GameMode.CREATIVE)) {
-                    int expAmount = getters.dropItemExpAmount(blockname);
-
-                    if (doubleExp)
-                        expAmount = expAmount * 2;
-
-                    if (getters.dropItemExpDrop(blockname))
-                        bworld.spawn(loc, ExperienceOrb.class).setExperience(expAmount);
-                    else
-                        player.giveExp(expAmount);
-                }
-            }
-        }
-
-        if (!player.getGameMode().equals(GameMode.CREATIVE)) {
-            if (eventItem != null) {
-                if (main.getRandom().nextInt(rarity) == 1) {
-                    if (dropEventItem)
-                        bworld.dropItemNaturally(loc, eventItem);
-                    else
-                        player.getInventory().addItem(eventItem);
+                if (eventItem != null) {
+                    if (main.getRandom().nextInt(rarity) == 1) {
+                        if (dropEventItem)
+                            bworld.dropItemNaturally(loc, eventItem);
+                        else
+                            player.getInventory().addItem(eventItem);
+                    }
                 }
             }
         }

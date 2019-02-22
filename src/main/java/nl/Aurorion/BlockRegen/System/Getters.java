@@ -3,7 +3,6 @@ package nl.Aurorion.BlockRegen.System;
 import nl.Aurorion.BlockRegen.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.boss.BarColor;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
@@ -52,8 +51,7 @@ public class Getters {
     public Material blockMaterial(String blockName) {
         if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".block-type") != null)
             return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".block-type").split(";")[0].toUpperCase());
-        else
-        {
+        else {
             main.getLogger().warning("Block material of " + blockName + " is invalid.");
             return null;
         }
@@ -97,46 +95,48 @@ public class Getters {
         return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".natural-break");
     }
 
-    public Material dropItemMaterial(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material").split(";")[0]);
+    // ---------------- DROPS -------------- //
+
+    public Material dropItemMaterial(String blockName, String subName) {
+        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material") != null) {
+            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").split(";")[0]);
         }
         return null;
     }
 
-    public byte dropItemData(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material") != null)
-            if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material").contains(";"))
-                return Byte.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material").split(";")[1]);
+    public byte dropItemData(String blockName, String subName) {
+        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material") != null)
+            if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").contains(";"))
+                return Byte.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").split(";")[1]);
         return 0;
     }
 
-    public String dropItemName(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name") != null)
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name"));
+    public String dropItemName(String blockName, String subName) {
+        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".name") != null)
+            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".name"));
         return null;
     }
 
-    public List<String> dropItemLores(String blockname) {
-        List<String> lores = new ArrayList<String>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.lores")) {
+    public List<String> dropItemLores(String blockName, String subName) {
+        List<String> lores = new ArrayList<>();
+        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".drop-items." + subName + ".lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }
         return lores;
     }
 
-    public boolean dropItemDropNaturally(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.drop-naturally");
+    public boolean dropItemDropNaturally(String blockName, String subName) {
+        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-items." + subName + ".drop-naturally");
     }
 
-    public boolean dropItemExpDrop(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.exp.drop-naturally");
+    public boolean dropItemExpDrop(String blockName, String subName) {
+        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-items." + subName + ".drop-naturally");
     }
 
-    public List<Enchant> dropEnchants(String blockname) {
+    public List<Enchant> dropEnchants(String blockname, String subName) {
         List<Enchant> enchants = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.enchants") != null)
-            for (String enchantData : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.enchants")) {
+        if (main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-items." + subName + ".enchants") != null)
+            for (String enchantData : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-items." + subName + ".enchants")) {
                 String[] splitter = enchantData.split(";");
                 Enchantment enchantment;
                 int enchantLevel;
@@ -144,7 +144,7 @@ public class Getters {
                     enchantment = Enchantment.getByName(splitter[0]);
                     enchantLevel = Integer.valueOf(splitter[1]);
                 } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Enchant levels/names of " + blockname + " are not valid.");
+                    main.getLogger().warning("A mistake in config, Enchant levels/names of " + blockname + " - " + subName + " are not valid.");
                     continue;
                 }
                 enchants.add(new Enchant(enchantment, enchantLevel));
@@ -152,15 +152,15 @@ public class Getters {
         return enchants;
     }
 
-    public List<ItemFlag> dropFlags(String blockname) {
+    public List<ItemFlag> dropFlags(String blockName, String subName) {
         List<ItemFlag> flags = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.flags") != null) {
-            for (String flagName : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.flags")) {
+        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".flags") != null) {
+            for (String flagName : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + "." + subName + ".drop-item.flags")) {
                 ItemFlag flag;
                 try {
                     flag = ItemFlag.valueOf(flagName);
                 } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Flags of " + blockname + " are not valid.");
+                    main.getLogger().warning("A mistake in config, Flags of " + blockName + " - " + subName + " are not valid.");
                     continue;
                 }
                 flags.add(flag);
@@ -169,14 +169,14 @@ public class Getters {
         return flags;
     }
 
-    public Integer dropItemExpAmount(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.exp.amount");
+    public Integer dropItemExpAmount(String blockName, String subName) {
+        return main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".exp.amount");
     }
 
-    public Integer dropItemAmount(String blockname, Player player) {
-        int amounthigh = main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.high");
-        int amountlow = main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.low");
-        int amount = main.getRandom().nextInt((amounthigh - amountlow) + 1) + amountlow;
+    public Integer dropItemAmount(String blockName, String subName, Player player) {
+        int amountHigh = main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".amount.high");
+        int amountLow = main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".amount.low");
+        int amount = main.getRandom().nextInt((amountHigh - amountLow) + 1) + amountLow;
         if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
             int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;
@@ -211,7 +211,7 @@ public class Getters {
     }
 
     public List<String> eventItemLores(String blockname) {
-        List<String> lores = new ArrayList<String>();
+        List<String> lores = new ArrayList<>();
         for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }
@@ -228,7 +228,7 @@ public class Getters {
 
     public List<String> regionBlocks(String regionName) {
         List<String> blockNames = new ArrayList<>();
-        if (main.getFiles().getRegions().getConfigurationSection("Regions." + regionName).contains("blocks")){
+        if (main.getFiles().getRegions().getConfigurationSection("Regions." + regionName).contains("blocks")) {
             // Get the list in the save file
 
             if (main.getFiles().getRegions().getConfigurationSection("Regions." + regionName).contains("blocks")) {
@@ -241,7 +241,7 @@ public class Getters {
                     blockNames.add(blocks1);
             }
         }
-            return blockNames;
+        return blockNames;
     }
 
     // Tool getters

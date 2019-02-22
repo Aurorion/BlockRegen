@@ -50,16 +50,10 @@ public class Main extends JavaPlugin {
         this.setupWorldGuard();
         this.checkForPlugins();
         this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bYou are using version " + this.getDescription().getVersion()));
-        this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bReport bugs on discord: Wertík#5332"));
-        this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bAlways backup if you are not sure about things."));
+        this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bUpdater &cdisabled"));
+        this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bForked by Wertik1206, originally created by Aurorion."));
+        this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bAlways backup if you are not sure about things, just read the instructions."));
         this.enableMetrics();
-
-        getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&',
-                "&6&m-----&r &3&lBlockRegen &6&m-----"
-                        + "\n&eCurrent verion: &c" + getDescription().getVersion()
-                        + "\n&eUpdater &cdisabled."
-                        + "\n&eForked with &d<3 &eby Wertik1206"
-                        + "\n&6&m-----------------------"));
 
 		/*
 		if (this.getGetters().updateChecker()) {
