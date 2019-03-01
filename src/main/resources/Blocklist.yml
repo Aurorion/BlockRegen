@@ -1,12 +1,15 @@
 # BlockRegen 3.0
 # 
 # Developer: Aurorion
+# Fork version made by Wertik1206
+# This configuration is not compatible with the main version of BlockRegen.
 # Version: 3.3.0
 # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+# ^^ IN-GAME: F3 + H - advanced tooltips
 
 Blocks:
   # The block that gets broken
-  block1:
+  stone:
     # The block to replace it with.
     replace-block: STONE
     # The block to look for.
@@ -32,7 +35,7 @@ Blocks:
     natural-break: false
     # If natural-break set to false then the drop-item section is used
     drop-items:
-      '1':
+      diamond:
         # The material of the dropped item.
         material: DIAMOND
         # The name that is given to the dropped item
@@ -60,8 +63,8 @@ Blocks:
         # This generates a random number between, in this case, 0 and 5
         amount:
           high: 5
-          low: 0
-      '2':
+          low: 1
+      stone:
         # The material of the dropped item.
         material: STONE
         # The name that is given to the dropped item
@@ -74,7 +77,9 @@ Blocks:
         # Seperate enchantName;enchantLevel
         enchants:
           - DAMAGE_ALL;3
-        amount: 1
+        amount:
+          high: 5
+          low: 1
   block2:
     # The block to replace it with.
     replace-block: PLANK

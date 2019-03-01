@@ -9,7 +9,6 @@ import nl.Aurorion.BlockRegen.Events.BlockBreak;
 import nl.Aurorion.BlockRegen.Events.BlockExplode;
 import nl.Aurorion.BlockRegen.Events.BlockPlace;
 import nl.Aurorion.BlockRegen.Events.PlayerInteract;
-import nl.Aurorion.BlockRegen.Particles.ParticleUtil;
 import nl.Aurorion.BlockRegen.System.Getters;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -32,7 +31,6 @@ public class Main extends JavaPlugin {
 
     private Files files;
     private Messages messages;
-    private ParticleUtil particleUtil;
     private Getters getters;
     private Random random;
 
@@ -85,7 +83,6 @@ public class Main extends JavaPlugin {
     private void registerClasses() {
         files = new Files(this);
         messages = new Messages(files);
-        particleUtil = new ParticleUtil(this);
         getters = new Getters(this);
         random = new Random();
     }
@@ -196,10 +193,6 @@ public class Main extends JavaPlugin {
 
     public Messages getMessages() {
         return this.messages;
-    }
-
-    public ParticleUtil getParticles() {
-        return this.particleUtil;
     }
 
     public Getters getGetters() {
