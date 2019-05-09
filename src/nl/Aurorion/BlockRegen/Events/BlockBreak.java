@@ -57,7 +57,7 @@ public class BlockBreak implements Listener {
 			return;
 		}
 
-		String blockname = Utils.blockToString(block);
+		String blockname = block.getType().name();
 
 		if (Utils.itemcheck.contains(player.getName())) {
 			event.setCancelled(true);
@@ -67,11 +67,18 @@ public class BlockBreak implements Listener {
 
 		FileConfiguration settings = main.getFiles().getSettings();
 
-		if (settings.getBoolean("Towny-Support")) {
+		if (main.getGetters().useTowny()) {
 			if (TownyUniverse.getTownBlock(block.getLocation()) != null) {
 				if (TownyUniverse.getTownBlock(block.getLocation()).hasTown()) {
 					return;
 				}
+			}
+		}
+		
+		if (main.getGetters().useGP()) {
+			String noBuildReason = main.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
+			if (noBuildReason != null) {
+				return;
 			}
 		}
 
@@ -275,10 +282,12 @@ public class BlockBreak implements Listener {
 				ItemStack dropStack = new ItemStack(mat, amount);
 				bworld.dropItemNaturally(block.getLocation(), dropStack);
 			}
-			if (doubleExp) {
-				((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop * 2);
-			} else {
-				((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop);
+			if (exptodrop > 0) {
+				if (doubleExp) {
+					((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop * 2);
+				} else {
+					((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop);
+				}
 			}
 		} else if (getters.dropItemMaterial(blockname) != null) {
 			if (getters.dropItemAmount(blockname, player) > 0) {
@@ -328,7 +337,7 @@ public class BlockBreak implements Listener {
 		}
 
 		// Vault money -----------------------------------------------------------------------------------------
-		if (main.getEconomy() != null && getters.money(blockname) > 0) {
+		if (main.getEconomy() != null && getters.money(blockname) != null && getters.money(blockname) > 0) {
 			main.getEconomy().depositPlayer(player, getters.money(blockname));
 		}
 
@@ -345,9 +354,23 @@ public class BlockBreak implements Listener {
 		if (getters.particleCheck(blockname) != null) {
 			main.getParticles().check(getters.particleCheck(blockname).toLowerCase());
 		}
+		
+		// Data Recovery
+		FileConfiguration data = main.getFiles().getData();
+		if (getters.dataRecovery()) {
+			if (data.contains(blockname)) {
+				List<String> dataLocs = data.getStringList(blockname);
+				dataLocs.add(Utils.locationToString(loc));
+				data.set(blockname, dataLocs);
+			} else {
+				data.set(blockname, Utils.locationToString(loc));
+			}
+			main.getFiles().saveData();
+		} else {
+			Utils.persist.put(loc, block.getType());
+		}		
 
 		// Replacing the block ---------------------------------------------------------------------------------
-		Utils.persist.put(loc, block.getType());
 		new BukkitRunnable() {
 
 			@Override
@@ -371,6 +394,10 @@ public class BlockBreak implements Listener {
 				Utils.persist.remove(loc);
 				Utils.regenBlocks.remove(loc);
 				Utils.tasks.remove(loc);
+				List<String> dataLocs = data.getStringList(blockname);
+				dataLocs.remove(Utils.locationToString(loc));
+				data.set(blockname, dataLocs);
+				main.getFiles().saveData();
 			}
 		}.runTaskLater(main, regendelay * 20);
 		

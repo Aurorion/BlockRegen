@@ -10,7 +10,6 @@ import org.bukkit.Chunk;
 import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.boss.BossBar;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -44,9 +43,9 @@ public class Utils {
         return newLoc.clone();
     }
     
-	public static String blockToString(Block block){
+    /*public static String blockToString(Block block){
     	return block.getType().name();
-    }
+    }*/
     
     public static void fillFireworkColors(){
     	colors.add(Color.AQUA);

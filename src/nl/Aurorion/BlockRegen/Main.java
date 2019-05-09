@@ -1,10 +1,12 @@
 package nl.Aurorion.BlockRegen;
 
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -14,6 +16,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 
+import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
 import nl.Aurorion.BlockRegen.Commands.Commands;
 import nl.Aurorion.BlockRegen.Configurations.Files;
@@ -29,6 +32,7 @@ public class Main extends JavaPlugin {
 	public Main plugin;
 	public Economy econ;
 	public WorldEditPlugin worldedit;
+	public GriefPrevention griefPrevention;
 
 	private Files files;
 	private Messages messages;
@@ -49,6 +53,7 @@ public class Main extends JavaPlugin {
 		this.setupWorldEdit();
 		this.checkForPlugins();
 		Utils.fillFireworkColors();
+		this.recoveryCheck();
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bYou are using version " + this.getDescription().getVersion()));
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bReport bugs or suggestions to discord only please."));
 		this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &bAlways backup if you are not sure about things."));
@@ -71,7 +76,7 @@ public class Main extends JavaPlugin {
 	@Override
 	public void onDisable(){
 		this.getServer().getScheduler().cancelTasks(this);
-		if(!Utils.regenBlocks.isEmpty()) {
+		if(!this.getGetters().dataRecovery() && !Utils.regenBlocks.isEmpty()) {
 			for (Location loc : Utils.persist.keySet()) {
 				loc.getBlock().setType(Utils.persist.get(loc));
 			}
@@ -171,6 +176,10 @@ public class Main extends JavaPlugin {
 		return false;
 	}
 	
+	public GriefPrevention getGriefPrevention() {
+    	return griefPrevention;
+    }
+	
 	public Files getFiles(){
 		return this.files;
 	}
@@ -189,6 +198,27 @@ public class Main extends JavaPlugin {
 	
 	public Random getRandom() {
 		return this.random;
+	}
+	
+	public void recoveryCheck() {
+		if (this.getGetters().dataRecovery()) {
+			Set<String> set = files.getData().getKeys(false);
+			if (!set.isEmpty()) {
+				while (set.iterator().hasNext()) {
+					String name = set.iterator().next();
+					List<String> list = files.getData().getStringList(name);
+					for (int i = 0; i < list.size(); i++) {
+						Location loc = Utils.stringToLocation(list.get(i));
+						loc.getBlock().setType(Material.valueOf(name));
+					}
+					set.remove(name);
+				}
+			}
+			for (String key : files.getData().getKeys(false)) {
+				files.getData().set(key, null);
+			}
+			files.saveData();
+		}
 	}
 
 }

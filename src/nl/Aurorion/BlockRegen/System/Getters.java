@@ -41,6 +41,10 @@ public class Getters {
 		return main.getFiles().getSettings().getBoolean("Towny-Support");
 	}
 	
+	public boolean useGP() {
+		return main.getFiles().getSettings().getBoolean("GriefPrevention-Support");
+	}
+	
 	public boolean disableOtherBreak() {
 		return main.getFiles().getSettings().getBoolean("Disable-Other-Break");
 	}
@@ -51,6 +55,10 @@ public class Getters {
 	
 	public boolean boneMealOverride() {
 		return main.getFiles().getSettings().getBoolean("Bone-Meal-Override");
+	}
+	
+	public boolean dataRecovery() {
+		return main.getFiles().getSettings().getBoolean("Data-Recovery");
 	}
 	
 	// Getters Blocklist.yml
