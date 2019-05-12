@@ -1,6 +1,6 @@
 name: BlockRegen
 main: nl.Aurorion.BlockRegen.Main
-version: 3.4.0
+version: 3.5.1
 author: [Aurorion]
 softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention]
 api-version: 1.13
@@ -8,3 +8,4 @@ api-version: 1.13
 commands:
   blockregen:
     aliases: [br]
+    description: Main plugin command

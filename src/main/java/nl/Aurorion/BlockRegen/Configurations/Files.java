@@ -14,7 +14,7 @@ public class Files {
 	public File sfile, mfile, bfile, rfile, dfile;
 	public FileConfiguration settings, messages, blocklist, regions, data;
 	
-	public Files(Plugin plugin){
+	public Files(Plugin plugin) {
 		
 		sfile = new File(plugin.getDataFolder(), "Settings.yml");
 		mfile = new File(plugin.getDataFolder(), "Messages.yml");
@@ -54,19 +54,22 @@ public class Files {
 		regions = YamlConfiguration.loadConfiguration(rfile);
 		plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aLoaded Regions.yml"));
 		
+		generateRecoveryFile(plugin);
+	}
+
+	public void generateRecoveryFile(Plugin plugin) {
 		if (settings.getBoolean("Data-Recovery")) {
 			dfile = new File(plugin.getDataFolder(), "Recovery.yml");
-			
+
 			if(!dfile.exists()){
 				dfile.getParentFile().mkdirs();
 				plugin.saveResource("Recovery.yml", false);
 				plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Recovery.yml"));
 			}
-			
+
 			data = YamlConfiguration.loadConfiguration(dfile);
 			plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aLoaded Recovery.yml"));
 		}
-		
 	}
 	
 	public FileConfiguration getSettings(){
