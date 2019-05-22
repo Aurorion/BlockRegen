@@ -383,10 +383,14 @@ public class BlockBreak implements Listener {
                 Utils.persist.remove(loc);
                 Utils.regenBlocks.remove(loc);
                 Utils.tasks.remove(loc);
-                List<String> dataLocs = data.getStringList(blockname);
-                dataLocs.remove(Utils.locationToString(loc));
-                data.set(blockname, dataLocs);
-                main.getFiles().saveData();
+                if (data != null && data.contains(blockname)) {
+                    List<String> dataLocs = data.getStringList(blockname);
+                    if (dataLocs != null && !dataLocs.isEmpty()) {
+                        dataLocs.remove(Utils.locationToString(loc));
+                        data.set(blockname, dataLocs);
+                        main.getFiles().saveData();
+                    }
+                }
             }
         }.runTaskLater(main, regendelay * 20);
 
