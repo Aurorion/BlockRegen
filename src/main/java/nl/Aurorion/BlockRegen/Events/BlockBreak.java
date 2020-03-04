@@ -2,7 +2,7 @@ package nl.Aurorion.BlockRegen.Events;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
-import com.palmergames.bukkit.towny.object.TownyUniverse;
+import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.Aurorion.BlockRegen.Main;
@@ -27,149 +27,159 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class BlockBreak implements Listener {
 
-    private Main main;
+    private final Main plugin;
 
-    public BlockBreak(Main main) {
-        this.main = main;
+    public BlockBreak(Main plugin) {
+        this.plugin = plugin;
     }
-
-    public static Block block;
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        block = event.getBlock();
-        if (Utils.bypass.contains(player.getName())) {
-            return;
-        }
 
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+
+        // Check bypass
+        if (Utils.bypass.contains(player.getName()))
+            return;
+
+        // Check regen
         if (Utils.regenBlocks.contains(block.getLocation())) {
             event.setCancelled(true);
             return;
         }
 
-        String blockname = block.getType().name();
+        String blockName = block.getType().name();
 
+        // Block data check
         if (Utils.itemcheck.contains(player.getName())) {
             event.setCancelled(true);
-            player.sendMessage(main.getMessages().datacheck.replace("%block%", blockname));
+            player.sendMessage(plugin.getMessages().datacheck.replace("%block%", blockName));
             return;
         }
 
-        FileConfiguration settings = main.getFiles().getSettings();
+        FileConfiguration settings = plugin.getFiles().getSettings();
 
-        if (main.getGetters().useTowny()) {
-            if (TownyUniverse.getTownBlock(block.getLocation()) != null) {
-                if (TownyUniverse.getTownBlock(block.getLocation()).hasTown()) {
+        // Towny
+        if (plugin.getGetters().useTowny()) {
+            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
+                if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
                     return;
-                }
-            }
         }
 
-        if (main.getGetters().useGP()) {
-            String noBuildReason = main.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
-            if (noBuildReason != null) {
+        // Grief Prevention
+        if (plugin.getGetters().useGP()) {
+            String noBuildReason = plugin.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
+            if (noBuildReason != null)
                 return;
-            }
         }
 
-        FileConfiguration blocklist = main.getFiles().getBlocklist();
-        ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
-        Set<String> setblocks = blocks.getKeys(false);
+        FileConfiguration blockList = plugin.getFiles().getBlocklist();
 
-        String worldname = player.getWorld().getName();
+        // Check worlds
+        String worldName = player.getWorld().getName();
         List<String> worlds = settings.getStringList("Worlds-Enabled");
-        boolean isinone = false;
+
+        boolean isInWorld = false;
         for (String world : worlds) {
-            if (world.equalsIgnoreCase(worldname)) {
-                isinone = true;
+            if (world.equalsIgnoreCase(worldName)) {
+                isInWorld = true;
+                break;
             }
         }
 
-        if (isinone) {
+        // Load blocks
+        ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
+
+        List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
+
+        if (isInWorld) {
 
             World bworld = block.getWorld();
 
-            boolean useregions = settings.getBoolean("Use-Regions");
-            boolean disablebreak = settings.getBoolean("Disable-Other-Break");
-            boolean disablebreakr = settings.getBoolean("Disable-Other-Break-Region");
+            boolean useRegions = settings.getBoolean("Use-Regions");
+            boolean disableBreak = settings.getBoolean("Disable-Other-Break");
+            boolean disableBreakRegions = settings.getBoolean("Disable-Other-Break-Region");
 
-            boolean isinregion = false;
+            boolean isInRegion = false;
 
-            if (useregions && main.getWorldEdit() != null) {
-                ConfigurationSection regionsection = main.getFiles().getRegions().getConfigurationSection("Regions");
-                Set<String> regionset = regionsection.getKeys(false);
-                for (String regionloop : regionset) {
-                    Location locA = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-                    Location locB = Utils.stringToLocation(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
+            if (useRegions && plugin.getWorldEdit() != null) {
+                ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+
+                List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
+
+                for (String region : regions) {
+                    String max = plugin.getFiles().getRegions().getString("Regions." + region + ".Max");
+                    String min = plugin.getFiles().getRegions().getString("Regions." + region + ".Min");
+
+                    if (min == null || max == null)
+                        continue;
+
+                    Location locA = Utils.stringToLocation(max);
+                    Location locB = Utils.stringToLocation(min);
+
                     CuboidRegion selection = new CuboidRegion(BukkitAdapter.asBlockVector(locA), BukkitAdapter.asBlockVector(locB));
+
                     if (selection.contains(BukkitAdapter.asBlockVector(block.getLocation()))) {
-                        isinregion = true;
+                        isInRegion = true;
                         break;
                     }
                 }
             }
 
-            if (setblocks.contains(blockname)) {
+            if (blocks.contains(blockName)) {
 
                 int expToDrop = event.getExpToDrop();
 
-                if (isinregion) {
-                    if ((main.getGetters().toolRequired(blockname) != null) && (!toolCheck(main.getGetters().toolRequired(blockname), player))) {
+                if (isInRegion) {
+                    if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                         event.setCancelled(true);
                         return;
                     }
-                    if ((main.getGetters().enchantRequired(blockname) != null) && (!enchantCheck(main.getGetters().enchantRequired(blockname), player))) {
+
+                    if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
                         event.setCancelled(true);
                         return;
                     }
-                    if (main.getGetters().jobsCheck(blockname) != null) {
-                        if (!jobsCheck(main.getGetters().jobsCheck(blockname), player)) {
+
+                    if (plugin.getGetters().jobsCheck(blockName) != null) {
+                        if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
                             event.setCancelled(true);
                             return;
                         }
                     }
+
                     event.setDropItems(false);
                     event.setExpToDrop(0);
-                    this.blockBreak(player, block, blockname, bworld, expToDrop);
+                    this.blockBreak(player, block, blockName, bworld, expToDrop);
                 } else {
-                    if (useregions) {
-                        return;
-                    } else {
-                        if ((main.getGetters().toolRequired(blockname) != null) && (!toolCheck(main.getGetters().toolRequired(blockname), player))) {
+                    if (!useRegions) {
+                        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                             event.setCancelled(true);
                             return;
                         }
-                        if ((main.getGetters().enchantRequired(blockname) != null) && (!enchantCheck(main.getGetters().enchantRequired(blockname), player))) {
+
+                        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
                             event.setCancelled(true);
                             return;
                         }
-                        if (main.getGetters().jobsCheck(blockname) != null) {
-                            if (!jobsCheck(main.getGetters().jobsCheck(blockname), player)) {
+
+                        if (plugin.getGetters().jobsCheck(blockName) != null) {
+                            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
                                 event.setCancelled(true);
                                 return;
                             }
                         }
                         event.setDropItems(false);
                         event.setExpToDrop(0);
-                        this.blockBreak(player, block, blockname, bworld, expToDrop);
+                        this.blockBreak(player, block, blockName, bworld, expToDrop);
                     }
                 }
             } else {
-                if (isinregion) {
-                    if (disablebreakr) {
-                        event.setCancelled(true);
-                    } else if (disablebreak) {
-                        event.setCancelled(true);
-                    }
-                }
-                if (disablebreak) {
-                    event.setCancelled(true);
-                }
+                if ((isInRegion && disableBreakRegions) || disableBreak) event.setCancelled(true);
             }
         }
     }
@@ -187,7 +197,7 @@ public class BlockBreak implements Listener {
         if (check) {
             return true;
         }
-        player.sendMessage(this.main.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
+        player.sendMessage(this.plugin.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
         return false;
     }
 
@@ -205,7 +215,7 @@ public class BlockBreak implements Listener {
         if (check) {
             return true;
         }
-        player.sendMessage(this.main.getMessages().enchantRequired.replace("%enchant%", string.toLowerCase().replace("_", " ")));
+        player.sendMessage(this.plugin.getMessages().enchantRequired.replace("%enchant%", string.toLowerCase().replace("_", " ")));
         return false;
     }
 
@@ -222,10 +232,10 @@ public class BlockBreak implements Listener {
             }
         }
         if (job == null || !job.equals(jobCheckString[0])) {
-            player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+            player.sendMessage(plugin.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
         } else if (level < Integer.valueOf(jobCheckString[1])) {
-            player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+            player.sendMessage(plugin.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
         } else {
             return true;
@@ -233,7 +243,7 @@ public class BlockBreak implements Listener {
     }
 
     private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {
-        Getters getters = main.getGetters();
+        Getters getters = plugin.getGetters();
         BlockState state = block.getState();
         Location loc = block.getLocation();
 
@@ -321,7 +331,7 @@ public class BlockBreak implements Listener {
         }
 
         if (eventItem != null) {
-            if ((main.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
+            if ((plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
                 if (dropEventItem) {
                     bworld.dropItemNaturally(loc, eventItem);
                 } else {
@@ -331,8 +341,8 @@ public class BlockBreak implements Listener {
         }
 
         // Vault money -----------------------------------------------------------------------------------------
-        if (main.getEconomy() != null && getters.money(blockname) != null && getters.money(blockname) > 0)
-            main.getEconomy().depositPlayer(player, getters.money(blockname));
+        if (plugin.getEconomy() != null && getters.money(blockname) != null && getters.money(blockname) > 0)
+            plugin.getEconomy().depositPlayer(player, getters.money(blockname));
 
         // Commands execution -----------------------------------------------------------------------------------
         if (getters.consoleCommands(blockname) != null)
@@ -343,38 +353,38 @@ public class BlockBreak implements Listener {
 
         // Particles -------------------------------------------------------------------------------------------
         if (getters.particleCheck(blockname) != null)
-            main.getParticles().check(getters.particleCheck(blockname).toLowerCase());
+            plugin.getParticles().run(getters.particleCheck(blockname).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
-        FileConfiguration data = main.getFiles().getData();
+        FileConfiguration data = plugin.getFiles().getData();
+
         if (getters.dataRecovery()) {
             List<String> dataLocs = new ArrayList<>();
+
             if (data.contains(blockname))
                 dataLocs = data.getStringList(blockname);
+
             dataLocs.add(Utils.locationToString(loc));
             data.set(blockname, dataLocs);
-            main.getFiles().saveData();
-        } else {
+            plugin.getFiles().saveData();
+        } else
             Utils.persist.put(loc, block.getType());
-        }
 
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
-
             @Override
             public void run() {
                 block.setType(getters.replaceBlock(blockname));
             }
-
-        }.runTaskLater(main, 2L);
+        }.runTaskLater(plugin, 2L);
 
         Utils.regenBlocks.add(loc);
 
         // Actual Regeneration -------------------------------------------------------------------------------------
         int regendelay = 3;
-        if (getters.replaceDelay(blockname) != null) {
+
+        if (getters.replaceDelay(blockname) != null)
             regendelay = getters.replaceDelay(blockname);
-        }
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
@@ -389,11 +399,11 @@ public class BlockBreak implements Listener {
                     if (!dataLocs.isEmpty()) {
                         dataLocs.remove(Utils.locationToString(loc));
                         data.set(blockname, dataLocs);
-                        main.getFiles().saveData();
+                        plugin.getFiles().saveData();
                     }
                 }
             }
-        }.runTaskLater(main, regendelay * 20);
+        }.runTaskLater(plugin, regendelay * 20);
 
         Utils.tasks.put(loc, task);
     }
