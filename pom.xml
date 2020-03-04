@@ -77,13 +77,6 @@
             <artifactId>VaultAPI</artifactId>
             <version>1.7</version>
         </dependency>
-        <!-- Lombok -->
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.10</version>
-            <scope>provided</scope>
-        </dependency>
         <!-- Towny Advanced -->
         <dependency>
             <groupId>com.palmergames</groupId>
@@ -104,6 +97,12 @@
             <artifactId>Jobs</artifactId>
             <scope>system</scope>
             <systemPath>${basedir}/libs/Jobs4.15.5.jar</systemPath>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>13.0</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 </project>

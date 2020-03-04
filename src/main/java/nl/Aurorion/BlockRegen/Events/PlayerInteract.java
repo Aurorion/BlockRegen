@@ -22,7 +22,7 @@ public class PlayerInteract implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (!plugin.getFiles().getSettings().getBoolean("Bone-Meal-Override") ||
+        if (!plugin.getGetters().boneMealOverride() ||
                 event.getAction() != Action.RIGHT_CLICK_BLOCK)
             return;
 

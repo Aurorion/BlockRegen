@@ -340,5 +340,4 @@ public class MetricsLite {
         gzip.close();
         return outputStream.toByteArray();
     }
-
 }

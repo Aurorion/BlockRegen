@@ -5,13 +5,13 @@ import nl.Aurorion.BlockRegen.Utils;
 
 public class ConsoleOutput {
 
-    private Main main;
+    private final Main plugin;
 
     private boolean debug;
     private String prefix;
 
-    public ConsoleOutput(Main main) {
-        this.main = main;
+    public ConsoleOutput(Main plugin) {
+        this.plugin = plugin;
     }
 
     public void setDebug(boolean debug) {
@@ -28,18 +28,18 @@ public class ConsoleOutput {
 
     public void debug(String msg) {
         if (debug)
-            main.getServer().getLogger().info(prefix + "§7DEBUG: " + Utils.color(msg));
+            plugin.getServer().getLogger().info(prefix + "§7DEBUG: " + Utils.color(msg));
     }
 
     public void err(String msg) {
-        main.getServer().getLogger().info(prefix + "§4" + Utils.color(msg));
+        plugin.getServer().getLogger().info(prefix + "§4" + Utils.color(msg));
     }
 
     public void info(String msg) {
-        main.getServer().getLogger().info(prefix + "§7" + Utils.color(msg));
+        plugin.getServer().getLogger().info(prefix + "§7" + Utils.color(msg));
     }
 
     public void warn(String msg) {
-        main.getServer().getLogger().info(prefix + "§c" + Utils.color(msg));
+        plugin.getServer().getLogger().info(prefix + "§c" + Utils.color(msg));
     }
 }

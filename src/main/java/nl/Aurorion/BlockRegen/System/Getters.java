@@ -13,10 +13,10 @@ import java.util.List;
 
 public class Getters {
 
-    private Main main;
+    private final Main plugin;
 
     public Getters(Main instance) {
-        this.main = instance;
+        this.plugin = instance;
     }
 
     // Player related
@@ -26,70 +26,69 @@ public class Getters {
 
     // Getter Settings.yml
     public boolean updateChecker() {
-        if (main.getFiles().getSettings().get("Update-Checker") != null) {
-            return main.getFiles().getSettings().getBoolean("Update-Checker");
+        if (plugin.getFiles().getSettings().get("Update-Checker") != null) {
+            return plugin.getFiles().getSettings().getBoolean("Update-Checker");
         }
         return true;
     }
 
     public boolean useRegions() {
-        return main.getFiles().getSettings().getBoolean("Use-Regions");
+        return plugin.getFiles().getSettings().getBoolean("Use-Regions");
     }
 
     public boolean useTowny() {
-        return main.getFiles().getSettings().getBoolean("Towny-Support");
+        return plugin.getFiles().getSettings().getBoolean("Towny-Support");
     }
 
     public boolean useGP() {
-        return main.getFiles().getSettings().getBoolean("GriefPrevention-Support");
+        return plugin.getFiles().getSettings().getBoolean("GriefPrevention-Support");
     }
 
     public boolean disableOtherBreak() {
-        return main.getFiles().getSettings().getBoolean("Disable-Other-Break");
+        return plugin.getFiles().getSettings().getBoolean("Disable-Other-Break");
     }
 
     public boolean disableOtherBreakRegion() {
-        return main.getFiles().getSettings().getBoolean("Disable-Other-Break-Region");
+        return plugin.getFiles().getSettings().getBoolean("Disable-Other-Break-Region");
     }
 
     public boolean boneMealOverride() {
-        return main.getFiles().getSettings().getBoolean("Bone-Meal-Override");
+        return plugin.getFiles().getSettings().getBoolean("Bone-Meal-Override");
     }
 
     public boolean dataRecovery() {
-        return main.getFiles().getSettings().getBoolean("Data-Recovery");
+        return plugin.getFiles().getSettings().getBoolean("Data-Recovery");
     }
 
-    // Getters Blocklist.yml
     public Material replaceBlock(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block").toUpperCase());
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block") != null) {
+            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block").toUpperCase());
         }
         return null;
     }
 
     public Integer replaceDelay(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
+        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
     }
 
     public Integer money(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".money");
+        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".money");
     }
 
     public List<String> consoleCommands(String blockname) {
         List<String> consoleCommands = new ArrayList<>();
 
         String path = "Blocks." + blockname;
-        if (main.getFiles().getBlocklist().getConfigurationSection(path).contains("console-commands"))
+        if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-commands"))
             path += ".console-commands";
-        else if (main.getFiles().getBlocklist().getConfigurationSection(path).contains("console-command"))
+        else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-command"))
             path += ".console-command";
         else return null;
 
-        if (!main.getFiles().getBlocklist().getStringList(path).isEmpty())
-            consoleCommands = main.getFiles().getBlocklist().getStringList(path);
+        if (!plugin.getFiles().getBlocklist().getStringList(path).isEmpty())
+            consoleCommands = plugin.getFiles().getBlocklist().getStringList(path);
         else
-            consoleCommands.add(main.getFiles().getBlocklist().getString(path));
+            consoleCommands.add(plugin.getFiles().getBlocklist().getString(path));
 
         return consoleCommands;
     }
@@ -98,78 +97,78 @@ public class Getters {
         List<String> playerCommands = new ArrayList<>();
 
         String path = "Blocks." + blockname;
-        if (main.getFiles().getBlocklist().getConfigurationSection(path).contains("player-commands"))
+        if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("player-commands"))
             path += ".player-commands";
-        else if (main.getFiles().getBlocklist().getConfigurationSection(path).contains("player-command"))
+        else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("player-command"))
             path += ".player-command";
         else return null;
 
-        if (!main.getFiles().getBlocklist().getStringList(path).isEmpty())
-            playerCommands = main.getFiles().getBlocklist().getStringList(path);
+        if (!plugin.getFiles().getBlocklist().getStringList(path).isEmpty())
+            playerCommands = plugin.getFiles().getBlocklist().getStringList(path);
         else
-            playerCommands.add(main.getFiles().getBlocklist().getString(path));
+            playerCommands.add(plugin.getFiles().getBlocklist().getString(path));
 
         return playerCommands;
     }
 
     public String toolRequired(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".tool-required");
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".tool-required");
     }
 
     public String enchantRequired(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".enchant-required");
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".enchant-required");
     }
 
     public String jobsCheck(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".jobs-check");
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".jobs-check");
     }
 
     public String particleCheck(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".particles");
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".particles");
     }
 
     public boolean naturalBreak(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".natural-break");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".natural-break");
     }
 
     public Material dropItemMaterial(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material"));
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material") != null) {
+            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.material"));
         }
         return null;
     }
 
     public String dropItemName(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name"));
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name") != null) {
+            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name"));
         }
         return null;
     }
 
     public List<String> dropItemLores(String blockname) {
         List<String> lores = new ArrayList<String>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.lores")) {
+        for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }
         return lores;
     }
 
     public boolean dropItemDropNaturally(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.drop-naturally");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.drop-naturally");
     }
 
     public boolean dropItemExpDrop(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.exp.drop-naturally");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".drop-item.exp.drop-naturally");
     }
 
     public Integer dropItemExpAmount(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.exp.amount");
+        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.exp.amount");
     }
 
     public Integer dropItemAmount(String blockname, Player player) {
-        int amounthigh = main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.high");
-        int amountlow = main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.low");
-        int amount = main.getRandom().nextInt((amounthigh - amountlow) + 1) + amountlow;
+        int amounthigh = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.high");
+        int amountlow = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.low");
+        int amount = plugin.getRandom().nextInt((amounthigh - amountlow) + 1) + amountlow;
         if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
             int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;
@@ -178,59 +177,58 @@ public class Getters {
     }
 
     public String eventName(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.event-name");
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.event-name");
     }
 
     public String eventBossbarName(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name"));
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name") != null) {
+            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name"));
         }
         return null;
     }
 
     public BarColor eventBossbarColor(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color") != null) {
-            return BarColor.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color").toUpperCase());
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color") != null) {
+            return BarColor.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color").toUpperCase());
         }
         return null;
     }
 
     public boolean eventDoubleDrops(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-drops");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-drops");
     }
 
     public boolean eventDoubleExp(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-exp");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-exp");
     }
 
     public Material eventItemMaterial(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material").toUpperCase());
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material") != null) {
+            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material").toUpperCase());
         }
         return null;
     }
 
     public String eventItemName(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name"));
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name") != null) {
+            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name"));
         }
         return null;
     }
 
     public List<String> eventItemLores(String blockname) {
         List<String> lores = new ArrayList<String>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
+        for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }
         return lores;
     }
 
     public boolean eventItemDropNaturally(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.custom-item.drop-naturally");
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.custom-item.drop-naturally");
     }
 
     public Integer eventItemRarity(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".event.custom-item.rarity");
+        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".event.custom-item.rarity");
     }
-
 }

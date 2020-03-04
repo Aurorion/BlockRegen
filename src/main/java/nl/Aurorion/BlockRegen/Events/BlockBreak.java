@@ -100,9 +100,7 @@ public class BlockBreak implements Listener {
 
             World bworld = block.getWorld();
 
-            boolean useRegions = settings.getBoolean("Use-Regions");
-            boolean disableBreak = settings.getBoolean("Disable-Other-Break");
-            boolean disableBreakRegions = settings.getBoolean("Disable-Other-Break-Region");
+            boolean useRegions = plugin.getGetters().useRegions();
 
             boolean isInRegion = false;
 
@@ -179,7 +177,10 @@ public class BlockBreak implements Listener {
                     }
                 }
             } else {
-                if ((isInRegion && disableBreakRegions) || disableBreak) event.setCancelled(true);
+                if ((isInRegion && Main.getInstance().getGetters().disableOtherBreakRegion()) ||
+                        Main.getInstance().getGetters().disableOtherBreak())
+
+                    event.setCancelled(true);
             }
         }
     }

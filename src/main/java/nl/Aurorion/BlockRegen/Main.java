@@ -23,21 +23,30 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 public class Main extends JavaPlugin {
 
-    public Main plugin;
+    public static Main instance;
+
+    public static Main getInstance() {
+        return instance;
+    }
+
+    // Dependencies
     public Economy econ;
     public WorldEditPlugin worldEdit;
     public GriefPrevention griefPrevention;
 
     private Files files;
     private Messages messages;
-    private ParticleUtil particleUtil;
+
     private Getters getters;
+
+    private ParticleUtil particleUtil;
     private Random random;
 
     // Handles every output going to console, easier, more centralized control.
@@ -47,25 +56,34 @@ public class Main extends JavaPlugin {
 
     public String newVersion = null;
 
+    private boolean useJobs = false;
+
     @Override
     public void onEnable() {
-        plugin = this;
+        instance = this;
+
         this.registerClasses(); // Also generates files
+
         cO = new ConsoleOutput(this);
         cO.setDebug(files.settings.getBoolean("Debug-Enabled", false));
         cO.setPrefix(ChatColor.translateAlternateColorCodes('&', files.messages.getString("Messages.Prefix")));
+
         eH = new ExceptionHandler(this);
+
         this.registerCommands();
         this.registerEvents();
         this.fillEvents();
         this.setupEconomy();
         this.setupWorldEdit();
-        this.checkForPlugins();
+        this.setupJobs();
+
         Utils.fillFireworkColors();
         this.recoveryCheck();
+
         cO.info("&bYou are using version " + this.getDescription().getVersion());
         cO.info("&bReport bugs or suggestions to discord only please.");
         cO.info("&bAlways backup if you are not sure about things.");
+
         this.enableMetrics();
         if (this.getGetters().updateChecker()) {
             this.getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
@@ -89,7 +107,8 @@ public class Main extends JavaPlugin {
                 loc.getBlock().setType(Utils.persist.get(loc));
             }
         }
-        plugin = null;
+
+        instance = null;
     }
 
     private void registerClasses() {
@@ -112,54 +131,58 @@ public class Main extends JavaPlugin {
         pm.registerEvents(new PlayerJoin(this), this);
     }
 
-    private boolean setupEconomy() {
+    private void setupEconomy() {
         if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
             cO.info("&eDidn't found Vault. &cEconomy functions disabled.");
-            return false;
+            return;
         }
+
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
+
         if (rsp == null) {
             cO.info("&eVault found, but no economy plugin. &cEconomy functions disabled.");
-            return false;
+            return;
         }
+
         econ = rsp.getProvider();
         cO.info("&eVault & economy plugin found! &aEnabling economy functions.");
-        return econ != null;
     }
 
-    private boolean setupWorldEdit() {
-        Plugin worldeditplugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
-        if (worldeditplugin == null || !(worldeditplugin instanceof WorldEditPlugin)) {
+    private void setupWorldEdit() {
+        Plugin worldEditPlugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
+
+        if (!(worldEditPlugin instanceof WorldEditPlugin)) {
             cO.info("&eDidn't found WorldEdit. &cRegion functions disabled.");
-            return false;
+            return;
         }
+
         cO.info("&eWorldEdit found! &aEnabling region fuctions.");
-        worldEdit = (WorldEditPlugin) worldeditplugin;
-        return worldEdit != null;
+        worldEdit = (WorldEditPlugin) worldEditPlugin;
     }
 
-    private void checkForPlugins() {
-        if (this.getJobs())
+    private void setupJobs() {
+        useJobs = this.getServer().getPluginManager().getPlugin("Jobs") != null;
+
+        if (useJobs)
             cO.info("&eJobs found! &aEnabling Jobs fuctions.");
     }
 
     public void fillEvents() {
-        FileConfiguration blocklist = files.getBlocklist();
-        ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
-        Set<String> setblocks = blocks.getKeys(false);
-        for (String loopBlocks : setblocks) {
-            String eventName = blocklist.getString("Blocks." + loopBlocks + ".event.event-name");
-            if (eventName == null) {
-                continue;
-            } else {
+        FileConfiguration blockList = files.getBlocklist();
+        ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
+
+        List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
+
+        for (String loopBlocks : blocks) {
+            String eventName = blockList.getString("Blocks." + loopBlocks + ".event.event-name");
+
+            if (eventName != null)
                 Utils.events.put(eventName, false);
-            }
         }
-        if (Utils.events.isEmpty()) {
-            this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &cThere are 0 events found. Skip adding to the system."));
-        } else {
-            this.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " events found. Added all to the system."));
-        }
+
+        getServer().getConsoleSender().sendMessage(Utils.color(Utils.events.isEmpty() ?
+                "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " events found. Added all to the system." :
+                "&6[&3BlockRegen&6] &cThere are 0 events found. Skip adding to the system."));
     }
 
     public void enableMetrics() {
@@ -176,11 +199,8 @@ public class Main extends JavaPlugin {
         return this.worldEdit;
     }
 
-    public boolean getJobs() {
-        if (this.getServer().getPluginManager().getPlugin("Jobs") != null) {
-            return true;
-        }
-        return false;
+    public boolean useJobs() {
+        return useJobs;
     }
 
     public GriefPrevention getGriefPrevention() {
