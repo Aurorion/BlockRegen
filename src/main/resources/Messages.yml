@@ -1,7 +1,7 @@
-# BlockRegen 3.0
+# BlockRegen
 # 
-# Developer: Aurorion
-# Version: 3.4.0
+# Developer: Aurorion & Wertik1206
+# Version: ${project.version}
 
 Messages:
     Prefix: "&6&l[&3BlockRegen&6&l] &f"

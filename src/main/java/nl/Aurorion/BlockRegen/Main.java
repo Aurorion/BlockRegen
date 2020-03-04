@@ -13,7 +13,6 @@ import nl.Aurorion.BlockRegen.System.ConsoleOutput;
 import nl.Aurorion.BlockRegen.System.ExceptionHandler;
 import nl.Aurorion.BlockRegen.System.Getters;
 import nl.Aurorion.BlockRegen.System.UpdateCheck;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;

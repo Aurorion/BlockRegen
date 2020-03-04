@@ -1,7 +1,6 @@
 package nl.Aurorion.BlockRegen.System;
 
 import nl.Aurorion.BlockRegen.Main;
-import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.boss.BarColor;

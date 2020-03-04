@@ -1,7 +1,7 @@
 name: BlockRegen
-main: nl.Aurorion.BlockRegen.Main
-version: 3.5.1
-author: [Aurorion]
+main: nl.aurorion.blockregen.Main
+version: ${project.version}
+authors: [Aurorion, Wertik1206]
 softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention]
 api-version: 1.13
 
