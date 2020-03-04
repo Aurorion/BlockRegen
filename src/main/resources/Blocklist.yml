@@ -1,7 +1,8 @@
-# BlockRegen 3.0
+# BlockRegen
 # 
-# Developer: Aurorion
-# Version: 3.4.0
+# Developer: Aurorion & Wertik1206
+# Version: ${project.version}
+#
 # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
 Blocks:

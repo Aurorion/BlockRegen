@@ -244,7 +244,7 @@ public class BlockBreak implements Listener {
         boolean dropEventItem = false;
         int rarity = 0;
 
-        if (getters.eventName(blockname) != null) {
+        if (getters.eventName(blockname) != null && Utils.events.containsKey(blockname))
             if (Utils.events.get(getters.eventName(blockname))) {
                 doubleDrops = getters.eventDoubleDrops(blockname);
                 doubleExp = getters.eventDoubleExp(blockname);
@@ -262,7 +262,6 @@ public class BlockBreak implements Listener {
                     rarity = getters.eventItemRarity(blockname);
                 }
             }
-        }
 
         // Drop Section-----------------------------------------------------------------------------------------
         if (getters.naturalBreak(blockname)) {
@@ -346,7 +345,7 @@ public class BlockBreak implements Listener {
         if (getters.particleCheck(blockname) != null)
             main.getParticles().check(getters.particleCheck(blockname).toLowerCase());
 
-        // Data Recovery
+        // Data Recovery ---------------------------------------------------------------------------------------
         FileConfiguration data = main.getFiles().getData();
         if (getters.dataRecovery()) {
             List<String> dataLocs = new ArrayList<>();
@@ -367,11 +366,11 @@ public class BlockBreak implements Listener {
                 block.setType(getters.replaceBlock(blockname));
             }
 
-        }.runTaskLater(main, 2l);
+        }.runTaskLater(main, 2L);
 
         Utils.regenBlocks.add(loc);
 
-        // Actual Regening -------------------------------------------------------------------------------------
+        // Actual Regeneration -------------------------------------------------------------------------------------
         int regendelay = 3;
         if (getters.replaceDelay(blockname) != null) {
             regendelay = getters.replaceDelay(blockname);
@@ -383,9 +382,11 @@ public class BlockBreak implements Listener {
                 Utils.persist.remove(loc);
                 Utils.regenBlocks.remove(loc);
                 Utils.tasks.remove(loc);
+
                 if (data != null && data.contains(blockname)) {
                     List<String> dataLocs = data.getStringList(blockname);
-                    if (dataLocs != null && !dataLocs.isEmpty()) {
+
+                    if (!dataLocs.isEmpty()) {
                         dataLocs.remove(Utils.locationToString(loc));
                         data.set(blockname, dataLocs);
                         main.getFiles().saveData();
@@ -395,7 +396,5 @@ public class BlockBreak implements Listener {
         }.runTaskLater(main, regendelay * 20);
 
         Utils.tasks.put(loc, task);
-        return;
     }
-
 }
