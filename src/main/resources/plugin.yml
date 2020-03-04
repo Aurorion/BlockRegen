@@ -1,5 +1,5 @@
 name: BlockRegen
-main: nl.aurorion.blockregen.Main
+main: nl.Aurorion.BlockRegen.Main
 version: ${project.version}
 authors: [Aurorion, Wertik1206]
 softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention]
