@@ -36,7 +36,7 @@ public class Commands implements CommandExecutor, Listener {
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (cmd.getName().equalsIgnoreCase("blockregen")) {
             if (args.length == 0) {
-                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
+                sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &7v.&f" + plugin.getDescription().getVersion() + " &6&m-----"
                         + "\n&3/" + label + " reload &7: Reload the Settings.yml, Messages.yml and Blocklist.yml, also generates Recovery.yml if needed."
                         + "\n&3/" + label + " bypass &7: Bypass the events."
                         + "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
