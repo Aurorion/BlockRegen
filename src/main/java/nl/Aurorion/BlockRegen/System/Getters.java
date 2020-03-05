@@ -3,8 +3,6 @@ package nl.Aurorion.BlockRegen.System;
 import nl.Aurorion.BlockRegen.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.boss.BarColor;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -69,23 +67,11 @@ public class Getters {
     }
 
     public Integer replaceDelay(String blockname) {
-        ConfigurationSection section = plugin.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockname + ".regen-delay");
-
-        // Regen instantly
-        if (section == null)
-            return 0;
-
-        if (section.contains("low") && section.contains("high")) {
-            int low = section.getInt("low");
-            int high = section.getInt("high");
-
-            return plugin.getRandom().nextInt((high - low) + 1) + low;
-        } else
-            return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
+        return Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockname + ".regen-delay", 0).getInt();
     }
 
     public Integer money(String blockname) {
-        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".money");
+        return Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockname + ".money", 0).getInt();
     }
 
     public List<String> consoleCommands(String blockname) {
@@ -100,12 +86,12 @@ public class Getters {
             path += ".console-commands";
         else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-command"))
             path += ".console-command";
-        else return null;
+        else return consoleCommands;
 
-        if (!plugin.getFiles().getBlocklist().getStringList(path).isEmpty())
-            consoleCommands = plugin.getFiles().getBlocklist().getStringList(path);
-        else
+        if (plugin.getFiles().getBlocklist().isString(path))
             consoleCommands.add(plugin.getFiles().getBlocklist().getString(path));
+        else
+            consoleCommands = plugin.getFiles().getBlocklist().getStringList(path);
 
         return consoleCommands;
     }
@@ -118,12 +104,12 @@ public class Getters {
             path += ".player-commands";
         else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("player-command"))
             path += ".player-command";
-        else return null;
+        else return playerCommands;
 
-        if (!plugin.getFiles().getBlocklist().getStringList(path).isEmpty())
-            playerCommands = plugin.getFiles().getBlocklist().getStringList(path);
-        else
+        if (plugin.getFiles().getBlocklist().isString(path))
             playerCommands.add(plugin.getFiles().getBlocklist().getString(path));
+        else
+            playerCommands = plugin.getFiles().getBlocklist().getStringList(path);
 
         return playerCommands;
     }
@@ -183,33 +169,18 @@ public class Getters {
     }
 
     public Integer dropItemAmount(String blockname, Player player) {
-        int amounthigh = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.high");
-        int amountlow = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.low");
-        int amount = plugin.getRandom().nextInt((amounthigh - amountlow) + 1) + amountlow;
+        int amount = Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockname + ".drop-item.amount", 1).getInt();
 
         if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
             int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;
         }
+
         return amount;
     }
 
     public String eventName(String blockname) {
         return plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.event-name");
-    }
-
-    public String eventBossbarName(String blockname) {
-        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.name"));
-        }
-        return null;
-    }
-
-    public BarColor eventBossbarColor(String blockname) {
-        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color") != null) {
-            return BarColor.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.bossbar.color").toUpperCase());
-        }
-        return null;
     }
 
     public boolean eventDoubleDrops(String blockname) {
@@ -235,7 +206,7 @@ public class Getters {
     }
 
     public List<String> eventItemLores(String blockname) {
-        List<String> lores = new ArrayList<String>();
+        List<String> lores = new ArrayList<>();
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }

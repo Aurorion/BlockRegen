@@ -42,6 +42,10 @@ public class Utils {
         Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
     }
+    
+    public static String removeColors(String str) {
+        return ChatColor.stripColor(str);
+    }
 
     public static String parse(String string, Player player) {
         return parse("", string, player);
