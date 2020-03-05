@@ -92,11 +92,11 @@ public class Commands implements CommandExecutor, Listener {
                         player.sendMessage(plugin.getMessages().noperm);
                         return true;
                     }
-                    if (!Utils.itemcheck.contains(player.getName())) {
-                        Utils.itemcheck.add(player.getName());
+                    if (!Utils.dataCheck.contains(player.getName())) {
+                        Utils.dataCheck.add(player.getName());
                         player.sendMessage(plugin.getMessages().datacheckon);
                     } else {
-                        Utils.itemcheck.remove(player.getName());
+                        Utils.dataCheck.remove(player.getName());
                         player.sendMessage(plugin.getMessages().datacheckoff);
                     }
                     return true;

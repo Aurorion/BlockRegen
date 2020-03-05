@@ -4,6 +4,7 @@ import nl.Aurorion.BlockRegen.Main;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -68,7 +69,19 @@ public class Getters {
     }
 
     public Integer replaceDelay(String blockname) {
-        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
+        ConfigurationSection section = plugin.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockname + ".regen-delay");
+
+        // Regen instantly
+        if (section == null)
+            return 0;
+
+        if (section.contains("low") && section.contains("high")) {
+            int low = section.getInt("low");
+            int high = section.getInt("high");
+
+            return plugin.getRandom().nextInt((high - low) + 1) + low;
+        } else
+            return plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
     }
 
     public Integer money(String blockname) {
@@ -79,6 +92,10 @@ public class Getters {
         List<String> consoleCommands = new ArrayList<>();
 
         String path = "Blocks." + blockname;
+
+        if (!plugin.getFiles().getBlocklist().contains("Blocks." + blockname))
+            return new ArrayList<>();
+
         if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-commands"))
             path += ".console-commands";
         else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-command"))
@@ -146,7 +163,7 @@ public class Getters {
     }
 
     public List<String> dropItemLores(String blockname) {
-        List<String> lores = new ArrayList<String>();
+        List<String> lores = new ArrayList<>();
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-item.lores")) {
             lores.add(ChatColor.translateAlternateColorCodes('&', all));
         }
@@ -169,6 +186,7 @@ public class Getters {
         int amounthigh = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.high");
         int amountlow = plugin.getFiles().getBlocklist().getInt("Blocks." + blockname + ".drop-item.amount.low");
         int amount = plugin.getRandom().nextInt((amounthigh - amountlow) + 1) + amountlow;
+
         if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
             int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;

@@ -55,7 +55,7 @@ public class BlockBreak implements Listener {
         String blockName = block.getType().name();
 
         // Block data check
-        if (Utils.itemcheck.contains(player.getName())) {
+        if (Utils.dataCheck.contains(player.getName())) {
             event.setCancelled(true);
             player.sendMessage(plugin.getMessages().datacheck.replace("%block%", blockName));
             return;
