@@ -6,6 +6,7 @@ import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.Aurorion.BlockRegen.Main;
+import nl.Aurorion.BlockRegen.Message;
 import nl.Aurorion.BlockRegen.System.Getters;
 import nl.Aurorion.BlockRegen.Utils;
 import org.bukkit.*;
@@ -57,7 +58,7 @@ public class BlockBreak implements Listener {
         // Block data check
         if (Utils.dataCheck.contains(player.getName())) {
             event.setCancelled(true);
-            player.sendMessage(plugin.getMessages().datacheck.replace("%block%", blockName));
+            player.sendMessage(Message.DATA_CHECK.get().replace("%block%", blockName));
             return;
         }
 
@@ -198,7 +199,7 @@ public class BlockBreak implements Listener {
         if (check) {
             return true;
         }
-        player.sendMessage(this.plugin.getMessages().toolRequired.replace("%tool%", string.toLowerCase().replace("_", " ")));
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get().replace("%tool%", string.toLowerCase().replace("_", " ")));
         return false;
     }
 
@@ -216,7 +217,7 @@ public class BlockBreak implements Listener {
         if (check) {
             return true;
         }
-        player.sendMessage(this.plugin.getMessages().enchantRequired.replace("%enchant%", string.toLowerCase().replace("_", " ")));
+        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", string.toLowerCase().replace("_", " ")));
         return false;
     }
 
@@ -233,10 +234,10 @@ public class BlockBreak implements Listener {
             }
         }
         if (job == null || !job.equals(jobCheckString[0])) {
-            player.sendMessage(plugin.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+            player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
-        } else if (level < Integer.valueOf(jobCheckString[1])) {
-            player.sendMessage(plugin.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+        } else if (level < Integer.parseInt(jobCheckString[1])) {
+            player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
         } else {
             return true;
@@ -354,7 +355,7 @@ public class BlockBreak implements Listener {
 
         // Particles -------------------------------------------------------------------------------------------
         if (getters.particleCheck(blockname) != null)
-            plugin.getParticles().run(getters.particleCheck(blockname).toLowerCase(), block);
+            plugin.getParticleUtil().run(getters.particleCheck(blockname).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
         FileConfiguration data = plugin.getFiles().getData();

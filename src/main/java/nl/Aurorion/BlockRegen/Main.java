@@ -1,6 +1,7 @@
 package nl.Aurorion.BlockRegen;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
 import nl.Aurorion.BlockRegen.Commands.Commands;
@@ -30,23 +31,28 @@ import java.util.Set;
 
 public class Main extends JavaPlugin {
 
+    @Getter
     public static Main instance;
 
-    public static Main getInstance() {
-        return instance;
-    }
-
     // Dependencies
-    public Economy econ;
+    @Getter
+    public Economy economy;
+    @Getter
     public WorldEditPlugin worldEdit;
+    @Getter
     public GriefPrevention griefPrevention;
 
+    @Getter
     private Files files;
-    private Messages messages;
+    @Getter
+    private Message message;
 
+    @Getter
     private Getters getters;
 
+    @Getter
     private ParticleUtil particleUtil;
+    @Getter
     private Random random;
 
     // Handles every output going to console, easier, more centralized control.
@@ -55,8 +61,6 @@ public class Main extends JavaPlugin {
     public ExceptionHandler eH;
 
     public String newVersion = null;
-
-    private boolean useJobs = false;
 
     @Override
     public void onEnable() {
@@ -113,7 +117,7 @@ public class Main extends JavaPlugin {
 
     private void registerClasses() {
         files = new Files(this);
-        messages = new Messages(files);
+        Message.load();
         particleUtil = new ParticleUtil(this);
         getters = new Getters(this);
         random = new Random();
@@ -144,7 +148,7 @@ public class Main extends JavaPlugin {
             return;
         }
 
-        econ = rsp.getProvider();
+        economy = rsp.getProvider();
         cO.info("&eVault & economy plugin found! &aEnabling economy functions.");
     }
 
@@ -161,7 +165,7 @@ public class Main extends JavaPlugin {
     }
 
     private void setupJobs() {
-        useJobs = this.getServer().getPluginManager().getPlugin("Jobs") != null;
+        boolean useJobs = this.getServer().getPluginManager().getPlugin("Jobs") != null;
 
         if (useJobs)
             cO.info("&eJobs found! &aEnabling Jobs fuctions.");
@@ -191,41 +195,6 @@ public class Main extends JavaPlugin {
     }
 
     //-------------------- Getters --------------------------
-    public Economy getEconomy() {
-        return this.econ;
-    }
-
-    public WorldEditPlugin getWorldEdit() {
-        return this.worldEdit;
-    }
-
-    public boolean useJobs() {
-        return useJobs;
-    }
-
-    public GriefPrevention getGriefPrevention() {
-        return griefPrevention;
-    }
-
-    public Files getFiles() {
-        return this.files;
-    }
-
-    public Messages getMessages() {
-        return this.messages;
-    }
-
-    public ParticleUtil getParticles() {
-        return this.particleUtil;
-    }
-
-    public Getters getGetters() {
-        return this.getters;
-    }
-
-    public Random getRandom() {
-        return this.random;
-    }
 
     public void recoveryCheck() {
         if (this.getGetters().dataRecovery()) {
@@ -234,8 +203,8 @@ public class Main extends JavaPlugin {
                 while (set.iterator().hasNext()) {
                     String name = set.iterator().next();
                     List<String> list = files.getData().getStringList(name);
-                    for (int i = 0; i < list.size(); i++) {
-                        Location loc = Utils.stringToLocation(list.get(i));
+                    for (String s : list) {
+                        Location loc = Utils.stringToLocation(s);
                         loc.getBlock().setType(Material.valueOf(name));
                         cO.debug("Recovered " + name + " on position " + Utils.locationToString(loc));
                     }
