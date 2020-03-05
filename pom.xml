@@ -87,6 +87,7 @@
         <dependency>
             <groupId>com.palmergames</groupId>
             <artifactId>Towny</artifactId>
+            <version>0.95.2.20</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/Towny-0.95.2.20.jar</systemPath>
         </dependency>
@@ -94,6 +95,7 @@
         <dependency>
             <groupId>me.ryanhamshire.GriefPrevention</groupId>
             <artifactId>GriefPrevention</artifactId>
+            <version>16.13.0</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/GriefPrevention.jar</systemPath>
         </dependency>
@@ -101,6 +103,7 @@
         <dependency>
             <groupId>com.gamingmesh.jobs</groupId>
             <artifactId>Jobs</artifactId>
+            <version>4.15.5</version>
             <scope>system</scope>
             <systemPath>${basedir}/libs/Jobs4.15.5.jar</systemPath>
         </dependency>
