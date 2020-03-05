@@ -9,6 +9,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Getters {
 
@@ -61,7 +62,7 @@ public class Getters {
 
     public Material replaceBlock(String blockname) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block") != null) {
-            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block").toUpperCase());
+            return Material.valueOf(Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block")).toUpperCase());
         }
         return null;
     }
@@ -82,9 +83,9 @@ public class Getters {
         if (!plugin.getFiles().getBlocklist().contains("Blocks." + blockname))
             return new ArrayList<>();
 
-        if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-commands"))
+        if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("console-commands"))
             path += ".console-commands";
-        else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("console-command"))
+        else if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("console-command"))
             path += ".console-command";
         else return consoleCommands;
 
@@ -100,9 +101,9 @@ public class Getters {
         List<String> playerCommands = new ArrayList<>();
 
         String path = "Blocks." + blockname;
-        if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("player-commands"))
+        if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("player-commands"))
             path += ".player-commands";
-        else if (plugin.getFiles().getBlocklist().getConfigurationSection(path).contains("player-command"))
+        else if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("player-command"))
             path += ".player-command";
         else return playerCommands;
 
@@ -143,7 +144,7 @@ public class Getters {
 
     public String dropItemName(String blockname) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name"));
+            return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".drop-item.name")));
         }
         return null;
     }
@@ -171,8 +172,8 @@ public class Getters {
     public Integer dropItemAmount(String blockname, Player player) {
         int amount = Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockname + ".drop-item.amount", 1).getInt();
 
-        if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-            int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+        if (getHand(player).hasItemMeta() && Objects.requireNonNull(getHand(player).getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+            int enchantLevel = Objects.requireNonNull(getHand(player).getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;
         }
 
@@ -193,14 +194,14 @@ public class Getters {
 
     public Material eventItemMaterial(String blockname) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material") != null) {
-            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material").toUpperCase());
+            return Material.valueOf(Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material")).toUpperCase());
         }
         return null;
     }
 
     public String eventItemName(String blockname) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name"));
+            return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name")));
         }
         return null;
     }

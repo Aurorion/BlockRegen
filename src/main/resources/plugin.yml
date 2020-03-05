@@ -3,7 +3,7 @@ main: nl.Aurorion.BlockRegen.Main
 version: ${project.version}
 authors: [Aurorion, Wertik1206]
 softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention]
-api-version: 1.13
+api-version: "1.13"
 commands:
   blockregen:
     aliases: [br]

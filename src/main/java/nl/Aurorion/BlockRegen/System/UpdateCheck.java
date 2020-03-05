@@ -12,7 +12,7 @@ public class UpdateCheck {
 	
     private URL checkURL;
     private String newVersion;
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     public UpdateCheck(JavaPlugin plugin, int projectID) {
         this.plugin = plugin;

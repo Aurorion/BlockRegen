@@ -3,13 +3,12 @@ package nl.Aurorion.BlockRegen;
 import lombok.Getter;
 import lombok.Setter;
 
+/**
+ * Message system, loaded on enable & reload.
+ *
+ * @author Wertik1206
+ * */
 public enum Message {
-
-    /**
-     * Message system, loaded on enable & reload.
-     *
-     * @author Wertik1206
-     * */
 
     PREFIX("Prefix", "&6&l[&3BlockRegen&6&l] &f"),
     NO_PERM("Insufficient-Permission", "&cYou don't have the permissions to do this!"),

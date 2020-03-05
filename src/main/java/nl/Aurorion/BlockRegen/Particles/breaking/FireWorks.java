@@ -1,6 +1,5 @@
 package nl.Aurorion.BlockRegen.Particles.breaking;
 
-import nl.Aurorion.BlockRegen.Events.BlockBreak;
 import nl.Aurorion.BlockRegen.Main;
 import nl.Aurorion.BlockRegen.Utils;
 import org.bukkit.Color;

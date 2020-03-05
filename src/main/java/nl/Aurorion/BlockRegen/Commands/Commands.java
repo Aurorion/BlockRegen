@@ -22,6 +22,9 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 public class Commands implements CommandExecutor, Listener {
@@ -118,10 +121,8 @@ public class Commands implements CommandExecutor, Listener {
                 }
 
                 if (args[0].equalsIgnoreCase("region")) {
-                    if (!(sender instanceof Player)) {
-                        sender.sendMessage(Message.NO_PLAYER.get());
+                    if (checkConsole(sender))
                         return true;
-                    }
 
                     Player player = (Player) sender;
 
@@ -142,7 +143,7 @@ public class Commands implements CommandExecutor, Listener {
                     if (args.length == 2) {
                         if (args[1].equalsIgnoreCase("list")) {
                             ConfigurationSection regions = plugin.getFiles().getRegions().getConfigurationSection("Regions");
-                            Set<String> setregions = regions.getKeys(false);
+                            Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
                             player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eHere is a list of all your regions."));
                             player.sendMessage(" ");
@@ -166,23 +167,20 @@ public class Commands implements CommandExecutor, Listener {
                                 e.printStackTrace();
                             }
 
-                            if (plugin.getFiles().getRegions().getString("Regions") == null) {
-                                plugin.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMinimumPoint())));
+                            List<String> regions = new ArrayList<>();
+
+                            if (plugin.getFiles().getRegions().getString("Regions") != null) {
+                                ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                                regions = new ArrayList<>(Objects.requireNonNull(regionSection).getKeys(false));
+                            }
+
+                            if (regions.contains(args[2])) {
+                                player.sendMessage(Message.DUPLICATED_REGION.get());
+                            } else {
+                                plugin.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(s).getMinimumPoint())));
                                 plugin.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
                                 plugin.getFiles().saveRegions();
                                 player.sendMessage(Message.SET_REGION.get());
-                            } else {
-                                ConfigurationSection regions = plugin.getFiles().getRegions().getConfigurationSection("Regions");
-                                Set<String> setregions = regions.getKeys(false);
-                                if (setregions.contains(args[2])) {
-                                    player.sendMessage(Message.DUPLICATED_REGION.get());
-                                } else {
-                                    plugin.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMinimumPoint())));
-                                    plugin.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
-                                    plugin.getFiles().saveRegions();
-                                    player.sendMessage(Message.SET_REGION.get());
-                                }
-                                return true;
                             }
                             return true;
                         }
@@ -191,7 +189,7 @@ public class Commands implements CommandExecutor, Listener {
                                 player.sendMessage(Message.UNKNOWN_REGION.get());
                             } else {
                                 ConfigurationSection regions = plugin.getFiles().getRegions().getConfigurationSection("Regions");
-                                Set<String> setregions = regions.getKeys(false);
+                                Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
 
                                 if (setregions.contains(args[2])) {
                                     plugin.getFiles().getRegions().set("Regions." + args[2], null);
@@ -209,10 +207,8 @@ public class Commands implements CommandExecutor, Listener {
                 }
 
                 if (args[0].equalsIgnoreCase("events")) {
-                    if (!(sender instanceof Player)) {
-                        sender.sendMessage(Message.NO_PLAYER.get());
+                    if (checkConsole(sender))
                         return true;
-                    }
 
                     Player player = (Player) sender;
                     if (!player.hasPermission("blockregen.admin")) {
@@ -262,10 +258,10 @@ public class Commands implements CommandExecutor, Listener {
                                     BarColor barColor = BarColor.BLUE;
                                     FileConfiguration blocklist = plugin.getFiles().getBlocklist();
                                     ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
-                                    Set<String> setblocks = blocks.getKeys(false);
+                                    Set<String> setblocks = Objects.requireNonNull(blocks).getKeys(false);
                                     for (String loopBlocks : setblocks) {
                                         String eventName = blocklist.getString("Blocks." + loopBlocks + ".event.event-name");
-                                        if (eventName.equalsIgnoreCase(allArgs)) {
+                                        if (Objects.requireNonNull(eventName).equalsIgnoreCase(allArgs)) {
                                             if (blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name") == null) {
                                                 barName = "Event " + allArgs + " is now active!";
                                             } else {
@@ -274,17 +270,16 @@ public class Commands implements CommandExecutor, Listener {
                                             if (blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color") == null) {
                                                 barColor = BarColor.YELLOW;
                                             } else {
-                                                barColor = BarColor.valueOf(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color").toUpperCase());
+                                                barColor = BarColor.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color")).toUpperCase());
                                             }
 
                                             break;
-                                        } else {
-                                            continue;
                                         }
                                     }
+
                                     BossBar bossbar = Bukkit.createBossBar(null, BarColor.BLUE, BarStyle.SOLID);
                                     Utils.bars.put(allArgs, bossbar);
-                                    bossbar.setTitle(ChatColor.translateAlternateColorCodes('&', barName));
+                                    bossbar.setTitle(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(barName)));
                                     bossbar.setColor(barColor);
                                     for (Player online : Bukkit.getOnlinePlayers()) {
                                         bossbar.addPlayer(online);
@@ -352,11 +347,11 @@ public class Commands implements CommandExecutor, Listener {
         String world;
 
         ConfigurationSection regionsection = regions.getConfigurationSection("Regions");
-        Set<String> regionset = regionsection.getKeys(false);
+        Set<String> regionset = Objects.requireNonNull(regionsection).getKeys(false);
         for (String regionloop : regionset) {
             if (regions.get("Regions." + regionloop + ".World") != null) {
-                locA = regions.getString("Regions." + regionloop + ".Max").split(";");
-                locB = regions.getString("Regions." + regionloop + ".Min").split(";");
+                locA = Objects.requireNonNull(regions.getString("Regions." + regionloop + ".Max")).split(";");
+                locB = Objects.requireNonNull(regions.getString("Regions." + regionloop + ".Min")).split(";");
                 world = regions.getString("Regions." + regionloop + ".World");
                 regions.set("Regions." + regionloop + ".Max", world + ";" + locA[0] + ";" + locA[1] + ";" + locA[2]);
                 regions.set("Regions." + regionloop + ".Min", world + ";" + locB[0] + ";" + locB[1] + ";" + locB[2]);
@@ -365,5 +360,14 @@ public class Commands implements CommandExecutor, Listener {
         }
 
         plugin.getFiles().saveRegions();
+    }
+
+    private boolean checkConsole(CommandSender sender) {
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(Message.NO_PLAYER.get());
+            return true;
+        }
+
+        return false;
     }
 }

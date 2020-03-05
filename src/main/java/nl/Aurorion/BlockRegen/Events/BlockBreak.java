@@ -134,47 +134,10 @@ public class BlockBreak implements Listener {
                 int expToDrop = event.getExpToDrop();
 
                 if (isInRegion) {
-                    if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
-                        event.setCancelled(true);
-                        return;
-                    }
-
-                    if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
-                        event.setCancelled(true);
-                        return;
-                    }
-
-                    if (plugin.getGetters().jobsCheck(blockName) != null) {
-                        if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
-                            event.setCancelled(true);
-                            return;
-                        }
-                    }
-
-                    event.setDropItems(false);
-                    event.setExpToDrop(0);
-                    this.blockBreak(player, block, blockName, bworld, expToDrop);
+                    check(event, player, block, blockName, bworld, expToDrop);
                 } else {
                     if (!useRegions) {
-                        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
-                            event.setCancelled(true);
-                            return;
-                        }
-
-                        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
-                            event.setCancelled(true);
-                            return;
-                        }
-
-                        if (plugin.getGetters().jobsCheck(blockName) != null) {
-                            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
-                                event.setCancelled(true);
-                                return;
-                            }
-                        }
-                        event.setDropItems(false);
-                        event.setExpToDrop(0);
-                        this.blockBreak(player, block, blockName, bworld, expToDrop);
+                        check(event, player, block, blockName, bworld, expToDrop);
                     }
                 }
             } else {
@@ -184,6 +147,29 @@ public class BlockBreak implements Listener {
                     event.setCancelled(true);
             }
         }
+    }
+
+    private void check(BlockBreakEvent event, Player player, Block block, String blockName, World bworld, int expToDrop) {
+        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
+            event.setCancelled(true);
+            return;
+        }
+
+        if (plugin.getGetters().jobsCheck(blockName) != null) {
+            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+
+        event.setDropItems(false);
+        event.setExpToDrop(0);
+        this.blockBreak(player, block, blockName, bworld, expToDrop);
     }
 
     private boolean toolCheck(String string, Player player) {
@@ -208,15 +194,21 @@ public class BlockBreak implements Listener {
         boolean check = false;
         for (String all : enchants) {
             Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(all.toLowerCase()));
+            if (enchant == null)
+                continue;
+
             ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
-            if (meta.hasEnchant(enchant)) {
-                check = true;
-                break;
-            }
+            if (meta != null) {
+                if (meta.hasEnchant(enchant)) {
+                    check = true;
+                    break;
+                }
+            } else check = true;
         }
-        if (check) {
+
+        if (check)
             return true;
-        }
+
         player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", string.toLowerCase().replace("_", " ")));
         return false;
     }
@@ -256,19 +248,24 @@ public class BlockBreak implements Listener {
         boolean dropEventItem = false;
         int rarity = 0;
 
-        if (getters.eventName(blockname) != null && Utils.events.containsKey(blockname))
+        if (getters.eventName(blockname) != null && Utils.events.containsKey(getters.eventName(blockname)))
             if (Utils.events.get(getters.eventName(blockname))) {
+
                 doubleDrops = getters.eventDoubleDrops(blockname);
                 doubleExp = getters.eventDoubleExp(blockname);
+
                 if (getters.eventItemMaterial(blockname) != null) {
                     eventItem = new ItemStack(getters.eventItemMaterial(blockname), 1);
                     ItemMeta meta = eventItem.getItemMeta();
-                    if (getters.eventItemName(blockname) != null) {
-                        meta.setDisplayName(getters.eventItemName(blockname));
+
+                    if (meta != null) {
+                        if (getters.eventItemName(blockname) != null)
+                            meta.setDisplayName(getters.eventItemName(blockname));
+
+                        if (!getters.eventItemLores(blockname).isEmpty())
+                            meta.setLore(getters.eventItemLores(blockname));
                     }
-                    if (!getters.eventItemLores(blockname).isEmpty()) {
-                        meta.setLore(getters.eventItemLores(blockname));
-                    }
+
                     eventItem.setItemMeta(meta);
                     dropEventItem = getters.eventItemDropNaturally(blockname);
                     rarity = getters.eventItemRarity(blockname);
@@ -290,31 +287,38 @@ public class BlockBreak implements Listener {
             }
             if (exptodrop > 0) {
                 if (doubleExp) {
-                    ((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop * 2);
+                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop * 2);
                 } else {
-                    ((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(exptodrop);
+                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop);
                 }
             }
         } else if (getters.dropItemMaterial(blockname) != null) {
             if (getters.dropItemAmount(blockname, player) > 0) {
                 int itemAmount = getters.dropItemAmount(blockname, player);
+
                 if (doubleDrops) {
                     itemAmount = itemAmount * 2;
                 }
-                ItemStack dropitem = new ItemStack(getters.dropItemMaterial(blockname), itemAmount);
-                ItemMeta dropmeta = dropitem.getItemMeta();
-                if (getters.dropItemName(blockname) != null) {
-                    dropmeta.setDisplayName(getters.dropItemName(blockname));
+
+                ItemStack dropItem = new ItemStack(getters.dropItemMaterial(blockname), itemAmount);
+                ItemMeta dropMeta = dropItem.getItemMeta();
+
+                if (dropMeta != null) {
+                    if (getters.dropItemName(blockname) != null) {
+                        dropMeta.setDisplayName(getters.dropItemName(blockname));
+                    }
+
+                    if (!getters.dropItemLores(blockname).isEmpty()) {
+                        dropMeta.setLore(getters.dropItemLores(blockname));
+                    }
                 }
-                if (!getters.dropItemLores(blockname).isEmpty()) {
-                    dropmeta.setLore(getters.dropItemLores(blockname));
-                }
-                dropitem.setItemMeta(dropmeta);
+
+                dropItem.setItemMeta(dropMeta);
 
                 if (getters.dropItemDropNaturally(blockname)) {
-                    bworld.dropItem(loc, dropitem);
+                    bworld.dropItem(loc, dropItem);
                 } else {
-                    player.getInventory().addItem(dropitem);
+                    player.getInventory().addItem(dropItem);
                     player.updateInventory();
                 }
             }
@@ -325,7 +329,7 @@ public class BlockBreak implements Listener {
                     expAmount = expAmount * 2;
                 }
                 if (getters.dropItemExpDrop(blockname)) {
-                    ((ExperienceOrb) bworld.spawn(loc, ExperienceOrb.class)).setExperience(expAmount);
+                    bworld.spawn(loc, ExperienceOrb.class).setExperience(expAmount);
                 } else {
                     player.giveExp(expAmount);
                 }

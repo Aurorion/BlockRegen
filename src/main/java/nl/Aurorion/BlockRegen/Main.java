@@ -24,10 +24,7 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 public class Main extends JavaPlugin {
 
@@ -70,7 +67,7 @@ public class Main extends JavaPlugin {
 
         cO = new ConsoleOutput(this);
         cO.setDebug(files.settings.getBoolean("Debug-Enabled", false));
-        cO.setPrefix(ChatColor.translateAlternateColorCodes('&', files.messages.getString("Messages.Prefix")));
+        cO.setPrefix(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(files.messages.getString("Messages.Prefix"))));
 
         eH = new ExceptionHandler(this);
 
@@ -124,7 +121,7 @@ public class Main extends JavaPlugin {
     }
 
     private void registerCommands() {
-        this.getCommand("blockregen").setExecutor(new Commands(this));
+        Objects.requireNonNull(this.getCommand("blockregen")).setExecutor(new Commands(this));
     }
 
     private void registerEvents() {

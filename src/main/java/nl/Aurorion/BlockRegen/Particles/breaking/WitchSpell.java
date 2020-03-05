@@ -13,8 +13,8 @@ public class WitchSpell implements Runnable {
         this.block = block;
     }
 
-    int points = 40;
-    double radius = 0.5d;
+    final int points = 40;
+    final double radius = 0.5d;
 
     @Override
     public void run() {

@@ -12,39 +12,27 @@ import java.util.Map;
 
 public class Utils {
 
-    public static List<String> bypass = new ArrayList<>();
-    public static List<String> dataCheck = new ArrayList<>();
+    public static final List<String> bypass = new ArrayList<>();
+    public static final List<String> dataCheck = new ArrayList<>();
 
-    public static List<Color> colors = new ArrayList<>();
-    public static List<Location> regenBlocks = new ArrayList<>();
+    public static final List<Color> colors = new ArrayList<>();
+    public static final List<Location> regenBlocks = new ArrayList<>();
 
-    public static Map<String, Boolean> events = new HashMap<>();
-    public static Map<String, BossBar> bars = new HashMap<>();
+    public static final Map<String, Boolean> events = new HashMap<>();
+    public static final Map<String, BossBar> bars = new HashMap<>();
 
-    public static Map<Location, BukkitTask> tasks = new HashMap<>();
-    public static Map<Location, Material> persist = new HashMap<>();
-
-    public static Chunk stringToChunk(String string) {
-        String[] splits = string.split(";");
-        return Bukkit.getWorld(splits[0]).getChunkAt(Integer.parseInt(splits[1]), Integer.parseInt(splits[2]));
-    }
-
-    public static String chunkToString(Chunk chunk) {
-        return chunk.getWorld().getName() + ";" + chunk.getX() + ";" + chunk.getZ();
-    }
+    public static final Map<Location, BukkitTask> tasks = new HashMap<>();
+    public static final Map<Location, Material> persist = new HashMap<>();
 
     public static String locationToString(Location loc) {
-        return loc.getWorld().getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
+        World world = loc.getWorld();
+        return world == null ? "" : world.getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
     }
 
     public static Location stringToLocation(String str) {
         String[] arr = str.split(";");
         Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
-    }
-    
-    public static String removeColors(String str) {
-        return ChatColor.stripColor(str);
     }
 
     public static String parse(String string, Player player) {
@@ -56,7 +44,7 @@ public class Utils {
         string = string.replace("%player" + modifier + "Display%", player.getDisplayName());
         //string = string.replace("%player" + modifier + "Suffix%", Main.getChat().getPlayerSuffix(player));
         //string = string.replace("%player" + modifier + "Prefix%", Main.getChat().getPlayerPrefix(player));
-        string = string.replace("%player" + modifier + "MaxHP%", String.valueOf(player.getMaxHealth()));
+        //string = string.replace("%player" + modifier + "MaxHP%", String.valueOf(player.getMaxHealth()));
         string = string.replace("%player" + modifier + "HP%", String.valueOf(player.getHealth()));
         string = string.replace("%player" + modifier + "X%", String.valueOf(((int) player.getLocation().getX())));
         string = string.replace("%player" + modifier + "Y%", String.valueOf((int) player.getLocation().getY()));
@@ -65,16 +53,6 @@ public class Utils {
         string = string.replace("%player" + modifier + "Food%", String.valueOf(player.getFoodLevel()));
         string = string.replace("%player" + modifier + "Level%", String.valueOf(player.getLevel()));
         return string;
-    }
-
-    public static List<String> parseList(String modifier, List<String> list, Player player) {
-        List<String> outPut = new ArrayList<>();
-        list.forEach(line -> outPut.add(parse(modifier, line, player)));
-        return outPut;
-    }
-
-    public static List<String> parseList(List<String> list, Player player) {
-        return parseList("", list, player);
     }
 
     public static void fillFireworkColors() {
