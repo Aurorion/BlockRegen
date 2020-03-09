@@ -18,10 +18,10 @@ public class Files {
     public final File rfile;
     public File dfile;
     public FileConfiguration settings;
-	public FileConfiguration messages;
-	public FileConfiguration blocklist;
-	public final FileConfiguration regions;
-	public FileConfiguration data;
+    public FileConfiguration messages;
+    public FileConfiguration blocklist;
+    public final FileConfiguration regions;
+    public FileConfiguration data;
 
     public Files(Plugin plugin) {
 
@@ -31,32 +31,28 @@ public class Files {
         rfile = new File(plugin.getDataFolder(), "Regions.yml");
 
         if (!sfile.exists()) {
-            if (!sfile.getParentFile().mkdirs())
-                Main.getInstance().cO.err("Could not create a folder.");
+            sfile.getParentFile().mkdirs();
 
             plugin.saveResource("Settings.yml", false);
             plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Settings.yml"));
         }
 
         if (!mfile.exists()) {
-            if (!mfile.getParentFile().mkdirs())
-                Main.getInstance().cO.err("Could not create a folder.");
+            mfile.getParentFile().mkdirs();
 
             plugin.saveResource("Messages.yml", false);
             plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Messages.yml"));
         }
 
         if (!bfile.exists()) {
-            if (!bfile.getParentFile().mkdirs())
-                Main.getInstance().cO.err("Could not create a folder.");
+            bfile.getParentFile().mkdirs();
 
             plugin.saveResource("Blocklist.yml", false);
             plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Blocklist.yml"));
         }
 
         if (!rfile.exists()) {
-            if (!rfile.getParentFile().mkdirs())
-                Main.getInstance().cO.err("Could not create a folder.");
+            rfile.getParentFile().mkdirs();
 
             plugin.saveResource("Regions.yml", false);
             plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Regions.yml"));

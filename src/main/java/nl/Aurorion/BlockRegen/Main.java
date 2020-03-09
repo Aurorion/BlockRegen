@@ -182,8 +182,8 @@ public class Main extends JavaPlugin {
         }
 
         getServer().getConsoleSender().sendMessage(Utils.color(Utils.events.isEmpty() ?
-                "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " events found. Added all to the system." :
-                "&6[&3BlockRegen&6] &cThere are 0 events found. Skip adding to the system."));
+                "&6[&3BlockRegen&6] &cFound no events. Skip adding to the system." :
+                "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " event(s) found. Added all to the system."));
     }
 
     public void enableMetrics() {

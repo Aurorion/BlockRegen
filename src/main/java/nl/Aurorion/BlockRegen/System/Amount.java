@@ -1,6 +1,6 @@
 package nl.Aurorion.BlockRegen.System;
 
-import jdk.internal.joptsimple.internal.Strings;
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import nl.Aurorion.BlockRegen.Main;
@@ -52,21 +52,14 @@ public class Amount {
         ConfigurationSection section = yaml.getConfigurationSection(path);
 
         if (section == null)
-            return new Amount(defaultValue);
+            try {
+                return new Amount(yaml.getDouble(path));
+            } catch (NullPointerException e) {
+                return new Amount(defaultValue);
+            }
 
         if (!section.contains("high") || !section.contains("low")) {
-            try {
-                String dataStr = yaml.getString(path);
-
-                if (Strings.isNullOrEmpty(dataStr))
-                    return new Amount(defaultValue);
-
-                double fixed = Double.parseDouble(dataStr);
-
-                return new Amount(fixed);
-            } catch (NumberFormatException e) {
-                return new Amount(1);
-            }
+            return new Amount(yaml.getDouble(path));
         } else {
             String dataStrLow = yaml.getString(path + ".low");
             String dataStrHigh = yaml.getString(path + ".high");
@@ -82,7 +75,7 @@ public class Amount {
     }
 
     public int getInt() {
-        return fixed ? (int) fixedValue : Main.getInstance().getRandom().nextInt((int) highValue) + (int) lowValue;
+        return fixed ? (int) fixedValue : Main.getInstance().getRandom().nextInt((int) highValue + 1) + (int) lowValue;
     }
 
     public double getDouble() {

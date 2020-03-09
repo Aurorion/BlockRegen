@@ -134,10 +134,48 @@ public class BlockBreak implements Listener {
                 int expToDrop = event.getExpToDrop();
 
                 if (isInRegion) {
-                    check(event, player, block, blockName, bworld, expToDrop);
+                    if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (plugin.getGetters().jobsCheck(blockName) != null) {
+                        if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
+                            event.setCancelled(true);
+                            return;
+                        }
+                    }
+
+                    event.setDropItems(false);
+                    event.setExpToDrop(0);
+                    this.blockBreak(player, block, blockName, bworld, expToDrop);
                 } else {
                     if (!useRegions) {
-                        check(event, player, block, blockName, bworld, expToDrop);
+                        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if (plugin.getGetters().jobsCheck(blockName) != null) {
+                            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
+                                event.setCancelled(true);
+                                return;
+                            }
+                        }
+
+                        event.setDropItems(false);
+                        event.setExpToDrop(0);
+                        this.blockBreak(player, block, blockName, bworld, expToDrop);
                     }
                 }
             } else {
@@ -147,29 +185,6 @@ public class BlockBreak implements Listener {
                     event.setCancelled(true);
             }
         }
-    }
-
-    private void check(BlockBreakEvent event, Player player, Block block, String blockName, World bworld, int expToDrop) {
-        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
-            event.setCancelled(true);
-            return;
-        }
-
-        if (plugin.getGetters().jobsCheck(blockName) != null) {
-            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
-                event.setCancelled(true);
-                return;
-            }
-        }
-
-        event.setDropItems(false);
-        event.setExpToDrop(0);
-        this.blockBreak(player, block, blockName, bworld, expToDrop);
     }
 
     private boolean toolCheck(String string, Player player) {
@@ -236,10 +251,10 @@ public class BlockBreak implements Listener {
         }
     }
 
-    private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {
+    private void blockBreak(Player player, Block block, String blockName, World world, int expToDrop) {
         Getters getters = plugin.getGetters();
         BlockState state = block.getState();
-        Location loc = block.getLocation();
+        Location location = block.getLocation();
 
         // Events ---------------------------------------------------------------------------------------------
         boolean doubleDrops = false;
@@ -248,32 +263,34 @@ public class BlockBreak implements Listener {
         boolean dropEventItem = false;
         int rarity = 0;
 
-        if (getters.eventName(blockname) != null && Utils.events.containsKey(getters.eventName(blockname)))
-            if (Utils.events.get(getters.eventName(blockname))) {
+        if (getters.eventName(blockName) != null && Utils.events.containsKey(getters.eventName(blockName)))
+            if (Utils.events.get(getters.eventName(blockName))) {
 
-                doubleDrops = getters.eventDoubleDrops(blockname);
-                doubleExp = getters.eventDoubleExp(blockname);
+                doubleDrops = getters.eventDoubleDrops(blockName);
+                doubleExp = getters.eventDoubleExp(blockName);
 
-                if (getters.eventItemMaterial(blockname) != null) {
-                    eventItem = new ItemStack(getters.eventItemMaterial(blockname), 1);
+                if (getters.eventItemMaterial(blockName) != null) {
+                    eventItem = new ItemStack(getters.eventItemMaterial(blockName), 1);
                     ItemMeta meta = eventItem.getItemMeta();
 
                     if (meta != null) {
-                        if (getters.eventItemName(blockname) != null)
-                            meta.setDisplayName(getters.eventItemName(blockname));
+                        if (getters.eventItemName(blockName) != null)
+                            meta.setDisplayName(getters.eventItemName(blockName));
 
-                        if (!getters.eventItemLores(blockname).isEmpty())
-                            meta.setLore(getters.eventItemLores(blockname));
+                        if (!getters.eventItemLores(blockName).isEmpty())
+                            meta.setLore(getters.eventItemLores(blockName));
                     }
 
                     eventItem.setItemMeta(meta);
-                    dropEventItem = getters.eventItemDropNaturally(blockname);
-                    rarity = getters.eventItemRarity(blockname);
+                    dropEventItem = getters.eventItemDropNaturally(blockName);
+                    rarity = getters.eventItemRarity(blockName);
                 }
             }
 
         // Drop Section-----------------------------------------------------------------------------------------
-        if (getters.naturalBreak(blockname)) {
+        Material dropMaterial = getters.dropItemMaterial(blockName);
+
+        if (getters.naturalBreak(blockName)) {
             for (ItemStack drops : block.getDrops()) {
                 Material mat = drops.getType();
                 int amount;
@@ -283,53 +300,55 @@ public class BlockBreak implements Listener {
                     amount = drops.getAmount();
                 }
                 ItemStack dropStack = new ItemStack(mat, amount);
-                bworld.dropItemNaturally(block.getLocation(), dropStack);
+                world.dropItemNaturally(block.getLocation(), dropStack);
             }
-            if (exptodrop > 0) {
+            if (expToDrop > 0) {
                 if (doubleExp) {
-                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop * 2);
+                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop * 2);
                 } else {
-                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop);
+                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
                 }
             }
-        } else if (getters.dropItemMaterial(blockname) != null) {
-            if (getters.dropItemAmount(blockname, player) > 0) {
-                int itemAmount = getters.dropItemAmount(blockname, player);
+        } else if (dropMaterial != null) {
+            if (dropMaterial != Material.AIR) {
+                int itemAmount = getters.dropItemAmount(blockName, player);
 
                 if (doubleDrops) {
                     itemAmount = itemAmount * 2;
                 }
 
-                ItemStack dropItem = new ItemStack(getters.dropItemMaterial(blockname), itemAmount);
+                ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
 
                 if (dropMeta != null) {
-                    if (getters.dropItemName(blockname) != null) {
-                        dropMeta.setDisplayName(getters.dropItemName(blockname));
+                    if (getters.dropItemName(blockName) != null) {
+                        dropMeta.setDisplayName(getters.dropItemName(blockName));
                     }
 
-                    if (!getters.dropItemLores(blockname).isEmpty()) {
-                        dropMeta.setLore(getters.dropItemLores(blockname));
+                    if (!getters.dropItemLores(blockName).isEmpty()) {
+                        dropMeta.setLore(getters.dropItemLores(blockName));
                     }
+
+                    dropItem.setItemMeta(dropMeta);
                 }
 
-                dropItem.setItemMeta(dropMeta);
-
-                if (getters.dropItemDropNaturally(blockname)) {
-                    bworld.dropItem(loc, dropItem);
-                } else {
-                    player.getInventory().addItem(dropItem);
-                    player.updateInventory();
-                }
+                if (itemAmount > 0)
+                    if (getters.dropItemDropNaturally(blockName)) {
+                        world.dropItemNaturally(location, dropItem);
+                    } else {
+                        player.getInventory().addItem(dropItem);
+                        player.updateInventory();
+                    }
             }
 
-            if (getters.dropItemExpAmount(blockname) > 0) {
-                int expAmount = getters.dropItemExpAmount(blockname);
-                if (doubleExp) {
+            int expAmount = getters.dropItemExpAmount(blockName);
+
+            if (expAmount > 0) {
+                if (doubleExp)
                     expAmount = expAmount * 2;
-                }
-                if (getters.dropItemExpDrop(blockname)) {
-                    bworld.spawn(loc, ExperienceOrb.class).setExperience(expAmount);
+
+                if (getters.dropItemExpDrop(blockName)) {
+                    world.spawn(location, ExperienceOrb.class).setExperience(expAmount);
                 } else {
                     player.giveExp(expAmount);
                 }
@@ -339,7 +358,7 @@ public class BlockBreak implements Listener {
         if (eventItem != null) {
             if ((plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
                 if (dropEventItem) {
-                    bworld.dropItemNaturally(loc, eventItem);
+                    world.dropItemNaturally(location, eventItem);
                 } else {
                     player.getInventory().addItem(eventItem);
                 }
@@ -347,19 +366,22 @@ public class BlockBreak implements Listener {
         }
 
         // Vault money -----------------------------------------------------------------------------------------
-        if (plugin.getEconomy() != null && getters.money(blockname) != null && getters.money(blockname) > 0)
-            plugin.getEconomy().depositPlayer(player, getters.money(blockname));
+        if (plugin.getEconomy() != null) {
+            int money = getters.money(blockName);
+            if (money > 0)
+                plugin.getEconomy().depositPlayer(player, money);
+        }
 
         // Commands execution -----------------------------------------------------------------------------------
-        if (getters.consoleCommands(blockname) != null)
-            getters.consoleCommands(blockname).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player)));
+        if (getters.consoleCommands(blockName) != null)
+            getters.consoleCommands(blockName).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player)));
 
-        if (getters.playerCommands(blockname) != null)
-            getters.playerCommands(blockname).forEach(command -> Bukkit.dispatchCommand(player, Utils.parse(command, player)));
+        if (getters.playerCommands(blockName) != null)
+            getters.playerCommands(blockName).forEach(command -> Bukkit.dispatchCommand(player, Utils.parse(command, player)));
 
         // Particles -------------------------------------------------------------------------------------------
-        if (getters.particleCheck(blockname) != null)
-            plugin.getParticleUtil().run(getters.particleCheck(blockname).toLowerCase(), block);
+        if (getters.particleCheck(blockName) != null)
+            plugin.getParticleUtil().run(getters.particleCheck(blockName).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
         FileConfiguration data = plugin.getFiles().getData();
@@ -367,50 +389,56 @@ public class BlockBreak implements Listener {
         if (getters.dataRecovery()) {
             List<String> dataLocs = new ArrayList<>();
 
-            if (data.contains(blockname))
-                dataLocs = data.getStringList(blockname);
+            if (data.contains(blockName))
+                dataLocs = data.getStringList(blockName);
 
-            dataLocs.add(Utils.locationToString(loc));
-            data.set(blockname, dataLocs);
+            dataLocs.add(Utils.locationToString(location));
+            data.set(blockName, dataLocs);
             plugin.getFiles().saveData();
         } else
-            Utils.persist.put(loc, block.getType());
+            Utils.persist.put(location, block.getType());
 
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
             @Override
             public void run() {
-                block.setType(getters.replaceBlock(blockname));
+                block.setType(getters.replaceBlock(blockName));
+                Main.getInstance().cO.debug("Replaced block");
             }
         }.runTaskLater(plugin, 2L);
 
-        Utils.regenBlocks.add(loc);
+        Utils.regenBlocks.add(location);
 
         // Actual Regeneration -------------------------------------------------------------------------------------
-        int regendelay = 3;
-
-        if (getters.replaceDelay(blockname) != null)
-            regendelay = getters.replaceDelay(blockname);
+        int regenDelay = getters.replaceDelay(blockName);
+        regenDelay = regenDelay == 0 ? 1 : regenDelay;
+        Main.getInstance().cO.debug("Regen Delay: " + regenDelay);
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
-                state.update(true);
-                Utils.persist.remove(loc);
-                Utils.regenBlocks.remove(loc);
-                Utils.tasks.remove(loc);
-
-                if (data != null && data.contains(blockname)) {
-                    List<String> dataLocs = data.getStringList(blockname);
-
-                    if (!dataLocs.isEmpty()) {
-                        dataLocs.remove(Utils.locationToString(loc));
-                        data.set(blockname, dataLocs);
-                        plugin.getFiles().saveData();
-                    }
-                }
+                regen(state, location, data, blockName);
             }
-        }.runTaskLater(plugin, regendelay * 20);
+        }.runTaskLater(plugin, regenDelay * 20);
 
-        Utils.tasks.put(loc, task);
+        Utils.tasks.put(location, task);
+    }
+
+    private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
+        state.update(true);
+        Main.getInstance().cO.debug("Regen");
+
+        Utils.persist.remove(location);
+        Utils.regenBlocks.remove(location);
+        Utils.tasks.remove(location);
+
+        if (data != null && data.contains(blockName)) {
+            List<String> dataLocs = data.getStringList(blockName);
+
+            if (!dataLocs.isEmpty()) {
+                dataLocs.remove(Utils.locationToString(location));
+                data.set(blockName, dataLocs);
+                plugin.getFiles().saveData();
+            }
+        }
     }
 }
