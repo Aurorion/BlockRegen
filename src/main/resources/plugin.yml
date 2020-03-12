@@ -8,3 +8,10 @@ commands:
   blockregen:
     aliases: [br]
     description: Main plugin command
+permissions:
+  blockregen.admin:
+    description: Gives access to admin commands
+  blockregen.bypass:
+    description: Allows player to use the bypass
+  blockregen.datacheck:
+    description: Allows player to use the data check

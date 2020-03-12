@@ -38,9 +38,9 @@ public class Commands implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &7v.&f" + plugin.getDescription().getVersion() + " &6&m-----"
-                    + "\n&3/" + label + " reload &7: Reload the Settings.yml, Messages.yml and Blocklist.yml, also generates Recovery.yml if needed."
-                    + "\n&3/" + label + " bypass &7: Bypass the events."
+            sender.sendMessage(Utils.color("&6&m-----&r &3BlockRegen &7v.&f" + plugin.getDescription().getVersion() + " &6&m-----"
+                    + "\n&3/" + label + " reload &7: Reload the plugin."
+                    + "\n&3/" + label + " bypass &7: Bypass block breaking."
                     + "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
                     + "\n&3/" + label + " region &7: All the info to set a region."
                     + "\n&3/" + label + " events &7: Check all your events."
@@ -200,25 +200,20 @@ public class Commands implements CommandExecutor, Listener {
                 }
                 break;
             case "events":
-                if (checkConsole(sender))
-                    return true;
-
-                player = (Player) sender;
-
-                if (!player.hasPermission("blockregen.admin")) {
-                    player.sendMessage(Message.NO_PERM.get());
+                if (!sender.hasPermission("blockregen.admin")) {
+                    sender.sendMessage(Message.NO_PERM.get());
                     return true;
                 }
 
                 if (args.length < 3) {
                     if (Utils.events.isEmpty()) {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
                                 + "\n&eYou haven't yet made any events. Make some to up your servers game!"
                                 + "\n&6&m-----------------------"));
                     } else {
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eYou have the following events ready to be activated."));
-                        player.sendMessage(" ");
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eYou have the following events ready to be activated."));
+                        sender.sendMessage(" ");
                         for (String events : Utils.events.keySet()) {
                             String state;
                             if (!Utils.events.get(events)) {
@@ -226,12 +221,12 @@ public class Commands implements CommandExecutor, Listener {
                             } else {
                                 state = ChatColor.GREEN + "(active)";
                             }
-                            player.sendMessage(ChatColor.AQUA + "- " + events + " " + state);
+                            sender.sendMessage(ChatColor.AQUA + "- " + events + " " + state);
                         }
-                        player.sendMessage(" ");
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events activate <event name> &eto activate it."));
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events deactivate <event name> &eto de-activate it."));
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----------------------"));
+                        sender.sendMessage(" ");
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events activate <event name> &eto activate it."));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events deactivate <event name> &eto de-activate it."));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----------------------"));
                     }
                 } else {
                     if (args[1].equalsIgnoreCase("activate")) {
@@ -247,7 +242,7 @@ public class Commands implements CommandExecutor, Listener {
                         if (Utils.events.containsKey(allArgs)) {
                             if (!Utils.events.get(allArgs)) {
                                 Utils.events.put(allArgs, true);
-                                player.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
+                                sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
                                 String barName = null;
                                 BarColor barColor = BarColor.BLUE;
                                 FileConfiguration blocklist = plugin.getFiles().getBlocklist();
@@ -279,10 +274,10 @@ public class Commands implements CommandExecutor, Listener {
                                     bossbar.addPlayer(online);
                                 }
                             } else {
-                                player.sendMessage(Message.EVENT_ALREADY_ACTIVE.get());
+                                sender.sendMessage(Message.EVENT_ALREADY_ACTIVE.get());
                             }
                         } else {
-                            player.sendMessage(Message.EVENT_NOT_FOUND.get());
+                            sender.sendMessage(Message.EVENT_NOT_FOUND.get());
                         }
                         return true;
                     }
@@ -300,15 +295,15 @@ public class Commands implements CommandExecutor, Listener {
                         if (Utils.events.containsKey(allArgs)) {
                             if (Utils.events.get(allArgs)) {
                                 Utils.events.put(allArgs, false);
-                                player.sendMessage(Message.DEACTIVATE_EVENT.get().replace("%event%", allArgs));
+                                sender.sendMessage(Message.DEACTIVATE_EVENT.get().replace("%event%", allArgs));
                                 BossBar bossbar = Utils.bars.get(allArgs);
                                 bossbar.removeAll();
                                 Utils.bars.remove(allArgs);
                             } else {
-                                player.sendMessage(Message.EVENT_NOT_ACTIVE.get());
+                                sender.sendMessage(Message.EVENT_NOT_ACTIVE.get());
                             }
                         } else {
-                            player.sendMessage(Message.EVENT_NOT_FOUND.get());
+                            sender.sendMessage(Message.EVENT_NOT_FOUND.get());
                         }
 
                         return true;
