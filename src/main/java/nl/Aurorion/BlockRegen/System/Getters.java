@@ -1,7 +1,9 @@
 package nl.Aurorion.BlockRegen.System;
 
 import com.google.common.base.Strings;
+import me.clip.placeholderapi.PlaceholderAPI;
 import nl.Aurorion.BlockRegen.Main;
+import nl.Aurorion.BlockRegen.Utils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
@@ -142,19 +144,34 @@ public class Getters {
         return null;
     }
 
-    public String dropItemName(String blockName) {
+    public String dropItemName(String blockName, Player player) {
+
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.name")));
+            String displayName = plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.name");
+
+            if (Strings.isNullOrEmpty(displayName))
+                return null;
+
+            if (Main.getInstance().isUsePlaceholderAPI())
+                displayName = PlaceholderAPI.setPlaceholders(player, displayName);
+
+            return Utils.color(Utils.parse(displayName, player));
         }
+
         return null;
     }
 
-    public List<String> dropItemLores(String blockName) {
-        List<String> lores = new ArrayList<>();
+    public List<String> dropItemLore(String blockName, Player player) {
+        List<String> lore = new ArrayList<>();
+
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".drop-item.lores")) {
-            lores.add(ChatColor.translateAlternateColorCodes('&', all));
+            if (Main.getInstance().isUsePlaceholderAPI())
+                all = PlaceholderAPI.setPlaceholders(player, all);
+
+            lore.add(Utils.color(Utils.parse(all, player)));
         }
-        return lores;
+
+        return lore;
     }
 
     public boolean dropItemDropNaturally(String blockName) {
@@ -192,6 +209,17 @@ public class Getters {
         return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".event.double-exp");
     }
 
+    public int eventItemAmount(String blockName, Player player) {
+        int amount = Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".event.custom-item.amount", 1).getInt();
+
+        if (getHand(player).hasItemMeta() && Objects.requireNonNull(getHand(player).getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+            int enchantLevel = Objects.requireNonNull(getHand(player).getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+            amount = amount + enchantLevel;
+        }
+
+        return amount;
+    }
+
     public Material eventItemMaterial(String blockName) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.material") != null) {
             return Material.valueOf(Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.material")).toUpperCase());
@@ -199,19 +227,32 @@ public class Getters {
         return null;
     }
 
-    public String eventItemName(String blockName) {
+    public String eventItemName(String blockName, Player player) {
         if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.name")));
+            String displayName = plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.name");
+
+            if (Strings.isNullOrEmpty(displayName))
+                return null;
+
+            if (Main.getInstance().isUsePlaceholderAPI())
+                displayName = PlaceholderAPI.setPlaceholders(player, displayName);
+
+            return Utils.color(Utils.parse(displayName, player));
         }
         return null;
     }
 
-    public List<String> eventItemLores(String blockName) {
-        List<String> lores = new ArrayList<>();
+    public List<String> eventItemLore(String blockName, Player player) {
+        List<String> lore = new ArrayList<>();
+
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".event.custom-item.lores")) {
-            lores.add(ChatColor.translateAlternateColorCodes('&', all));
+            if (Main.getInstance().isUsePlaceholderAPI())
+                all = PlaceholderAPI.setPlaceholders(player, all);
+
+            lore.add(Utils.color(Utils.parse(all, player)));
         }
-        return lores;
+
+        return lore;
     }
 
     public boolean eventItemDropNaturally(String blockName) {

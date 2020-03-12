@@ -4,10 +4,10 @@
 # Version: ${project.version}
 
 Messages:
-  Prefix: "&6&l[&3BlockRegen&6&l] &f"
+  Prefix: "&6[&3BlockRegen&6] &f"
   Insufficient-Permission: "&cYou don't have the permissions to do this!"
   Console-Sender-Error: "&cI'm sorry but the console can not perform this command!"
-  Reload: "&a&lSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"
+  Reload: "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"
   Bypass-On: "&aBypass toggled on!"
   Bypass-Off: "&cBypass toggled off!"
   Invalid-Command: "&cThis is not a valid command!"

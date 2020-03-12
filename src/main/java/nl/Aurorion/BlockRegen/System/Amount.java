@@ -30,13 +30,8 @@ public class Amount {
     public Amount(double low, double high) {
         fixed = false;
 
-        if (low > high) {
-            lowValue = high;
-            highValue = low;
-        } else {
-            lowValue = low;
-            highValue = high;
-        }
+        lowValue = Math.min(low, high);
+        highValue = Math.max(low, high);
     }
 
     // Constructor for fixed value
@@ -59,7 +54,11 @@ public class Amount {
             }
 
         if (!section.contains("high") || !section.contains("low")) {
-            return new Amount(yaml.getDouble(path));
+            try {
+                return new Amount(yaml.getDouble(path));
+            } catch (NullPointerException e) {
+                return new Amount(defaultValue);
+            }
         } else {
             String dataStrLow = yaml.getString(path + ".low");
             String dataStrHigh = yaml.getString(path + ".high");
@@ -75,11 +74,11 @@ public class Amount {
     }
 
     public int getInt() {
-        return fixed ? (int) fixedValue : Main.getInstance().getRandom().nextInt((int) highValue + 1) + (int) lowValue;
+        return fixed ? (int) fixedValue : Math.max(Main.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
     }
 
     public double getDouble() {
-        return fixed ? fixedValue : (Main.getInstance().getRandom().nextDouble() * highValue) + lowValue;
+        return fixed ? fixedValue : Math.max((Main.getInstance().getRandom().nextDouble() * highValue), lowValue);
     }
 
     public String toString() {

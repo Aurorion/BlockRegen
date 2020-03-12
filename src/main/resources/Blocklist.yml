@@ -9,7 +9,7 @@ Blocks:
     # The block that gets broken
     DIAMOND_ORE:
         # The block to replace it with.
-        replace-block: PODZOL
+        replace-block: STONE
         # The delay in which this block regens to its original state
         # In seconds
         regen-delay: 3
@@ -60,6 +60,7 @@ Blocks:
                 amount: 100
             # How many should the player get?
             # This generates a random number between, in this case, 0 and 5
+            # Can be used everywhere where a number is needed. for ex. regen-delay, money, amount
             amount:
                 high: 5
                 low: 0
@@ -69,7 +70,6 @@ Blocks:
         # Below is an example. Read more info on the spigot updates page.
         event:
             event-name: Double Diamonds
-            # Bossbar option are 1.9 and above only
             bossbar:
                 name: "&bDiamonds, diamonds everywhere!" 
                 color: BLUE
@@ -77,6 +77,7 @@ Blocks:
             double-exp: false
             custom-item:
                 enabled: false
+                amount: 1
                 material: LEATHER_BOOTS
                 name: "&dFancy &bshoes"
                 lores:
@@ -84,6 +85,7 @@ Blocks:
                 - "&eBling bling bling"
                 drop-naturally: false
                 # How rare it is to get the item. In this case a 1 in 50 chance of getting it.
+                # Can't use a random (low & high) number here.
                 rarity: 50
     SPRUCE_LOG:
         replace-block: BEDROCK

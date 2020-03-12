@@ -2,7 +2,7 @@ name: BlockRegen
 main: nl.Aurorion.BlockRegen.Main
 version: ${project.version}
 authors: [Aurorion, Wertik1206]
-softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention]
+softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention, PlaceholderAPI]
 api-version: "1.13"
 commands:
   blockregen:

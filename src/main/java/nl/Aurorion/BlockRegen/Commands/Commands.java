@@ -63,6 +63,9 @@ public class Commands implements CommandExecutor, Listener {
                 plugin.getFiles().reloadMessages();
                 Message.load();
 
+                plugin.cO.setDebug(plugin.getFiles().settings.getBoolean("Debug-Enabled", false));
+                plugin.cO.setPrefix(Utils.color(Objects.requireNonNull(plugin.getFiles().messages.getString("Messages.Prefix"))));
+
                 plugin.getFiles().reloadBlocklist();
                 plugin.getFiles().generateRecoveryFile(plugin);
 

@@ -40,6 +40,9 @@ public class Main extends JavaPlugin {
     public GriefPrevention griefPrevention;
 
     @Getter
+    private boolean usePlaceholderAPI = false;
+
+    @Getter
     private Files files;
 
     @Getter
@@ -64,8 +67,9 @@ public class Main extends JavaPlugin {
         this.registerClasses(); // Also generates files
 
         cO = new ConsoleOutput(this);
+
         cO.setDebug(files.settings.getBoolean("Debug-Enabled", false));
-        cO.setPrefix(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(files.messages.getString("Messages.Prefix"))));
+        cO.setPrefix(Utils.color(Objects.requireNonNull(files.messages.getString("Messages.Prefix"))));
 
         eH = new ExceptionHandler(this);
 
@@ -75,6 +79,9 @@ public class Main extends JavaPlugin {
         this.setupEconomy();
         this.setupWorldEdit();
         this.setupJobs();
+
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
+            usePlaceholderAPI = true;
 
         Utils.fillFireworkColors();
         this.recoveryCheck();
@@ -155,7 +162,7 @@ public class Main extends JavaPlugin {
             return;
         }
 
-        cO.info("&eWorldEdit found! &aEnabling region fuctions.");
+        cO.info("&eWorldEdit found! &aEnabling regions.");
         worldEdit = (WorldEditPlugin) worldEditPlugin;
     }
 
@@ -163,7 +170,7 @@ public class Main extends JavaPlugin {
         boolean useJobs = this.getServer().getPluginManager().getPlugin("Jobs") != null;
 
         if (useJobs)
-            cO.info("&eJobs found! &aEnabling Jobs fuctions.");
+            cO.info("&eJobs found! &aEnabling Jobs requirements.");
     }
 
     public void fillEvents() {

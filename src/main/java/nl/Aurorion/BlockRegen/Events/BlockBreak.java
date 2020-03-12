@@ -284,20 +284,24 @@ public class BlockBreak implements Listener {
                 doubleExp = getters.eventDoubleExp(blockName);
 
                 if (getters.eventItemMaterial(blockName) != null) {
-                    eventItem = new ItemStack(getters.eventItemMaterial(blockName), 1);
-                    ItemMeta meta = eventItem.getItemMeta();
+                    int amount = getters.eventItemAmount(blockName, player);
 
-                    if (meta != null) {
-                        if (getters.eventItemName(blockName) != null)
-                            meta.setDisplayName(getters.eventItemName(blockName));
+                    if (amount > 0) {
+                        eventItem = new ItemStack(getters.eventItemMaterial(blockName), amount);
+                        ItemMeta meta = eventItem.getItemMeta();
 
-                        if (!getters.eventItemLores(blockName).isEmpty())
-                            meta.setLore(getters.eventItemLores(blockName));
+                        if (meta != null) {
+                            if (getters.eventItemName(blockName, player) != null)
+                                meta.setDisplayName(getters.eventItemName(blockName, player));
+
+                            if (!getters.eventItemLore(blockName, player).isEmpty())
+                                meta.setLore(getters.eventItemLore(blockName, player));
+                        }
+
+                        eventItem.setItemMeta(meta);
+                        dropEventItem = getters.eventItemDropNaturally(blockName);
+                        rarity = getters.eventItemRarity(blockName);
                     }
-
-                    eventItem.setItemMeta(meta);
-                    dropEventItem = getters.eventItemDropNaturally(blockName);
-                    rarity = getters.eventItemRarity(blockName);
                 }
             }
 
@@ -334,13 +338,15 @@ public class BlockBreak implements Listener {
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
 
+                Main.getInstance().cO.debug("Dropping item x" + itemAmount);
+
                 if (dropMeta != null) {
-                    if (getters.dropItemName(blockName) != null) {
-                        dropMeta.setDisplayName(getters.dropItemName(blockName));
+                    if (getters.dropItemName(blockName, player) != null) {
+                        dropMeta.setDisplayName(getters.dropItemName(blockName, player));
                     }
 
-                    if (!getters.dropItemLores(blockName).isEmpty()) {
-                        dropMeta.setLore(getters.dropItemLores(blockName));
+                    if (!getters.dropItemLore(blockName, player).isEmpty()) {
+                        dropMeta.setLore(getters.dropItemLore(blockName, player));
                     }
 
                     dropItem.setItemMeta(dropMeta);

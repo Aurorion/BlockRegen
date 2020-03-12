@@ -36,22 +36,7 @@ public class Utils {
     }
 
     public static String parse(String string, Player player) {
-        return parse("", string, player);
-    }
-
-    public static String parse(String modifier, String string, Player player) {
-        string = string.replace("%player" + modifier + "%", player.getName());
-        string = string.replace("%player" + modifier + "Display%", player.getDisplayName());
-        //string = string.replace("%player" + modifier + "Suffix%", Main.getChat().getPlayerSuffix(player));
-        //string = string.replace("%player" + modifier + "Prefix%", Main.getChat().getPlayerPrefix(player));
-        //string = string.replace("%player" + modifier + "MaxHP%", String.valueOf(player.getMaxHealth()));
-        string = string.replace("%player" + modifier + "HP%", String.valueOf(player.getHealth()));
-        string = string.replace("%player" + modifier + "X%", String.valueOf(((int) player.getLocation().getX())));
-        string = string.replace("%player" + modifier + "Y%", String.valueOf((int) player.getLocation().getY()));
-        string = string.replace("%player" + modifier + "Z%", String.valueOf((int) player.getLocation().getZ()));
-        string = string.replace("%player" + modifier + "World%", String.valueOf(player.getLocation().getWorld()));
-        string = string.replace("%player" + modifier + "Food%", String.valueOf(player.getFoodLevel()));
-        string = string.replace("%player" + modifier + "Level%", String.valueOf(player.getLevel()));
+        string = string.replace("%player%", player.getName());
         return string;
     }
 
