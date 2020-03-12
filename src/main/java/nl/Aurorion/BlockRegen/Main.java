@@ -41,8 +41,6 @@ public class Main extends JavaPlugin {
 
     @Getter
     private Files files;
-    @Getter
-    private Message message;
 
     @Getter
     private Getters getters;

@@ -17,6 +17,7 @@ public class Files {
     public final File bfile;
     public final File rfile;
     public File dfile;
+
     public FileConfiguration settings;
     public FileConfiguration messages;
     public FileConfiguration blocklist;
