@@ -134,6 +134,13 @@ public class BlockBreak implements Listener {
                 int expToDrop = event.getExpToDrop();
 
                 if (isInRegion) {
+
+                    if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
+                        player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
+                        event.setCancelled(true);
+                        return;
+                    }
+
                     if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                         event.setCancelled(true);
                         return;
@@ -156,6 +163,13 @@ public class BlockBreak implements Listener {
                     this.blockBreak(player, block, blockName, bworld, expToDrop);
                 } else {
                     if (!useRegions) {
+
+                        if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
+                            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
+                            event.setCancelled(true);
+                            return;
+                        }
+
                         if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                             event.setCancelled(true);
                             return;

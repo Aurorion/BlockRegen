@@ -1,5 +1,6 @@
 package nl.Aurorion.BlockRegen;
 
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -32,7 +33,8 @@ public enum Message {
     EVENT_NOT_ACTIVE("Event-Not_Active", "&cThis event is currently not active!"),
     TOOL_REQUIRED_ERROR("Tool-Required-Error", "&cYou can only break this block with the following tool(s): &b%tool%&c."),
     ENCHANT_REQUIRED_ERROR("Enchant-Required-Error", "&cYour tool need to have the following enchantment(s): &b%enchant%&c."),
-    JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to be a level &b%level% %job% &cto break this block.");
+    JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to be a level &b%level% %job% &cto break this block."),
+    PERMISSION_BLOCK_ERROR("Permission-Error", "&cYou don't have the permission to break this block.");
 
     @Getter
     private final String path;
@@ -57,7 +59,7 @@ public enum Message {
         for (Message msg : values()) {
             String str = Main.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
 
-            if (str == null) {
+            if (Strings.isNullOrEmpty(str)) {
                 Main.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getDefaultValue());
                 continue;
             }
