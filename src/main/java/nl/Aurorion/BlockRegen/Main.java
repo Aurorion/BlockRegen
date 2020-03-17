@@ -126,7 +126,7 @@ public class Main extends JavaPlugin {
     }
 
     private void registerCommands() {
-        Objects.requireNonNull(this.getCommand("blockregen")).setExecutor(new Commands(this));
+        getCommand("blockregen").setExecutor(new Commands(this));
     }
 
     private void registerEvents() {
