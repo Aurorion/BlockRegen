@@ -8,7 +8,7 @@ import lombok.Setter;
  * Message system, loaded on enable & reload.
  *
  * @author Wertik1206
- * */
+ */
 public enum Message {
 
     PREFIX("Prefix", "&6&l[&3BlockRegen&6&l] &f"),
@@ -40,8 +40,6 @@ public enum Message {
     private final String path;
 
     @Getter
-    private final String defaultValue;
-
     @Setter
     private String value;
 
@@ -49,10 +47,9 @@ public enum Message {
         return Utils.color(this.value);
     }
 
-    Message(String path, String defaultValue) {
+    Message(String path, String value) {
         this.path = path;
-        this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        this.value = value;
     }
 
     public static void load() {
@@ -60,7 +57,7 @@ public enum Message {
             String str = BlockRegen.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
 
             if (Strings.isNullOrEmpty(str)) {
-                BlockRegen.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getDefaultValue());
+                BlockRegen.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getValue());
                 continue;
             }
 
