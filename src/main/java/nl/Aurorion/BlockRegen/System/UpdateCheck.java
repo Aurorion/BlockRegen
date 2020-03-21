@@ -12,7 +12,7 @@ public class UpdateCheck {
 	
     private URL checkURL;
     private String newVersion;
-    private JavaPlugin plugin;
+    private final JavaPlugin plugin;
 
     public UpdateCheck(JavaPlugin plugin, int projectID) {
         this.plugin = plugin;
@@ -32,5 +32,4 @@ public class UpdateCheck {
         this.newVersion = new BufferedReader(new InputStreamReader(con.getInputStream())).readLine();
         return !plugin.getDescription().getVersion().equals(newVersion);
     }
-
 }

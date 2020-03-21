@@ -1,22 +1,25 @@
 package nl.Aurorion.BlockRegen.System;
 
+import com.google.common.base.Strings;
+import me.clip.placeholderapi.PlaceholderAPI;
 import nl.Aurorion.BlockRegen.Main;
+import nl.Aurorion.BlockRegen.Utils;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Getters {
 
-    private Main main;
+    private final Main plugin;
 
     public Getters(Main instance) {
-        this.main = instance;
+        this.plugin = instance;
     }
 
     // Player related
@@ -26,285 +29,237 @@ public class Getters {
 
     // Getter Settings.yml
     public boolean updateChecker() {
-        if (main.getFiles().getSettings().get("Update-Checker") != null) {
-            return main.getFiles().getSettings().getBoolean("Update-Checker");
+        if (plugin.getFiles().getSettings().get("Update-Checker") != null) {
+            return plugin.getFiles().getSettings().getBoolean("Update-Checker");
         }
         return true;
     }
 
-    public boolean useRestorer() {
-        return main.getFiles().getSettings().getBoolean("Use-Restorer");
+    public boolean useRegions() {
+        return plugin.getFiles().getSettings().getBoolean("Use-Regions");
     }
 
-    // Getters Blocklist.yml
-
-    public List<String> blockNames() {
-        return new ArrayList<>(main.getFiles().getBlocklist().getConfigurationSection("Blocks").getKeys(false));
+    public boolean useTowny() {
+        return plugin.getFiles().getSettings().getBoolean("Towny-Support");
     }
 
-    public Material replaceBlockMaterial(String blockName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".replace-block") != null)
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".replace-block").split(";")[0].toUpperCase());
-        return null;
+    public boolean useGP() {
+        return plugin.getFiles().getSettings().getBoolean("GriefPrevention-Support");
     }
 
-    public Material blockMaterial(String blockName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".block-type") != null)
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".block-type").split(";")[0].toUpperCase());
-        else {
-            main.getLogger().warning("Block material of " + blockName + " is invalid.");
-            return null;
-        }
+    public boolean disableOtherBreak() {
+        return plugin.getFiles().getSettings().getBoolean("Disable-Other-Break");
     }
 
-    public byte blockData(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".block-type") != null)
-            if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".block-type").contains(";"))
-                return Byte.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".block-type").split(";")[1]);
-        return 0;
+    public boolean disableOtherBreakRegion() {
+        return plugin.getFiles().getSettings().getBoolean("Disable-Other-Break-Region");
     }
 
-    public byte replaceBlockData(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block") != null)
-            if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block").contains(";"))
-                return Byte.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".replace-block").split(";")[1]);
-        return 0;
+    public boolean boneMealOverride() {
+        return plugin.getFiles().getSettings().getBoolean("Bone-Meal-Override");
     }
 
-    public Integer replaceDelay(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".regen-delay");
+    public boolean dataRecovery() {
+        return plugin.getFiles().getSettings().getBoolean("Data-Recovery");
     }
 
-    public Integer money(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".money");
-    }
-
-    public List<String> consoleCommands(String blockname) {
-        return main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".console-commands");
-    }
-
-    public List<String> playerCommands(String blockname) {
-        return main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".player-commands");
-    }
-
-    public String jobsCheck(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".jobs-check");
-    }
-
-    public boolean naturalBreak(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".natural-break");
-    }
-
-    // ---------------- DROPS -------------- //
-
-    public Material dropItemMaterial(String blockName, String subName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").split(";")[0]);
+    public Material replaceBlock(String blockName) {
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".replace-block") != null) {
+            return Material.valueOf(Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".replace-block")).toUpperCase());
         }
         return null;
     }
 
-    public byte dropItemData(String blockName, String subName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material") != null)
-            if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").contains(";"))
-                return Byte.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".material").split(";")[1]);
-        return 0;
+    public int replaceDelay(String blockName) {
+        return Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".regen-delay", 1).getInt();
     }
 
-    public String dropItemName(String blockName, String subName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".name") != null)
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".name"));
+    public int money(String blockName) {
+        return Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".money", 0).getInt();
+    }
+
+    public List<String> consoleCommands(String blockName) {
+        List<String> consoleCommands = new ArrayList<>();
+
+        String path = "Blocks." + blockName;
+
+        if (!plugin.getFiles().getBlocklist().contains("Blocks." + blockName))
+            return new ArrayList<>();
+
+        if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("console-commands"))
+            path += ".console-commands";
+        else if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("console-command"))
+            path += ".console-command";
+        else return consoleCommands;
+
+        if (plugin.getFiles().getBlocklist().isString(path))
+            consoleCommands.add(plugin.getFiles().getBlocklist().getString(path));
+        else
+            consoleCommands = plugin.getFiles().getBlocklist().getStringList(path);
+
+        return consoleCommands;
+    }
+
+    public List<String> playerCommands(String blockName) {
+        List<String> playerCommands = new ArrayList<>();
+
+        String path = "Blocks." + blockName;
+        if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("player-commands"))
+            path += ".player-commands";
+        else if (Objects.requireNonNull(plugin.getFiles().getBlocklist().getConfigurationSection(path)).contains("player-command"))
+            path += ".player-command";
+        else return playerCommands;
+
+        if (plugin.getFiles().getBlocklist().isString(path))
+            playerCommands.add(plugin.getFiles().getBlocklist().getString(path));
+        else
+            playerCommands = plugin.getFiles().getBlocklist().getStringList(path);
+
+        return playerCommands;
+    }
+
+    public String toolRequired(String blockName) {
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required");
+    }
+
+    public String enchantRequired(String blockName) {
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".enchant-required");
+    }
+
+    public String jobsCheck(String blockName) {
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".jobs-check");
+    }
+
+    public String particleCheck(String blockName) {
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".particles");
+    }
+
+    public boolean naturalBreak(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".natural-break");
+    }
+
+    public Material dropItemMaterial(String blockName) {
+        if (!Strings.isNullOrEmpty(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.material")))
+            return Material.valueOf(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.material"));
         return null;
     }
 
-    public List<String> dropItemLores(String blockName, String subName) {
-        List<String> lores = new ArrayList<>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".drop-items." + subName + ".lores")) {
-            lores.add(ChatColor.translateAlternateColorCodes('&', all));
+    public String dropItemName(String blockName, Player player) {
+
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.name") != null) {
+            String displayName = plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-item.name");
+
+            if (Strings.isNullOrEmpty(displayName))
+                return null;
+
+            if (Main.getInstance().isUsePlaceholderAPI())
+                displayName = PlaceholderAPI.setPlaceholders(player, displayName);
+
+            return Utils.color(Utils.parse(displayName, player));
         }
-        return lores;
+
+        return null;
     }
 
-    public boolean dropItemDropNaturally(String blockName, String subName) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-items." + subName + ".drop-naturally");
-    }
+    public List<String> dropItemLore(String blockName, Player player) {
+        List<String> lore = new ArrayList<>();
 
-    public boolean dropItemExpDrop(String blockName, String subName) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-items." + subName + ".drop-naturally");
-    }
+        for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".drop-item.lores")) {
+            if (Main.getInstance().isUsePlaceholderAPI())
+                all = PlaceholderAPI.setPlaceholders(player, all);
 
-    public List<Enchant> dropEnchants(String blockname, String subName) {
-        List<Enchant> enchants = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-items." + subName + ".enchants") != null)
-            for (String enchantData : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".drop-items." + subName + ".enchants")) {
-                String[] splitter = enchantData.split(";");
-                Enchantment enchantment;
-                int enchantLevel;
-                try {
-                    enchantment = Enchantment.getByName(splitter[0]);
-                    enchantLevel = Integer.valueOf(splitter[1]);
-                } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Enchant levels/names of " + blockname + " - " + subName + " are not valid.");
-                    continue;
-                }
-                enchants.add(new Enchant(enchantment, enchantLevel));
-            }
-        return enchants;
-    }
-
-    public List<ItemFlag> dropFlags(String blockName, String subName) {
-        List<ItemFlag> flags = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".drop-items." + subName + ".flags") != null) {
-            for (String flagName : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + "." + subName + ".drop-item.flags")) {
-                ItemFlag flag;
-                try {
-                    flag = ItemFlag.valueOf(flagName);
-                } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Flags of " + blockName + " - " + subName + " are not valid.");
-                    continue;
-                }
-                flags.add(flag);
-            }
+            lore.add(Utils.color(Utils.parse(all, player)));
         }
-        return flags;
+
+        return lore;
     }
 
-    public Integer dropItemExpAmount(String blockName, String subName) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".exp.amount");
+    public boolean dropItemDropNaturally(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-item.drop-naturally");
     }
 
-    public Integer dropItemAmount(String blockName, String subName, Player player) {
-        int amountHigh = main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".amount.high");
-        int amountLow = main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".drop-items." + subName + ".amount.low");
-        int amount = main.getRandom().nextInt((amountHigh - amountLow) + 1) + amountLow;
-        if (getHand(player).hasItemMeta() && getHand(player).getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-            int enchantLevel = getHand(player).getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+    public boolean dropItemExpDrop(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".drop-item.exp.drop-naturally");
+    }
+
+    public int dropItemExpAmount(String blockName) {
+        return Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".drop-item.exp.amount", 1).getInt();
+    }
+
+    public int dropItemAmount(String blockName, Player player) {
+        int amount = Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".drop-item.amount", 1).getInt();
+
+        if (getHand(player).hasItemMeta() && Objects.requireNonNull(getHand(player).getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+            int enchantLevel = Objects.requireNonNull(getHand(player).getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
             amount = amount + enchantLevel;
         }
+
         return amount;
     }
 
-    public String eventName(String blockname) {
-        return main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.event-name");
+    public String eventName(String blockName) {
+        return plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.event-name");
     }
 
-    public boolean eventDoubleDrops(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-drops");
+    public boolean eventDoubleDrops(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".event.double-drops");
     }
 
-    public boolean eventDoubleExp(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.double-exp");
+    public boolean eventDoubleExp(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".event.double-exp");
     }
 
-    public Material eventItemMaterial(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material") != null) {
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.material").toUpperCase());
+    public int eventItemAmount(String blockName, Player player) {
+        int amount = Amount.loadAmount(plugin.getFiles().getBlocklist(), "Blocks." + blockName + ".event.custom-item.amount", 1).getInt();
+
+        if (getHand(player).hasItemMeta() && Objects.requireNonNull(getHand(player).getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
+            int enchantLevel = Objects.requireNonNull(getHand(player).getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+            amount = amount + enchantLevel;
+        }
+
+        return amount;
+    }
+
+    public Material eventItemMaterial(String blockName) {
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.material") != null) {
+            return Material.valueOf(Objects.requireNonNull(plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.material")).toUpperCase());
         }
         return null;
     }
 
-    public String eventItemName(String blockname) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name") != null) {
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockname + ".event.custom-item.name"));
+    public String eventItemName(String blockName, Player player) {
+        if (plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.name") != null) {
+            String displayName = plugin.getFiles().getBlocklist().getString("Blocks." + blockName + ".event.custom-item.name");
+
+            if (Strings.isNullOrEmpty(displayName))
+                return null;
+
+            if (Main.getInstance().isUsePlaceholderAPI())
+                displayName = PlaceholderAPI.setPlaceholders(player, displayName);
+
+            return Utils.color(Utils.parse(displayName, player));
         }
         return null;
     }
 
-    public List<String> eventItemLores(String blockname) {
-        List<String> lores = new ArrayList<>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockname + ".event.custom-item.lores")) {
-            lores.add(ChatColor.translateAlternateColorCodes('&', all));
+    public List<String> eventItemLore(String blockName, Player player) {
+        List<String> lore = new ArrayList<>();
+
+        for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".event.custom-item.lores")) {
+            if (Main.getInstance().isUsePlaceholderAPI())
+                all = PlaceholderAPI.setPlaceholders(player, all);
+
+            lore.add(Utils.color(Utils.parse(all, player)));
         }
-        return lores;
+
+        return lore;
     }
 
-    public boolean eventItemDropNaturally(String blockname) {
-        return main.getFiles().getBlocklist().getBoolean("Blocks." + blockname + ".event.custom-item.drop-naturally");
+    public boolean eventItemDropNaturally(String blockName) {
+        return plugin.getFiles().getBlocklist().getBoolean("Blocks." + blockName + ".event.custom-item.drop-naturally");
     }
 
-    public Integer eventItemRarity(String blockname) {
-        return main.getFiles().getBlocklist().getInt("Blocks." + blockname + ".event.custom-item.rarity");
-    }
-
-    public List<String> regionBlocks(String regionName) {
-        List<String> blockNames = new ArrayList<>();
-        if (main.getFiles().getRegions().getConfigurationSection("Regions." + regionName).contains("blocks")) {
-            // Get the list in the save file
-
-            if (main.getFiles().getRegions().getConfigurationSection("Regions." + regionName).contains("blocks")) {
-                String blocks1 = main.getFiles().getRegions().getString("Regions." + regionName + ".blocks");
-                if (blocks1.contains(","))
-                    for (String block : blocks1.split(",")) {
-                        blockNames.add(block);
-                    }
-                else
-                    blockNames.add(blocks1);
-            }
-        }
-        return blockNames;
-    }
-
-    // Tool getters
-
-    public Material toolMaterial(String blockName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required.material") != null)
-            return Material.valueOf(main.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required.material").split(";")[0].toUpperCase());
-        return null;
-    }
-
-    public String toolName(String blockName) {
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required.name") != null)
-            return ChatColor.translateAlternateColorCodes('&', main.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required.name"));
-        return null;
-    }
-
-    public List<String> toolLores(String blockName) {
-        List<String> lores = new ArrayList<String>();
-        for (String all : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".tool-required.lores")) {
-            lores.add(ChatColor.translateAlternateColorCodes('&', all));
-        }
-        return lores;
-    }
-
-    public List<Enchant> toolEnchants(String blockName) {
-        List<Enchant> enchants = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".tool-required.enchants") != null)
-            for (String enchantData : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".tool-required.enchants")) {
-                String[] splitter = enchantData.split(";");
-                Enchantment enchantment;
-                int enchantLevel;
-                try {
-                    enchantment = Enchantment.getByName(splitter[0]);
-                    enchantLevel = Integer.valueOf(splitter[1]);
-                } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Enchant levels/names for a tool of " + blockName + " are not valid.");
-                    continue;
-                }
-                enchants.add(new Enchant(enchantment, enchantLevel));
-            }
-        return enchants;
-    }
-
-    public int toolAmount(String blockName) {
-        if (main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockName + ".tool-required").contains("amount"))
-            return main.getFiles().getBlocklist().getInt("Blocks." + blockName + ".tool-required.amount");
-        return 1;
-    }
-
-    public List<ItemFlag> toolItemFlags(String blockName) {
-        List<ItemFlag> flags = new ArrayList<>();
-        if (main.getFiles().getBlocklist().getString("Blocks." + blockName + ".tool-required.flags") != null) {
-            for (String flagName : main.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".tool-required.flags")) {
-                ItemFlag flag;
-                try {
-                    flag = ItemFlag.valueOf(flagName);
-                } catch (Exception e) {
-                    main.getLogger().warning("A mistake in config, Flags for tool of " + blockName + " are not valid.");
-                    continue;
-                }
-                flags.add(flag);
-            }
-        }
-        return flags;
+    public int eventItemRarity(String blockName) {
+        return plugin.getFiles().getBlocklist().getInt("Blocks." + blockName + ".event.custom-item.rarity");
     }
 }

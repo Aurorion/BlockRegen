@@ -2,9 +2,11 @@ package nl.Aurorion.BlockRegen.Events;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
-import com.sk89q.worldedit.Vector;
+import com.palmergames.bukkit.towny.TownyAPI;
+import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.Aurorion.BlockRegen.Main;
+import nl.Aurorion.BlockRegen.Message;
 import nl.Aurorion.BlockRegen.System.Getters;
 import nl.Aurorion.BlockRegen.Utils;
 import org.bukkit.*;
@@ -12,6 +14,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -25,167 +28,131 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 public class BlockBreak implements Listener {
 
-    public static Block block;
-    private Main main;
+    private final Main plugin;
 
-    public BlockBreak(Main main) {
-        this.main = main;
+    public BlockBreak(Main plugin) {
+        this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onBreak(BlockBreakEvent event) {
-        Player player = event.getPlayer();
-        block = event.getBlock();
 
+        Player player = event.getPlayer();
+        Block block = event.getBlock();
+
+        // Check bypass
         if (Utils.bypass.contains(player.getName()))
             return;
 
+        // Check regen
         if (Utils.regenBlocks.contains(block.getLocation())) {
             event.setCancelled(true);
             return;
         }
 
-        String blockType = Utils.blockToString(block);
+        String blockName = block.getType().name();
 
-        // Find out blockNames by material
-        List<String> blockNames = new ArrayList<>();
-        for (String loopString : main.getGetters().blockNames()) {
-            if (main.getGetters().blockMaterial(loopString).equals(block.getType())) {
-                if (main.getGetters().blockData(loopString) == block.getData()) {
-                    blockNames.add(loopString);
-                }
-            }
-        }
-
-        if (Utils.itemcheck.contains(player.getName())) {
+        // Block data check
+        if (Utils.dataCheck.contains(player.getName())) {
             event.setCancelled(true);
-            player.sendMessage(main.getMessages().datacheck.replace("%block%", blockType));
+            player.sendMessage(Message.DATA_CHECK.get().replace("%block%", blockName));
             return;
         }
 
-        FileConfiguration settings = main.getFiles().getSettings();
+        FileConfiguration settings = plugin.getFiles().getSettings();
 
-        // Region and world stuff
+        // Towny
+        if (plugin.getGetters().useTowny()) {
+            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
+                if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
+                    return;
+        }
 
-        if (settings.getStringList("Worlds-Enabled").contains(player.getWorld().getName())) {
+        // Grief Prevention
+        if (plugin.getGetters().useGP()) {
+            String noBuildReason = plugin.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
+            if (noBuildReason != null)
+                return;
+        }
 
-            World world = block.getWorld();
+        FileConfiguration blockList = plugin.getFiles().getBlocklist();
 
-            boolean useRegions = settings.getBoolean("Use-Regions");
-            boolean disableBreak = settings.getBoolean("Disable-Other-Break");
-            boolean disableBreakRegions = settings.getBoolean("Disable-Other-Break-Region");
+        // Check worlds
+        String worldName = player.getWorld().getName();
+        List<String> worlds = settings.getStringList("Worlds-Enabled");
+
+        boolean isInWorld = false;
+        for (String world : worlds) {
+            if (world.equalsIgnoreCase(worldName)) {
+                isInWorld = true;
+                break;
+            }
+        }
+
+        // Load blocks
+        ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
+
+        List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
+
+        if (isInWorld) {
+
+            World bworld = block.getWorld();
+
+            boolean useRegions = plugin.getGetters().useRegions();
 
             boolean isInRegion = false;
 
-            // Is in region or not?
+            if (useRegions && plugin.getWorldEdit() != null) {
+                ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
 
-            // Which one?
-            String regionName = null;
+                List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
 
-            if (useRegions && main.getWorldEdit() != null) {
+                for (String region : regions) {
+                    String max = plugin.getFiles().getRegions().getString("Regions." + region + ".Max");
+                    String min = plugin.getFiles().getRegions().getString("Regions." + region + ".Min");
 
-                ConfigurationSection regionSection = main.getFiles().getRegions().getConfigurationSection("Regions");
-                Set<String> regionset = regionSection.getKeys(false);
+                    if (min == null || max == null)
+                        continue;
 
-                for (String regionloop : regionset) {
-                    World regionWorld = Bukkit.getWorld(main.getFiles().getRegions().getString("Regions." + regionloop + ".World"));
+                    Location locA = Utils.stringToLocation(max);
+                    Location locB = Utils.stringToLocation(min);
 
-                    if (world == regionWorld) {
+                    CuboidRegion selection = new CuboidRegion(BukkitAdapter.asBlockVector(locA), BukkitAdapter.asBlockVector(locB));
 
-                        Vector locA = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Max"));
-                        Vector locB = Utils.stringToVector(main.getFiles().getRegions().getString("Regions." + regionloop + ".Min"));
-
-                        CuboidRegion selection = new CuboidRegion(locA, locB);
-
-                        Vector vec = new Vector(Double.valueOf(block.getX()), Double.valueOf(block.getY()), Double.valueOf(block.getZ()));
-
-                        if (selection.contains(vec)) {
-                            isInRegion = true;
-                            regionName = regionloop;
-                            break;
-                        }
+                    if (selection.contains(BukkitAdapter.asBlockVector(block.getLocation()))) {
+                        isInRegion = true;
+                        break;
                     }
                 }
             }
 
-            List<String> list1 = new ArrayList<>();
+            if (blocks.contains(blockName)) {
 
-            if (isInRegion) {
-                for (String blockName : blockNames)
-                    if (!main.getGetters().regionBlocks(regionName).contains(blockName)) {
-                        list1.add(blockName);
-                    }
-            }
+                int expToDrop = event.getExpToDrop();
 
-            blockNames.removeAll(list1);
-
-            String blockName;
-
-            if (blockNames.size() > 1) {
-                main.getLogger().warning("There are multiple options for this block, unable to take action.");
-                return;
-            } else if (blockNames.size() == 1)
-                blockName = blockNames.get(0);
-            else {
-                // Block Break disable, if enabled.
                 if (isInRegion) {
-                    if (disableBreakRegions)
-                        event.setCancelled(true);
-                    else if (disableBreak)
-                        event.setCancelled(true);
-                    else {
-                        if (!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer())
-                            Utils.restorer.put(block.getLocation(), block.getType());
-                        return;
-                    }
-                }
-                if (disableBreak)
-                    event.setCancelled(true);
-                else {
-                    if (!Utils.restorer.containsKey(block.getLocation()) && main.getGetters().useRestorer())
-                        Utils.restorer.put(block.getLocation(), block.getType());
-                }
-                return;
-            }
 
-            int expToDrop = event.getExpToDrop();
-
-            if (isInRegion) {
-                // Tool check
-                if ((main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockName + ".tool-required") != null) && (!toolCheck(blockName, player))) {
-                    event.setCancelled(true);
-                    return;
-                }
-
-                // Jobs require check
-                if (main.getGetters().jobsCheck(blockName) != null) {
-                    if (!jobsCheck(main.getGetters().jobsCheck(blockName), player)) {
-                        event.setCancelled(true);
-                        return;
-                    }
-                }
-
-                // Proceed
-                event.setDropItems(false);
-                event.setExpToDrop(0);
-                blockBreak(player, block, blockName, world, expToDrop);
-            } else {
-                // Out of an region, if enabled.
-                if (useRegions)
-                    return;
-                else {
-
-                    if ((main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockName + ".tool-required") != null) && (!toolCheck(blockName, player))) {
+                    if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
+                        player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
                         event.setCancelled(true);
                         return;
                     }
 
-                    if (main.getGetters().jobsCheck(blockName) != null) {
-                        if (!jobsCheck(main.getGetters().jobsCheck(blockName), player)) {
+                    if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
+                        event.setCancelled(true);
+                        return;
+                    }
+
+                    if (plugin.getGetters().jobsCheck(blockName) != null) {
+                        if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
                             event.setCancelled(true);
                             return;
                         }
@@ -193,32 +160,86 @@ public class BlockBreak implements Listener {
 
                     event.setDropItems(false);
                     event.setExpToDrop(0);
-                    blockBreak(player, block, blockName, world, expToDrop);
+                    this.blockBreak(player, block, blockName, bworld, expToDrop);
+                } else {
+                    if (!useRegions) {
+
+                        if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
+                            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
+                            event.setCancelled(true);
+                            return;
+                        }
+
+                        if (plugin.getGetters().jobsCheck(blockName) != null) {
+                            if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
+                                event.setCancelled(true);
+                                return;
+                            }
+                        }
+
+                        event.setDropItems(false);
+                        event.setExpToDrop(0);
+                        this.blockBreak(player, block, blockName, bworld, expToDrop);
+                    }
                 }
+            } else {
+                if ((isInRegion && Main.getInstance().getGetters().disableOtherBreakRegion()) ||
+                        Main.getInstance().getGetters().disableOtherBreak())
+
+                    event.setCancelled(true);
             }
         }
     }
 
-    private boolean toolCheck(String blockName, Player player) {
-
-        ItemStack tool = player.getInventory().getItemInHand();
-
-        // Type
-        if (main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockName + ".tool-required") != null) {
-            if (!tool.getType().equals(main.getGetters().toolMaterial(blockName)))
-                return false;
-            if (tool.getAmount() != main.getGetters().toolAmount(blockName))
-                return false;
-            if (!tool.getItemMeta().getItemFlags().equals(main.getGetters().toolItemFlags(blockName)))
-                return false;
-            if (!(Utils.enchantmentsToEnchants(tool.getItemMeta().getEnchants()).contains(main.getGetters().toolEnchants(blockName))))
-                return false;
-            if (!tool.getItemMeta().getDisplayName().equals(main.getGetters().toolName(blockName)))
-                return false;
-            if (!tool.getItemMeta().getLore().equals(main.getGetters().toolLores(blockName)))
-                return false;
+    private boolean toolCheck(String string, Player player) {
+        String[] tools = string.split(", ");
+        boolean check = false;
+        for (String all : tools) {
+            Material tool = Material.valueOf(all.toUpperCase());
+            if (player.getInventory().getItemInMainHand().getType() == tool) {
+                check = true;
+                break;
+            }
         }
-        return true;
+        if (check) {
+            return true;
+        }
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get().replace("%tool%", string.toLowerCase().replace("_", " ")));
+        return false;
+    }
+
+    private boolean enchantCheck(String string, Player player) {
+        String[] enchants = string.split(", ");
+        boolean check = false;
+        for (String all : enchants) {
+            Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(all.toLowerCase()));
+            if (enchant == null)
+                continue;
+
+            ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
+            if (meta != null) {
+                if (meta.hasEnchant(enchant)) {
+                    check = true;
+                    break;
+                }
+            } else check = true;
+        }
+
+        if (check)
+            return true;
+
+        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", string.toLowerCase().replace("_", " ")));
+        return false;
     }
 
     private boolean jobsCheck(String string, Player player) {
@@ -234,19 +255,20 @@ public class BlockBreak implements Listener {
             }
         }
         if (job == null || !job.equals(jobCheckString[0])) {
-            player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+            player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
-        } else if (level < Integer.valueOf(jobCheckString[1])) {
-            player.sendMessage(main.getMessages().jobsError.replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
+        } else if (level < Integer.parseInt(jobCheckString[1])) {
+            player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", jobCheckString[0]).replace("%level%", jobCheckString[1]));
             return false;
-        } else
+        } else {
             return true;
+        }
     }
 
-    private void blockBreak(Player player, Block block, String blockname, World bworld, Integer exptodrop) {
-        Getters getters = main.getGetters();
+    private void blockBreak(Player player, Block block, String blockName, World world, int expToDrop) {
+        Getters getters = plugin.getGetters();
         BlockState state = block.getState();
-        Location loc = block.getLocation();
+        Location location = block.getLocation();
 
         // Events ---------------------------------------------------------------------------------------------
         boolean doubleDrops = false;
@@ -255,160 +277,188 @@ public class BlockBreak implements Listener {
         boolean dropEventItem = false;
         int rarity = 0;
 
-        if (getters.eventName(blockname) != null) {
-            if (Utils.events.get(getters.eventName(blockname))) {
-                doubleDrops = getters.eventDoubleDrops(blockname);
-                doubleExp = getters.eventDoubleExp(blockname);
-                if (getters.eventItemMaterial(blockname) != null) {
-                    eventItem = new ItemStack(getters.eventItemMaterial(blockname), 1);
-                    ItemMeta meta = eventItem.getItemMeta();
-                    if (getters.eventItemName(blockname) != null) {
-                        meta.setDisplayName(getters.eventItemName(blockname));
+        if (getters.eventName(blockName) != null && Utils.events.containsKey(getters.eventName(blockName)))
+            if (Utils.events.get(getters.eventName(blockName))) {
+
+                doubleDrops = getters.eventDoubleDrops(blockName);
+                doubleExp = getters.eventDoubleExp(blockName);
+
+                if (getters.eventItemMaterial(blockName) != null) {
+                    int amount = getters.eventItemAmount(blockName, player);
+
+                    if (amount > 0) {
+                        eventItem = new ItemStack(getters.eventItemMaterial(blockName), amount);
+                        ItemMeta meta = eventItem.getItemMeta();
+
+                        if (meta != null) {
+                            if (getters.eventItemName(blockName, player) != null)
+                                meta.setDisplayName(getters.eventItemName(blockName, player));
+
+                            if (!getters.eventItemLore(blockName, player).isEmpty())
+                                meta.setLore(getters.eventItemLore(blockName, player));
+                        }
+
+                        eventItem.setItemMeta(meta);
+                        dropEventItem = getters.eventItemDropNaturally(blockName);
+                        rarity = getters.eventItemRarity(blockName);
                     }
-                    if (!getters.eventItemLores(blockname).isEmpty()) {
-                        meta.setLore(getters.eventItemLores(blockname));
+                }
+            }
+
+        // Drop Section-----------------------------------------------------------------------------------------
+        Material dropMaterial = getters.dropItemMaterial(blockName);
+
+        if (getters.naturalBreak(blockName)) {
+            for (ItemStack drops : block.getDrops()) {
+                Material mat = drops.getType();
+                int amount;
+                if (doubleDrops) {
+                    amount = drops.getAmount() * 2;
+                } else {
+                    amount = drops.getAmount();
+                }
+                ItemStack dropStack = new ItemStack(mat, amount);
+                world.dropItemNaturally(block.getLocation(), dropStack);
+            }
+            if (expToDrop > 0) {
+                if (doubleExp) {
+                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop * 2);
+                } else {
+                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
+                }
+            }
+        } else if (dropMaterial != null) {
+            if (dropMaterial != Material.AIR) {
+                int itemAmount = getters.dropItemAmount(blockName, player);
+
+                if (doubleDrops) {
+                    itemAmount = itemAmount * 2;
+                }
+
+                ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
+                ItemMeta dropMeta = dropItem.getItemMeta();
+
+                Main.getInstance().cO.debug("Dropping item x" + itemAmount);
+
+                if (dropMeta != null) {
+                    if (getters.dropItemName(blockName, player) != null) {
+                        dropMeta.setDisplayName(getters.dropItemName(blockName, player));
                     }
-                    eventItem.setItemMeta(meta);
-                    dropEventItem = getters.eventItemDropNaturally(blockname);
-                    rarity = getters.eventItemRarity(blockname);
+
+                    if (!getters.dropItemLore(blockName, player).isEmpty()) {
+                        dropMeta.setLore(getters.dropItemLore(blockName, player));
+                    }
+
+                    dropItem.setItemMeta(dropMeta);
+                }
+
+                if (itemAmount > 0)
+                    if (getters.dropItemDropNaturally(blockName)) {
+                        world.dropItemNaturally(location, dropItem);
+                    } else {
+                        player.getInventory().addItem(dropItem);
+                        player.updateInventory();
+                    }
+            }
+
+            int expAmount = getters.dropItemExpAmount(blockName);
+
+            if (expAmount > 0) {
+                if (doubleExp)
+                    expAmount = expAmount * 2;
+
+                if (getters.dropItemExpDrop(blockName)) {
+                    world.spawn(location, ExperienceOrb.class).setExperience(expAmount);
+                } else {
+                    player.giveExp(expAmount);
                 }
             }
         }
 
-        // Drop Section-----------------------------------------------------------------------------------------
-        if (!player.getGameMode().equals(GameMode.CREATIVE)) {
-            if (getters.naturalBreak(blockname)) {
-                for (ItemStack drop : block.getDrops()) {
-                    Material dropMaterial = drop.getType();
-                    int dropAmount;
-                    if (doubleDrops)
-                        dropAmount = drop.getAmount() * 2;
-                    else
-                        dropAmount = drop.getAmount();
-
-                    ItemStack dropStack = new ItemStack(dropMaterial, dropAmount);
-                    bworld.dropItemNaturally(block.getLocation(), dropStack);
-                }
-                if (doubleExp)
-                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop * 2);
-                else
-                    bworld.spawn(loc, ExperienceOrb.class).setExperience(exptodrop);
-            }
-
-            for (String subName : main.getFiles().getBlocklist().getConfigurationSection("Blocks." + blockname + ".drop-items").getKeys(false)) {
-
-                if (getters.dropItemMaterial(blockname, subName) != null) {
-                    if (getters.dropItemAmount(blockname, subName, player) > 0) {
-
-                        // CUSTOM DROP ITEMSTACK -----------------------------------------------------------
-
-                        int dropAmount = getters.dropItemAmount(blockname, subName, player);
-
-                        if (doubleDrops)
-                            dropAmount = dropAmount * 2;
-
-                        ItemStack dropItemStack = new ItemStack(getters.dropItemMaterial(blockname, subName), dropAmount, getters.dropItemData(blockname, subName));
-                        ItemMeta dropMeta = dropItemStack.getItemMeta();
-
-                        if (getters.dropItemName(blockname, subName) != null)
-                            dropMeta.setDisplayName(getters.dropItemName(blockname, subName));
-
-                        if (!getters.dropItemLores(blockname, subName).isEmpty())
-                            dropMeta.setLore(getters.dropItemLores(blockname, subName));
-
-                        if (!getters.dropEnchants(blockname, subName).isEmpty())
-                            getters.dropEnchants(blockname, subName).forEach(enchant -> dropMeta.addEnchant(enchant.getEnchantment(), enchant.getLevel(), true));
-
-                        if (!getters.dropFlags(blockname, subName).isEmpty())
-                            getters.dropFlags(blockname, subName).forEach(flag -> dropMeta.addItemFlags(flag));
-
-                        dropItemStack.setItemMeta(dropMeta);
-
-                        if (getters.dropItemDropNaturally(blockname, subName))
-                            bworld.dropItem(loc, dropItemStack);
-                        else {
-                            player.getInventory().addItem(dropItemStack);
-                            player.updateInventory();
-                        }
-                    }
-
-                    // EXP -------------------------------------------
-
-                    if (getters.dropItemExpAmount(blockname, subName) > 0) {
-                        if (!player.getGameMode().equals(GameMode.CREATIVE)) {
-                            int expAmount = getters.dropItemExpAmount(blockname, subName);
-
-                            if (doubleExp)
-                                expAmount = expAmount * 2;
-
-                            if (getters.dropItemExpDrop(blockname, subName))
-                                bworld.spawn(loc, ExperienceOrb.class).setExperience(expAmount);
-                            else
-                                player.giveExp(expAmount);
-                        }
-                    }
-                }
-
-                if (eventItem != null) {
-                    if (main.getRandom().nextInt(rarity) == 1) {
-                        if (dropEventItem)
-                            bworld.dropItemNaturally(loc, eventItem);
-                        else
-                            player.getInventory().addItem(eventItem);
-                    }
+        if (eventItem != null) {
+            if ((plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
+                if (dropEventItem) {
+                    world.dropItemNaturally(location, eventItem);
+                } else {
+                    player.getInventory().addItem(eventItem);
                 }
             }
         }
 
         // Vault money -----------------------------------------------------------------------------------------
-        if (main.getEconomy() != null && getters.money(blockname) > 0)
-            main.getEconomy().depositPlayer(player, getters.money(blockname));
+        if (plugin.getEconomy() != null) {
+            int money = getters.money(blockName);
+            if (money > 0)
+                plugin.getEconomy().depositPlayer(player, money);
+        }
 
-        // Command execution -----------------------------------------------------------------------------------
-        if (getters.consoleCommands(blockname) != null)
-            main.getGetters().consoleCommands(blockname).forEach(consoleCommand -> Bukkit.dispatchCommand(player, consoleCommand.replace("%player%", player.getName())));
+        // Commands execution -----------------------------------------------------------------------------------
+        if (getters.consoleCommands(blockName) != null)
+            getters.consoleCommands(blockName).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player)));
 
-        if (getters.playerCommands(blockname) != null)
-            main.getGetters().playerCommands(blockname).forEach(playerCommand -> Bukkit.dispatchCommand(player, playerCommand.replace("%player%", player.getName())));
+        if (getters.playerCommands(blockName) != null)
+            getters.playerCommands(blockName).forEach(command -> Bukkit.dispatchCommand(player, Utils.parse(command, player)));
 
-        // Particles ------------------------------------------------------------------------------------------
-        // Disabled ATM - Will be in an particle update
-		/*if (blocklist.getString("Blocks." + blockname + ".particle-effect") != null) {
-			String particleName = blocklist.getString("Blocks." + blockname + ".particle-effect");
-			main.getParticles().check(particleName);
-		}*/
+        // Particles -------------------------------------------------------------------------------------------
+        if (getters.particleCheck(blockName) != null)
+            plugin.getParticleUtil().run(getters.particleCheck(blockName).toLowerCase(), block);
+
+        // Data Recovery ---------------------------------------------------------------------------------------
+        FileConfiguration data = plugin.getFiles().getData();
+
+        if (getters.dataRecovery()) {
+            List<String> dataLocs = new ArrayList<>();
+
+            if (data.contains(blockName))
+                dataLocs = data.getStringList(blockName);
+
+            dataLocs.add(Utils.locationToString(location));
+            data.set(blockName, dataLocs);
+            plugin.getFiles().saveData();
+        } else
+            Utils.persist.put(location, block.getType());
 
         // Replacing the block ---------------------------------------------------------------------------------
-        Utils.persist.put(loc, block.getType());
         new BukkitRunnable() {
-
             @Override
             public void run() {
-                block.setType(getters.replaceBlockMaterial(blockname));
-                block.setData(getters.replaceBlockData(blockname));
+                block.setType(getters.replaceBlock(blockName));
+                Main.getInstance().cO.debug("Replaced block");
             }
+        }.runTaskLater(plugin, 2L);
 
-        }.runTaskLater(main, 2l);
+        Utils.regenBlocks.add(location);
 
-        Utils.regenBlocks.add(loc);
-
-        // Actual Regening -------------------------------------------------------------------------------------
-        int regendelay = 3;
-        if (getters.replaceDelay(blockname) != null) {
-            regendelay = getters.replaceDelay(blockname);
-        }
+        // Actual Regeneration -------------------------------------------------------------------------------------
+        int regenDelay = getters.replaceDelay(blockName);
+        regenDelay = regenDelay == 0 ? 1 : regenDelay;
+        Main.getInstance().cO.debug("Regen Delay: " + regenDelay);
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
-                state.update(true);
-                Utils.persist.remove(loc);
-                Utils.regenBlocks.remove(loc);
-                Utils.tasks.remove(loc);
+                regen(state, location, data, blockName);
             }
-        }.runTaskLater(main, regendelay * 20);
+        }.runTaskLater(plugin, regenDelay * 20);
 
-        Utils.tasks.put(loc, task);
-        return;
+        Utils.tasks.put(location, task);
     }
 
+    private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
+        state.update(true);
+        Main.getInstance().cO.debug("Regen");
+
+        Utils.persist.remove(location);
+        Utils.regenBlocks.remove(location);
+        Utils.tasks.remove(location);
+
+        if (data != null && data.contains(blockName)) {
+            List<String> dataLocs = data.getStringList(blockName);
+
+            if (!dataLocs.isEmpty()) {
+                dataLocs.remove(Utils.locationToString(location));
+                data.set(blockName, dataLocs);
+                plugin.getFiles().saveData();
+            }
+        }
+    }
 }

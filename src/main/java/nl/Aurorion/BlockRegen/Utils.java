@@ -1,84 +1,57 @@
 package nl.Aurorion.BlockRegen;
 
+import org.bukkit.*;
+import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
+import org.bukkit.scheduler.BukkitTask;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import nl.Aurorion.BlockRegen.System.Enchant;
-import org.bukkit.Bukkit;
-import org.bukkit.Chunk;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.boss.BossBar;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.scheduler.BukkitTask;
-
-import com.sk89q.worldedit.Vector;
-
 public class Utils {
-	
-	public static List<String> bypass = new ArrayList<String>();
-	public static List<String> itemcheck = new ArrayList<String>();
-	public static List<Color> colors = new ArrayList<Color>();
-	public static List<Location> regenBlocks = new ArrayList<Location>();
-	public static List<Block> explode = new ArrayList<Block>();
-	public static Map<String, Boolean> events = new HashMap<String, Boolean>();
-	public static Map<String, BossBar> bars = new HashMap<String, BossBar>();
-	public static Map<Location, BukkitTask> tasks = new HashMap<Location, BukkitTask>();
-	public static Map<Location, Material> persist = new HashMap<Location, Material>();
-	public static Map<Location, Material> restorer = new HashMap<Location, Material>();
-	
-	public static Chunk stringToChunk(String string) {
-        String[] splits = string.split(";");
-        return Bukkit.getWorld(splits[0]).getChunkAt(Integer.valueOf(splits[1]), Integer.valueOf(splits[2]));
-    }
- 
-    public static String chunkToString(Chunk chunk) {
-        return chunk.getWorld().getName() + ";" + chunk.getX() + ";" + chunk.getZ();
-    }
- 
+
+    public static final List<String> bypass = new ArrayList<>();
+    public static final List<String> dataCheck = new ArrayList<>();
+
+    public static final List<Color> colors = new ArrayList<>();
+    public static final List<Location> regenBlocks = new ArrayList<>();
+
+    public static final Map<String, Boolean> events = new HashMap<>();
+    public static final Map<String, BossBar> bars = new HashMap<>();
+
+    public static final Map<Location, BukkitTask> tasks = new HashMap<>();
+    public static final Map<Location, Material> persist = new HashMap<>();
+
     public static String locationToString(Location loc) {
-        return loc.getWorld().getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ() + ";" + loc.getYaw() + ";" + loc.getPitch();
+        World world = loc.getWorld();
+        return world == null ? "" : world.getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
     }
-    
+
     public static Location stringToLocation(String str) {
-        String[] strar = str.split(";");
-        Location newLoc = new Location(Bukkit.getWorld(strar[0]), Double.valueOf(strar[1]).doubleValue(), Double.valueOf(strar[2]).doubleValue(), Double.valueOf(strar[3]).doubleValue(), Float.valueOf(strar[4]).floatValue(), Float.valueOf(strar[5]).floatValue());
+        String[] arr = str.split(";");
+        Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
     }
-    
-    public static String vectorToString(Vector vec) {
-    	String str = vec.toString().replaceAll(" ", "").replaceAll(",", ";").replace("(", "").replace(")", "");
-        return str;
-    }
-    
-    public static Vector stringToVector(String str) {
-        String[] strar = str.split(";");
-        Vector newVec = new Vector(Double.valueOf(strar[0]), Double.valueOf(strar[1]), Double.valueOf(strar[2]));
-        return newVec;
-    }
-    
-	public static String blockToString(Block block){
-    	return block.getType().name();
-    }
-    
-    public static void fillFireworkColors(){
-    	colors.add(Color.AQUA);
-    	colors.add(Color.BLUE);
-    	colors.add(Color.FUCHSIA);
-    	colors.add(Color.GREEN);
-    	colors.add(Color.LIME);
-    	colors.add(Color.ORANGE);
-    	colors.add(Color.WHITE);
-    	colors.add(Color.YELLOW);
+
+    public static String parse(String string, Player player) {
+        string = string.replace("%player%", player.getName());
+        return string;
     }
 
-    public static List<Enchant> enchantmentsToEnchants(Map<Enchantment, Integer> enchantments) {
-	    List<Enchant> enchants = new ArrayList<>();
-	    enchantments.keySet().forEach(enchantment -> enchants.add(new Enchant(enchantment, enchantments.get(enchantment))));
-	    return enchants;
+    public static void fillFireworkColors() {
+        colors.add(Color.AQUA);
+        colors.add(Color.BLUE);
+        colors.add(Color.FUCHSIA);
+        colors.add(Color.GREEN);
+        colors.add(Color.LIME);
+        colors.add(Color.ORANGE);
+        colors.add(Color.WHITE);
+        colors.add(Color.YELLOW);
+    }
+
+    public static String color(String msg) {
+        return ChatColor.translateAlternateColorCodes('&', msg);
     }
 }
