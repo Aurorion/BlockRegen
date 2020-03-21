@@ -1,4 +1,4 @@
-package nl.Aurorion.BlockRegen.Particles.breaking;
+package nl.aurorion.blockregen.Particles.breaking;
 
 import org.bukkit.Location;
 import org.bukkit.Particle;

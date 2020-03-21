@@ -1,12 +1,12 @@
-package nl.Aurorion.BlockRegen.System;
+package nl.aurorion.blockregen.System;
 
-import nl.Aurorion.BlockRegen.Main;
+import nl.aurorion.blockregen.BlockRegen;
 
 public class ExceptionHandler {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public ExceptionHandler(Main plugin) {
+    public ExceptionHandler(BlockRegen plugin) {
         this.plugin = plugin;
     }
 

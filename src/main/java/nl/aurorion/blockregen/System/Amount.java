@@ -1,9 +1,9 @@
-package nl.Aurorion.BlockRegen.System;
+package nl.aurorion.blockregen.System;
 
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
-import nl.Aurorion.BlockRegen.Main;
+import nl.aurorion.blockregen.BlockRegen;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -74,11 +74,11 @@ public class Amount {
     }
 
     public int getInt() {
-        return fixed ? (int) fixedValue : Math.max(Main.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
+        return fixed ? (int) fixedValue : Math.max(BlockRegen.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
     }
 
     public double getDouble() {
-        return fixed ? fixedValue : Math.max((Main.getInstance().getRandom().nextDouble() * highValue), lowValue);
+        return fixed ? fixedValue : Math.max((BlockRegen.getInstance().getRandom().nextDouble() * highValue), lowValue);
     }
 
     public String toString() {

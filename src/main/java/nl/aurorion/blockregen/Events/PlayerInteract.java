@@ -1,7 +1,7 @@
-package nl.Aurorion.BlockRegen.Events;
+package nl.aurorion.blockregen.Events;
 
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -14,9 +14,9 @@ import org.bukkit.material.Crops;
 
 public class PlayerInteract implements Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public PlayerInteract(Main instance) {
+    public PlayerInteract(BlockRegen instance) {
         this.plugin = instance;
     }
 

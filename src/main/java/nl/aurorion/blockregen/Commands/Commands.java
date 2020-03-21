@@ -1,11 +1,11 @@
-package nl.Aurorion.BlockRegen.Commands;
+package nl.aurorion.blockregen.Commands;
 
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Message;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
@@ -29,9 +29,9 @@ import java.util.Set;
 
 public class Commands implements CommandExecutor, Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public Commands(Main plugin) {
+    public Commands(BlockRegen plugin) {
         this.plugin = plugin;
     }
 

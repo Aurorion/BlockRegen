@@ -1,9 +1,9 @@
-package nl.Aurorion.BlockRegen.Particles;
+package nl.aurorion.blockregen.Particles;
 
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Particles.breaking.FireWorks;
-import nl.Aurorion.BlockRegen.Particles.breaking.FlameCrown;
-import nl.Aurorion.BlockRegen.Particles.breaking.WitchSpell;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Particles.breaking.FireWorks;
+import nl.aurorion.blockregen.Particles.breaking.FlameCrown;
+import nl.aurorion.blockregen.Particles.breaking.WitchSpell;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
@@ -12,9 +12,9 @@ import java.util.HashMap;
 
 public class ParticleUtil {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public ParticleUtil(Main instance) {
+    public ParticleUtil(BlockRegen instance) {
         this.plugin = instance;
     }
 

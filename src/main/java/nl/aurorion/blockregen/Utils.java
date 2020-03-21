@@ -1,4 +1,4 @@
-package nl.Aurorion.BlockRegen;
+package nl.aurorion.blockregen;
 
 import org.bukkit.*;
 import org.bukkit.boss.BossBar;

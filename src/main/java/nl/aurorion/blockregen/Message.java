@@ -1,4 +1,4 @@
-package nl.Aurorion.BlockRegen;
+package nl.aurorion.blockregen;
 
 import com.google.common.base.Strings;
 import lombok.Getter;
@@ -57,15 +57,15 @@ public enum Message {
 
     public static void load() {
         for (Message msg : values()) {
-            String str = Main.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
+            String str = BlockRegen.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
 
             if (Strings.isNullOrEmpty(str)) {
-                Main.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getDefaultValue());
+                BlockRegen.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getDefaultValue());
                 continue;
             }
 
             msg.setValue(str);
         }
-        Main.getInstance().getFiles().saveMessages();
+        BlockRegen.getInstance().getFiles().saveMessages();
     }
 }

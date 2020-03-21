@@ -1,7 +1,7 @@
-package nl.Aurorion.BlockRegen.Particles.breaking;
+package nl.aurorion.blockregen.Particles.breaking;
 
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
 import org.bukkit.FireworkEffect.Type;
@@ -17,11 +17,11 @@ import java.util.Random;
 
 public class FireWorks implements Runnable {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
     private final Block block;
 
-    public FireWorks(Main instance, Block block) {
+    public FireWorks(BlockRegen instance, Block block) {
         this.plugin = instance;
         this.block = block;
     }

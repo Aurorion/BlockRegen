@@ -1,19 +1,19 @@
-package nl.Aurorion.BlockRegen;
+package nl.aurorion.blockregen;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
-import nl.Aurorion.BlockRegen.Commands.Commands;
-import nl.Aurorion.BlockRegen.Configurations.Files;
-import nl.Aurorion.BlockRegen.Events.BlockBreak;
-import nl.Aurorion.BlockRegen.Events.PlayerInteract;
-import nl.Aurorion.BlockRegen.Events.PlayerJoin;
-import nl.Aurorion.BlockRegen.Particles.ParticleUtil;
-import nl.Aurorion.BlockRegen.System.ConsoleOutput;
-import nl.Aurorion.BlockRegen.System.ExceptionHandler;
-import nl.Aurorion.BlockRegen.System.Getters;
-import nl.Aurorion.BlockRegen.System.UpdateCheck;
+import nl.aurorion.blockregen.Configurations.Files;
+import nl.aurorion.blockregen.Commands.Commands;
+import nl.aurorion.blockregen.Events.BlockBreak;
+import nl.aurorion.blockregen.Events.PlayerInteract;
+import nl.aurorion.blockregen.Events.PlayerJoin;
+import nl.aurorion.blockregen.Particles.ParticleUtil;
+import nl.aurorion.blockregen.System.ConsoleOutput;
+import nl.aurorion.blockregen.System.ExceptionHandler;
+import nl.aurorion.blockregen.System.Getters;
+import nl.aurorion.blockregen.System.UpdateCheck;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -26,10 +26,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.*;
 
-public class Main extends JavaPlugin {
+public class BlockRegen extends JavaPlugin {
 
     @Getter
-    public static Main instance;
+    public static BlockRegen instance;
 
     // Dependencies
     @Getter

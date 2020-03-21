@@ -1,6 +1,6 @@
-package nl.Aurorion.BlockRegen.Configurations;
+package nl.aurorion.blockregen.Configurations;
 
-import nl.Aurorion.BlockRegen.Main;
+import nl.aurorion.blockregen.BlockRegen;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -77,7 +77,7 @@ public class Files {
 
             if (!dfile.exists()) {
                 if (!dfile.getParentFile().mkdirs())
-                    Main.getInstance().cO.err("Could not create a folder.");
+                    BlockRegen.getInstance().cO.err("Could not create a folder.");
 
                 plugin.saveResource("Recovery.yml", false);
                 plugin.getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &aCreated Recovery.yml"));

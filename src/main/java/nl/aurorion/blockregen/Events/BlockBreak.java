@@ -1,14 +1,14 @@
-package nl.Aurorion.BlockRegen.Events;
+package nl.aurorion.blockregen.Events;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Message;
-import nl.Aurorion.BlockRegen.System.Getters;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.System.Getters;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -31,9 +31,9 @@ import java.util.List;
 
 public class BlockBreak implements Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public BlockBreak(Main plugin) {
+    public BlockBreak(BlockRegen plugin) {
         this.plugin = plugin;
     }
 
@@ -193,8 +193,8 @@ public class BlockBreak implements Listener {
                     }
                 }
             } else {
-                if ((isInRegion && Main.getInstance().getGetters().disableOtherBreakRegion()) ||
-                        Main.getInstance().getGetters().disableOtherBreak())
+                if ((isInRegion && BlockRegen.getInstance().getGetters().disableOtherBreakRegion()) ||
+                        BlockRegen.getInstance().getGetters().disableOtherBreak())
 
                     event.setCancelled(true);
             }
@@ -338,7 +338,7 @@ public class BlockBreak implements Listener {
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
 
-                Main.getInstance().cO.debug("Dropping item x" + itemAmount);
+                BlockRegen.getInstance().cO.debug("Dropping item x" + itemAmount);
 
                 if (dropMeta != null) {
                     if (getters.dropItemName(blockName, player) != null) {
@@ -423,7 +423,7 @@ public class BlockBreak implements Listener {
             @Override
             public void run() {
                 block.setType(getters.replaceBlock(blockName));
-                Main.getInstance().cO.debug("Replaced block");
+                BlockRegen.getInstance().cO.debug("Replaced block");
             }
         }.runTaskLater(plugin, 2L);
 
@@ -432,7 +432,7 @@ public class BlockBreak implements Listener {
         // Actual Regeneration -------------------------------------------------------------------------------------
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
-        Main.getInstance().cO.debug("Regen Delay: " + regenDelay);
+        BlockRegen.getInstance().cO.debug("Regen Delay: " + regenDelay);
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
@@ -445,7 +445,7 @@ public class BlockBreak implements Listener {
 
     private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
         state.update(true);
-        Main.getInstance().cO.debug("Regen");
+        BlockRegen.getInstance().cO.debug("Regen");
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);

@@ -1,10 +1,9 @@
-package nl.Aurorion.BlockRegen.System;
+package nl.aurorion.blockregen.System;
 
 import com.google.common.base.Strings;
 import me.clip.placeholderapi.PlaceholderAPI;
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Utils;
-import org.bukkit.ChatColor;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -16,9 +15,9 @@ import java.util.Objects;
 
 public class Getters {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public Getters(Main instance) {
+    public Getters(BlockRegen instance) {
         this.plugin = instance;
     }
 
@@ -152,7 +151,7 @@ public class Getters {
             if (Strings.isNullOrEmpty(displayName))
                 return null;
 
-            if (Main.getInstance().isUsePlaceholderAPI())
+            if (BlockRegen.getInstance().isUsePlaceholderAPI())
                 displayName = PlaceholderAPI.setPlaceholders(player, displayName);
 
             return Utils.color(Utils.parse(displayName, player));
@@ -165,7 +164,7 @@ public class Getters {
         List<String> lore = new ArrayList<>();
 
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".drop-item.lores")) {
-            if (Main.getInstance().isUsePlaceholderAPI())
+            if (BlockRegen.getInstance().isUsePlaceholderAPI())
                 all = PlaceholderAPI.setPlaceholders(player, all);
 
             lore.add(Utils.color(Utils.parse(all, player)));
@@ -234,7 +233,7 @@ public class Getters {
             if (Strings.isNullOrEmpty(displayName))
                 return null;
 
-            if (Main.getInstance().isUsePlaceholderAPI())
+            if (BlockRegen.getInstance().isUsePlaceholderAPI())
                 displayName = PlaceholderAPI.setPlaceholders(player, displayName);
 
             return Utils.color(Utils.parse(displayName, player));
@@ -246,7 +245,7 @@ public class Getters {
         List<String> lore = new ArrayList<>();
 
         for (String all : plugin.getFiles().getBlocklist().getStringList("Blocks." + blockName + ".event.custom-item.lores")) {
-            if (Main.getInstance().isUsePlaceholderAPI())
+            if (BlockRegen.getInstance().isUsePlaceholderAPI())
                 all = PlaceholderAPI.setPlaceholders(player, all);
 
             lore.add(Utils.color(Utils.parse(all, player)));
