@@ -1,0 +1,33 @@
+# BlockRegen
+# 
+# Developer(s): Aurorion & Wertik1206
+# Version: ${project.version}
+
+# Get notified when there is a new version available
+Update-Checker: true
+
+# If you have WorldEdit installed and wish to make and use regions then set this to true
+Use-Regions: false
+
+# Set this to true if you dont want blocks to be regenerated in Towny towns
+Towny-Support: false
+
+# Set this to true if you have issues with GriefPrevention
+GriefPrevention-Support: false
+
+# If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
+Disable-Other-Break: false
+
+# If you wish to cancel all other blocks broken in the region then set this to true
+Disable-Other-Break-Region: false
+
+# This setting cancels the regeneration when a player uses bone meal on a crop
+Bone-Meal-Override: false
+
+# Having trouble with server crashes? This setting recovers blocks that are stuck in regening when your server crashes
+Data-Recovery: false
+
+# Add the worlds you wish to use BlockRegen in to this list
+Worlds-Enabled:
+    - world
+    - world_nether

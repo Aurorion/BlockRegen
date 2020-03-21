@@ -1,0 +1,17 @@
+name: BlockRegen
+main: nl.Aurorion.BlockRegen.Main
+version: ${project.version}
+authors: [Aurorion, Wertik1206]
+softdepend: [Vault, WorldEdit, Towny, Jobs, GriefPrevention, PlaceholderAPI]
+api-version: "1.13"
+commands:
+  blockregen:
+    aliases: [br]
+    description: Main plugin command
+permissions:
+  blockregen.admin:
+    description: Gives access to admin commands
+  blockregen.bypass:
+    description: Allows player to use the bypass
+  blockregen.datacheck:
+    description: Allows player to use the data check
