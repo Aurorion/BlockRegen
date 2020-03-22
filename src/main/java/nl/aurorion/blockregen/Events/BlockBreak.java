@@ -62,7 +62,7 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        FileConfiguration settings = plugin.getFiles().getSettings();
+        FileConfiguration settings = plugin.getFiles().getSettings().getFileConfiguration();
 
         // Towny
         if (plugin.getGetters().useTowny()) {
@@ -78,7 +78,7 @@ public class BlockBreak implements Listener {
                 return;
         }
 
-        FileConfiguration blockList = plugin.getFiles().getBlocklist();
+        FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();
 
         // Check worlds
         String worldName = player.getWorld().getName();
@@ -106,13 +106,13 @@ public class BlockBreak implements Listener {
             boolean isInRegion = false;
 
             if (useRegions && plugin.getWorldEdit() != null) {
-                ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
 
                 List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
 
                 for (String region : regions) {
-                    String max = plugin.getFiles().getRegions().getString("Regions." + region + ".Max");
-                    String min = plugin.getFiles().getRegions().getString("Regions." + region + ".Min");
+                    String max = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Max");
+                    String min = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Min");
 
                     if (min == null || max == null)
                         continue;
@@ -404,7 +404,7 @@ public class BlockBreak implements Listener {
             plugin.getParticleUtil().run(getters.particleCheck(blockName).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
-        FileConfiguration data = plugin.getFiles().getData();
+        FileConfiguration data = plugin.getFiles().getData().getFileConfiguration();
 
         if (getters.dataRecovery()) {
             List<String> dataLocs = new ArrayList<>();
@@ -414,7 +414,7 @@ public class BlockBreak implements Listener {
 
             dataLocs.add(Utils.locationToString(location));
             data.set(blockName, dataLocs);
-            plugin.getFiles().saveData();
+            plugin.getFiles().getData().save();
         } else
             Utils.persist.put(location, block.getType());
 
@@ -457,7 +457,7 @@ public class BlockBreak implements Listener {
             if (!dataLocs.isEmpty()) {
                 dataLocs.remove(Utils.locationToString(location));
                 data.set(blockName, dataLocs);
-                plugin.getFiles().saveData();
+                plugin.getFiles().getData().save();
             }
         }
     }

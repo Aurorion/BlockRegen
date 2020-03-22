@@ -10,11 +10,6 @@ public class ExceptionHandler {
         this.plugin = plugin;
     }
 
-    public void handleException(Exception e) {
-        plugin.cO.warn("The plugin came across an unexpected error.");
-        printTrace(e);
-    }
-
     private void printTrace(Exception e) {
         plugin.cO.warn("------------------- StackTrace --------------------");
         e.printStackTrace();

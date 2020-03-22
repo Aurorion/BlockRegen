@@ -54,15 +54,16 @@ public enum Message {
 
     public static void load() {
         for (Message msg : values()) {
-            String str = BlockRegen.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
+            String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
 
             if (Strings.isNullOrEmpty(str)) {
-                BlockRegen.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getValue());
+                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set(msg.getPath(), msg.getValue());
                 continue;
             }
 
             msg.setValue(str);
         }
-        BlockRegen.getInstance().getFiles().saveMessages();
+
+        BlockRegen.getInstance().getFiles().getMessages().save();
     }
 }

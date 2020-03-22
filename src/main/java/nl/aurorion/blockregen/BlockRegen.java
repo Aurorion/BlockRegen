@@ -4,8 +4,8 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
-import nl.aurorion.blockregen.Configurations.Files;
 import nl.aurorion.blockregen.Commands.Commands;
+import nl.aurorion.blockregen.Configurations.Files;
 import nl.aurorion.blockregen.Events.BlockBreak;
 import nl.aurorion.blockregen.Events.PlayerInteract;
 import nl.aurorion.blockregen.Events.PlayerJoin;
@@ -68,8 +68,8 @@ public class BlockRegen extends JavaPlugin {
 
         cO = new ConsoleOutput(this);
 
-        cO.setDebug(files.settings.getBoolean("Debug-Enabled", false));
-        cO.setPrefix(Utils.color(Objects.requireNonNull(files.messages.getString("Messages.Prefix"))));
+        cO.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
+        cO.setPrefix(Utils.color(Objects.requireNonNull(files.getMessages().getFileConfiguration().getString("Messages.Prefix"))));
 
         eH = new ExceptionHandler(this);
 
@@ -118,7 +118,7 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void registerClasses() {
-        files = new Files(this);
+        files = new Files();
         Message.load();
         particleUtil = new ParticleUtil(this);
         getters = new Getters(this);
@@ -174,7 +174,7 @@ public class BlockRegen extends JavaPlugin {
     }
 
     public void fillEvents() {
-        FileConfiguration blockList = files.getBlocklist();
+        FileConfiguration blockList = files.getBlocklist().getFileConfiguration();
         ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
 
         List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
@@ -200,11 +200,11 @@ public class BlockRegen extends JavaPlugin {
 
     public void recoveryCheck() {
         if (this.getGetters().dataRecovery()) {
-            Set<String> set = files.getData().getKeys(false);
+            Set<String> set = files.getData().getFileConfiguration().getKeys(false);
             if (!set.isEmpty()) {
                 while (set.iterator().hasNext()) {
                     String name = set.iterator().next();
-                    List<String> list = files.getData().getStringList(name);
+                    List<String> list = files.getData().getFileConfiguration().getStringList(name);
                     for (String s : list) {
                         Location loc = Utils.stringToLocation(s);
                         loc.getBlock().setType(Material.valueOf(name));
@@ -213,10 +213,12 @@ public class BlockRegen extends JavaPlugin {
                     set.remove(name);
                 }
             }
-            for (String key : files.getData().getKeys(false)) {
-                files.getData().set(key, null);
+
+            for (String key : files.getData().getFileConfiguration().getKeys(false)) {
+                files.getData().getFileConfiguration().set(key, null);
             }
-            files.saveData();
+
+            files.getData().save();
         }
     }
 }
