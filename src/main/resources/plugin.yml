@@ -15,3 +15,6 @@ permissions:
     description: Allows player to use the bypass
   blockregen.datacheck:
     description: Allows player to use the data check
+  blockregen.block.*:
+    default: true
+    description: Gives player the ability to mine ores
