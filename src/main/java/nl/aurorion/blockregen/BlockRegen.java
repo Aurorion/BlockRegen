@@ -68,6 +68,8 @@ public class BlockRegen extends JavaPlugin {
 
         cO = new ConsoleOutput(this);
 
+        files = new Files();
+
         cO.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
         cO.setPrefix(Utils.color(Objects.requireNonNull(files.getMessages().getFileConfiguration().getString("Messages.Prefix"))));
 
