@@ -29,7 +29,17 @@ public class ConfigFile {
 
     public void load() {
         if (!file.exists()) {
-            BlockRegen.getInstance().saveResource(this.path, false);
+            try {
+                BlockRegen.getInstance().saveResource(this.path, false);
+            } catch (IllegalArgumentException e) {
+                try {
+                    file.createNewFile();
+                } catch (IOException e1) {
+                    BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &cCould not create " + this.path));
+                    return;
+                }
+            }
+
             BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &aCreated " + this.path));
         }
 
