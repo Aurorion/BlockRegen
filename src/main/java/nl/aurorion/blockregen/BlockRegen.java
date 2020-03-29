@@ -43,6 +43,8 @@ public class BlockRegen extends JavaPlugin {
     private GriefPrevention griefPrevention;
     @Getter
     private WorldGuardPlugin worldGuard;
+    @Getter
+    private WorldGuardProvider worldGuardProvider;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -175,6 +177,8 @@ public class BlockRegen extends JavaPlugin {
 
         cO.info("&eWorldGuard found! &aSupporting it's region protection.");
         this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
+
+        this.worldGuardProvider = new WorldGuardProvider(this);
     }
 
     private void setupJobs() {
