@@ -142,7 +142,7 @@ public class Getters {
     }
 
     public boolean naturalBreak(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".natural-break");
+        return blocklist.getBoolean("Blocks." + blockName + ".natural-break", true);
     }
 
     public Material dropItemMaterial(String blockName) {

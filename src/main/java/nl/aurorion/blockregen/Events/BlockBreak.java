@@ -18,6 +18,7 @@ import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -334,17 +335,20 @@ public class BlockBreak implements Listener {
         Material dropMaterial = getters.dropItemMaterial(blockName);
 
         if (getters.naturalBreak(blockName)) {
-            for (ItemStack drops : block.getDrops()) {
-                Material mat = drops.getType();
+            for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                Material mat = drop.getType();
                 int amount;
+
                 if (doubleDrops) {
-                    amount = drops.getAmount() * 2;
+                    amount = drop.getAmount() * 2;
                 } else {
-                    amount = drops.getAmount();
+                    amount = drop.getAmount();
                 }
-                ItemStack dropStack = new ItemStack(mat, amount);
-                world.dropItemNaturally(block.getLocation(), dropStack);
+
+                ItemStack dropItem = new ItemStack(mat, amount);
+                world.dropItemNaturally(block.getLocation(), dropItem);
             }
+
             if (expToDrop > 0) {
                 if (doubleExp) {
                     world.spawn(location, ExperienceOrb.class).setExperience(expToDrop * 2);
