@@ -58,15 +58,17 @@ public class Commands implements CommandExecutor, Listener {
                 }
 
                 plugin.getFiles().getSettings().load();
-                plugin.cO.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled"));
+                plugin.cO.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
 
                 plugin.getFiles().getMessages().load();
                 Message.load();
 
-                plugin.cO.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-                plugin.cO.setPrefix(Utils.color(Objects.requireNonNull(plugin.getFiles().getMessages().getFileConfiguration().getString("Messages.Prefix"))));
+                plugin.cO.setPrefix(Utils.color(Message.PREFIX.get()));
+
+                plugin.getFiles().checkRecovery();
 
                 plugin.getFiles().getBlocklist().load();
+                plugin.getGetters().reload();
 
                 Utils.events.clear();
                 plugin.fillEvents();

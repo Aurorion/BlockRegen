@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
@@ -11,7 +12,6 @@ import nl.aurorion.blockregen.Events.PlayerInteract;
 import nl.aurorion.blockregen.Events.PlayerJoin;
 import nl.aurorion.blockregen.Particles.ParticleUtil;
 import nl.aurorion.blockregen.System.ConsoleOutput;
-import nl.aurorion.blockregen.System.ExceptionHandler;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.System.UpdateCheck;
 import org.bukkit.ChatColor;
@@ -24,7 +24,10 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 public class BlockRegen extends JavaPlugin {
 
@@ -33,11 +36,13 @@ public class BlockRegen extends JavaPlugin {
 
     // Dependencies
     @Getter
-    public Economy economy;
+    private Economy economy;
     @Getter
-    public WorldEditPlugin worldEdit;
+    private WorldEditPlugin worldEdit;
     @Getter
-    public GriefPrevention griefPrevention;
+    private GriefPrevention griefPrevention;
+    @Getter
+    private WorldGuardPlugin worldGuard;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -55,8 +60,6 @@ public class BlockRegen extends JavaPlugin {
 
     // Handles every output going to console, easier, more centralized control.
     public ConsoleOutput cO;
-    // Handles exceptions, pretties them and prints info along with them.
-    public ExceptionHandler eH;
 
     public String newVersion = null;
 
@@ -68,18 +71,15 @@ public class BlockRegen extends JavaPlugin {
 
         cO = new ConsoleOutput(this);
 
-        files = new Files();
-
         cO.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-        cO.setPrefix(Utils.color(Objects.requireNonNull(files.getMessages().getFileConfiguration().getString("Messages.Prefix"))));
-
-        eH = new ExceptionHandler(this);
+        cO.setPrefix(Utils.color(Message.PREFIX.get()));
 
         this.registerCommands();
         this.registerEvents();
         this.fillEvents();
         this.setupEconomy();
         this.setupWorldEdit();
+        this.setupWorldGuard();
         this.setupJobs();
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
@@ -101,7 +101,7 @@ public class BlockRegen extends JavaPlugin {
                         this.newVersion = updater.getLatestVersion();
                     }
                 } catch (Exception e) {
-                    eH.handleException(e, "Could not check for updates!");
+                    cO.warn("Could not check for updates.");
                 }
             }, 20L);
         }
@@ -166,6 +166,15 @@ public class BlockRegen extends JavaPlugin {
 
         cO.info("&eWorldEdit found! &aEnabling regions.");
         worldEdit = (WorldEditPlugin) worldEditPlugin;
+    }
+
+    private void setupWorldGuard() {
+        Plugin worldGuardPlugin = this.getServer().getPluginManager().getPlugin("WorldGuard");
+
+        if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
+
+        cO.info("&eWorldGuard found! &aSupporting it's region protection.");
+        this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
     }
 
     private void setupJobs() {

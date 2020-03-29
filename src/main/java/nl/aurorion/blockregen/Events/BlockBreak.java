@@ -5,10 +5,17 @@ import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.System.Getters;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -65,17 +72,35 @@ public class BlockBreak implements Listener {
         FileConfiguration settings = plugin.getFiles().getSettings().getFileConfiguration();
 
         // Towny
-        if (plugin.getGetters().useTowny()) {
+        if (plugin.getGetters().useTowny() && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
             if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
                 if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
                     return;
         }
 
         // Grief Prevention
-        if (plugin.getGetters().useGP()) {
+        if (plugin.getGetters().useGriefPrevention() && plugin.getGriefPrevention() != null) {
             String noBuildReason = plugin.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
-            if (noBuildReason != null)
-                return;
+            if (noBuildReason != null) return;
+        }
+
+        // WorldGuard
+        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuard() != null) {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionQuery query = container.createQuery();
+
+            com.sk89q.worldedit.util.Location location = new com.sk89q.worldedit.util.Location(
+                    BukkitAdapter.adapt(block.getWorld()),
+                    block.getLocation().getX(),
+                    block.getLocation().getY(),
+                    block.getLocation().getZ());
+
+            ApplicableRegionSet set = query.getApplicableRegions(location);
+
+            LocalPlayer localPlayer = plugin.getWorldGuard().wrapPlayer(player);
+
+            if (set.queryState(localPlayer, Flags.BLOCK_BREAK) == StateFlag.State.DENY ||
+                    set.queryState(localPlayer, Flags.BUILD) == StateFlag.State.DENY) return;
         }
 
         FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();

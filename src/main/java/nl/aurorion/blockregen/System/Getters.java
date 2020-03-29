@@ -24,6 +24,10 @@ public class Getters {
     public Getters(BlockRegen plugin) {
         this.plugin = plugin;
 
+        reload();
+    }
+
+    public void reload() {
         this.blocklist = plugin.getFiles().getBlocklist().getFileConfiguration();
         this.settings = plugin.getFiles().getSettings().getFileConfiguration();
     }
@@ -39,11 +43,15 @@ public class Getters {
     }
 
     public boolean useTowny() {
-        return settings.getBoolean("Towny-Support");
+        return settings.getBoolean("Towny-Support", false);
     }
 
-    public boolean useGP() {
-        return settings.getBoolean("GriefPrevention-Support");
+    public boolean useGriefPrevention() {
+        return settings.getBoolean("GriefPrevention-Support", false);
+    }
+
+    public boolean useWorldGuard() {
+        return settings.getBoolean("WorldGuard-Support", false);
     }
 
     public boolean disableOtherBreak() {

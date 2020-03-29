@@ -5,6 +5,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,16 +19,20 @@ public class ConfigFile {
     private FileConfiguration fileConfiguration;
 
     @Getter
-    private final File file;
+    private File file;
 
-    public ConfigFile(String path) {
+    private final JavaPlugin plugin;
+
+    public ConfigFile(JavaPlugin plugin, String path) {
         this.path = path.contains(".yml") ? path : path + ".yml";
-        this.file = new File(path);
+        this.plugin = plugin;
 
         load();
     }
 
     public void load() {
+        this.file = new File(plugin.getDataFolder(), this.path);
+
         if (!file.exists()) {
             try {
                 BlockRegen.getInstance().saveResource(this.path, false);
