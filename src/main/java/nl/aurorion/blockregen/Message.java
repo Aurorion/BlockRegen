@@ -1,4 +1,4 @@
-package nl.Aurorion.BlockRegen;
+package nl.aurorion.blockregen;
 
 import com.google.common.base.Strings;
 import lombok.Getter;
@@ -8,7 +8,7 @@ import lombok.Setter;
  * Message system, loaded on enable & reload.
  *
  * @author Wertik1206
- * */
+ */
 public enum Message {
 
     PREFIX("Prefix", "&6&l[&3BlockRegen&6&l] &f"),
@@ -40,8 +40,6 @@ public enum Message {
     private final String path;
 
     @Getter
-    private final String defaultValue;
-
     @Setter
     private String value;
 
@@ -49,23 +47,23 @@ public enum Message {
         return Utils.color(this.value);
     }
 
-    Message(String path, String defaultValue) {
+    Message(String path, String value) {
         this.path = path;
-        this.defaultValue = defaultValue;
-        this.value = defaultValue;
+        this.value = value;
     }
 
     public static void load() {
         for (Message msg : values()) {
-            String str = Main.getInstance().getFiles().getMessages().getString("Messages." + msg.getPath());
+            String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
 
             if (Strings.isNullOrEmpty(str)) {
-                Main.getInstance().getFiles().getMessages().set(msg.getPath(), msg.getDefaultValue());
+                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set(msg.getPath(), msg.getValue());
                 continue;
             }
 
             msg.setValue(str);
         }
-        Main.getInstance().getFiles().saveMessages();
+
+        BlockRegen.getInstance().getFiles().getMessages().save();
     }
 }

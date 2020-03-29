@@ -1,11 +1,11 @@
-package nl.Aurorion.BlockRegen.Commands;
+package nl.aurorion.blockregen.Commands;
 
 import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Message;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
@@ -29,9 +29,9 @@ import java.util.Set;
 
 public class Commands implements CommandExecutor, Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public Commands(Main plugin) {
+    public Commands(BlockRegen plugin) {
         this.plugin = plugin;
     }
 
@@ -57,17 +57,18 @@ public class Commands implements CommandExecutor, Listener {
                     return true;
                 }
 
-                plugin.getFiles().reloadSettings();
-                plugin.cO.setDebug(plugin.getFiles().getSettings().getBoolean("Debug-Enabled"));
+                plugin.getFiles().getSettings().load();
+                plugin.cO.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
 
-                plugin.getFiles().reloadMessages();
+                plugin.getFiles().getMessages().load();
                 Message.load();
 
-                plugin.cO.setDebug(plugin.getFiles().settings.getBoolean("Debug-Enabled", false));
-                plugin.cO.setPrefix(Utils.color(Objects.requireNonNull(plugin.getFiles().messages.getString("Messages.Prefix"))));
+                plugin.cO.setPrefix(Utils.color(Message.PREFIX.get()));
 
-                plugin.getFiles().reloadBlocklist();
-                plugin.getFiles().generateRecoveryFile(plugin);
+                plugin.getFiles().checkRecovery();
+
+                plugin.getFiles().getBlocklist().load();
+                plugin.getGetters().reload();
 
                 Utils.events.clear();
                 plugin.fillEvents();
@@ -139,7 +140,7 @@ public class Commands implements CommandExecutor, Listener {
 
                 if (args.length == 2) {
                     if (args[1].equalsIgnoreCase("list")) {
-                        ConfigurationSection regions = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                        ConfigurationSection regions = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
                         Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
                         player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eHere is a list of all your regions."));
@@ -166,31 +167,31 @@ public class Commands implements CommandExecutor, Listener {
 
                         List<String> regions = new ArrayList<>();
 
-                        if (plugin.getFiles().getRegions().getString("Regions") != null) {
-                            ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                        if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") != null) {
+                            ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
                             regions = new ArrayList<>(Objects.requireNonNull(regionSection).getKeys(false));
                         }
 
                         if (regions.contains(args[2])) {
                             player.sendMessage(Message.DUPLICATED_REGION.get());
                         } else {
-                            plugin.getFiles().getRegions().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(s).getMinimumPoint())));
-                            plugin.getFiles().getRegions().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
-                            plugin.getFiles().saveRegions();
+                            plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(s).getMinimumPoint())));
+                            plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
+                            plugin.getFiles().getRegions().save();
                             player.sendMessage(Message.SET_REGION.get());
                         }
                         return true;
                     }
                     if (args[1].equalsIgnoreCase("remove")) {
-                        if (plugin.getFiles().getRegions().getString("Regions") == null) {
+                        if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") == null) {
                             player.sendMessage(Message.UNKNOWN_REGION.get());
                         } else {
-                            ConfigurationSection regions = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                            ConfigurationSection regions = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
                             Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
 
                             if (setregions.contains(args[2])) {
-                                plugin.getFiles().getRegions().set("Regions." + args[2], null);
-                                plugin.getFiles().saveRegions();
+                                plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2], null);
+                                plugin.getFiles().getRegions().save();
                                 player.sendMessage(Message.REMOVE_REGION.get());
                             } else {
                                 player.sendMessage(Message.UNKNOWN_REGION.get());
@@ -248,7 +249,7 @@ public class Commands implements CommandExecutor, Listener {
                                 sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
                                 String barName = null;
                                 BarColor barColor = BarColor.BLUE;
-                                FileConfiguration blocklist = plugin.getFiles().getBlocklist();
+                                FileConfiguration blocklist = plugin.getFiles().getBlocklist().getFileConfiguration();
                                 ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
                                 Set<String> setblocks = Objects.requireNonNull(blocks).getKeys(false);
                                 for (String loopBlocks : setblocks) {
@@ -330,7 +331,7 @@ public class Commands implements CommandExecutor, Listener {
     }
 
     private void convert() {
-        FileConfiguration regions = plugin.getFiles().getRegions();
+        FileConfiguration regions = plugin.getFiles().getRegions().getFileConfiguration();
 
         String[] locA;
         String[] locB;
@@ -350,7 +351,7 @@ public class Commands implements CommandExecutor, Listener {
             }
         }
 
-        plugin.getFiles().saveRegions();
+        plugin.getFiles().getRegions().save();
     }
 
     private boolean checkConsole(CommandSender sender) {

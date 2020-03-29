@@ -1,6 +1,6 @@
-package nl.Aurorion.BlockRegen.Events;
+package nl.aurorion.blockregen.Events;
 
-import nl.Aurorion.BlockRegen.Main;
+import nl.aurorion.blockregen.BlockRegen;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -9,9 +9,9 @@ import org.bukkit.event.player.PlayerJoinEvent;
 
 public class PlayerJoin implements Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public PlayerJoin(Main instance) {
+    public PlayerJoin(BlockRegen instance) {
         this.plugin = instance;
     }
 

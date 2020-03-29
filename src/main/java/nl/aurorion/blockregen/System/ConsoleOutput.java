@@ -1,17 +1,17 @@
-package nl.Aurorion.BlockRegen.System;
+package nl.aurorion.blockregen.System;
 
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Utils;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.ChatColor;
 
 public class ConsoleOutput {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
     private boolean debug;
     private String prefix;
 
-    public ConsoleOutput(Main plugin) {
+    public ConsoleOutput(BlockRegen plugin) {
         this.plugin = plugin;
     }
 

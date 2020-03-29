@@ -1,16 +1,24 @@
-package nl.Aurorion.BlockRegen.Events;
+package nl.aurorion.blockregen.Events;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import nl.Aurorion.BlockRegen.Main;
-import nl.Aurorion.BlockRegen.Message;
-import nl.Aurorion.BlockRegen.System.Getters;
-import nl.Aurorion.BlockRegen.Utils;
+import com.sk89q.worldguard.LocalPlayer;
+import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
+import com.sk89q.worldguard.protection.flags.Flags;
+import com.sk89q.worldguard.protection.flags.StateFlag;
+import com.sk89q.worldguard.protection.regions.RegionContainer;
+import com.sk89q.worldguard.protection.regions.RegionQuery;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.System.Getters;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -31,9 +39,9 @@ import java.util.List;
 
 public class BlockBreak implements Listener {
 
-    private final Main plugin;
+    private final BlockRegen plugin;
 
-    public BlockBreak(Main plugin) {
+    public BlockBreak(BlockRegen plugin) {
         this.plugin = plugin;
     }
 
@@ -62,23 +70,41 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        FileConfiguration settings = plugin.getFiles().getSettings();
+        FileConfiguration settings = plugin.getFiles().getSettings().getFileConfiguration();
 
         // Towny
-        if (plugin.getGetters().useTowny()) {
+        if (plugin.getGetters().useTowny() && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
             if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
                 if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
                     return;
         }
 
         // Grief Prevention
-        if (plugin.getGetters().useGP()) {
+        if (plugin.getGetters().useGriefPrevention() && plugin.getGriefPrevention() != null) {
             String noBuildReason = plugin.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
-            if (noBuildReason != null)
-                return;
+            if (noBuildReason != null) return;
         }
 
-        FileConfiguration blockList = plugin.getFiles().getBlocklist();
+        // WorldGuard
+        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuard() != null) {
+            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
+            RegionQuery query = container.createQuery();
+
+            com.sk89q.worldedit.util.Location location = new com.sk89q.worldedit.util.Location(
+                    BukkitAdapter.adapt(block.getWorld()),
+                    block.getLocation().getX(),
+                    block.getLocation().getY(),
+                    block.getLocation().getZ());
+
+            ApplicableRegionSet set = query.getApplicableRegions(location);
+
+            LocalPlayer localPlayer = plugin.getWorldGuard().wrapPlayer(player);
+
+            if (set.queryState(localPlayer, Flags.BLOCK_BREAK) == StateFlag.State.DENY ||
+                    set.queryState(localPlayer, Flags.BUILD) == StateFlag.State.DENY) return;
+        }
+
+        FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();
 
         // Check worlds
         String worldName = player.getWorld().getName();
@@ -106,13 +132,13 @@ public class BlockBreak implements Listener {
             boolean isInRegion = false;
 
             if (useRegions && plugin.getWorldEdit() != null) {
-                ConfigurationSection regionSection = plugin.getFiles().getRegions().getConfigurationSection("Regions");
+                ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
 
                 List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
 
                 for (String region : regions) {
-                    String max = plugin.getFiles().getRegions().getString("Regions." + region + ".Max");
-                    String min = plugin.getFiles().getRegions().getString("Regions." + region + ".Min");
+                    String max = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Max");
+                    String min = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Min");
 
                     if (min == null || max == null)
                         continue;
@@ -193,8 +219,8 @@ public class BlockBreak implements Listener {
                     }
                 }
             } else {
-                if ((isInRegion && Main.getInstance().getGetters().disableOtherBreakRegion()) ||
-                        Main.getInstance().getGetters().disableOtherBreak())
+                if ((isInRegion && BlockRegen.getInstance().getGetters().disableOtherBreakRegion()) ||
+                        BlockRegen.getInstance().getGetters().disableOtherBreak())
 
                     event.setCancelled(true);
             }
@@ -309,17 +335,20 @@ public class BlockBreak implements Listener {
         Material dropMaterial = getters.dropItemMaterial(blockName);
 
         if (getters.naturalBreak(blockName)) {
-            for (ItemStack drops : block.getDrops()) {
-                Material mat = drops.getType();
+            for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                Material mat = drop.getType();
                 int amount;
+
                 if (doubleDrops) {
-                    amount = drops.getAmount() * 2;
+                    amount = drop.getAmount() * 2;
                 } else {
-                    amount = drops.getAmount();
+                    amount = drop.getAmount();
                 }
-                ItemStack dropStack = new ItemStack(mat, amount);
-                world.dropItemNaturally(block.getLocation(), dropStack);
+
+                ItemStack dropItem = new ItemStack(mat, amount);
+                world.dropItemNaturally(block.getLocation(), dropItem);
             }
+
             if (expToDrop > 0) {
                 if (doubleExp) {
                     world.spawn(location, ExperienceOrb.class).setExperience(expToDrop * 2);
@@ -338,7 +367,7 @@ public class BlockBreak implements Listener {
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
 
-                Main.getInstance().cO.debug("Dropping item x" + itemAmount);
+                BlockRegen.getInstance().cO.debug("Dropping item x" + itemAmount);
 
                 if (dropMeta != null) {
                     if (getters.dropItemName(blockName, player) != null) {
@@ -404,7 +433,7 @@ public class BlockBreak implements Listener {
             plugin.getParticleUtil().run(getters.particleCheck(blockName).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
-        FileConfiguration data = plugin.getFiles().getData();
+        FileConfiguration data = plugin.getFiles().getData().getFileConfiguration();
 
         if (getters.dataRecovery()) {
             List<String> dataLocs = new ArrayList<>();
@@ -414,7 +443,7 @@ public class BlockBreak implements Listener {
 
             dataLocs.add(Utils.locationToString(location));
             data.set(blockName, dataLocs);
-            plugin.getFiles().saveData();
+            plugin.getFiles().getData().save();
         } else
             Utils.persist.put(location, block.getType());
 
@@ -423,7 +452,7 @@ public class BlockBreak implements Listener {
             @Override
             public void run() {
                 block.setType(getters.replaceBlock(blockName));
-                Main.getInstance().cO.debug("Replaced block");
+                BlockRegen.getInstance().cO.debug("Replaced block");
             }
         }.runTaskLater(plugin, 2L);
 
@@ -432,7 +461,7 @@ public class BlockBreak implements Listener {
         // Actual Regeneration -------------------------------------------------------------------------------------
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
-        Main.getInstance().cO.debug("Regen Delay: " + regenDelay);
+        BlockRegen.getInstance().cO.debug("Regen Delay: " + regenDelay);
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
@@ -445,7 +474,7 @@ public class BlockBreak implements Listener {
 
     private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
         state.update(true);
-        Main.getInstance().cO.debug("Regen");
+        BlockRegen.getInstance().cO.debug("Regen");
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);
@@ -457,7 +486,7 @@ public class BlockBreak implements Listener {
             if (!dataLocs.isEmpty()) {
                 dataLocs.remove(Utils.locationToString(location));
                 data.set(blockName, dataLocs);
-                plugin.getFiles().saveData();
+                plugin.getFiles().getData().save();
             }
         }
     }

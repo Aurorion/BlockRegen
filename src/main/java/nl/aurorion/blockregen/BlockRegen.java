@@ -1,19 +1,19 @@
-package nl.Aurorion.BlockRegen;
+package nl.aurorion.blockregen;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
-import nl.Aurorion.BlockRegen.Commands.Commands;
-import nl.Aurorion.BlockRegen.Configurations.Files;
-import nl.Aurorion.BlockRegen.Events.BlockBreak;
-import nl.Aurorion.BlockRegen.Events.PlayerInteract;
-import nl.Aurorion.BlockRegen.Events.PlayerJoin;
-import nl.Aurorion.BlockRegen.Particles.ParticleUtil;
-import nl.Aurorion.BlockRegen.System.ConsoleOutput;
-import nl.Aurorion.BlockRegen.System.ExceptionHandler;
-import nl.Aurorion.BlockRegen.System.Getters;
-import nl.Aurorion.BlockRegen.System.UpdateCheck;
+import nl.aurorion.blockregen.Commands.Commands;
+import nl.aurorion.blockregen.Configurations.Files;
+import nl.aurorion.blockregen.Events.BlockBreak;
+import nl.aurorion.blockregen.Events.PlayerInteract;
+import nl.aurorion.blockregen.Events.PlayerJoin;
+import nl.aurorion.blockregen.Particles.ParticleUtil;
+import nl.aurorion.blockregen.System.ConsoleOutput;
+import nl.aurorion.blockregen.System.Getters;
+import nl.aurorion.blockregen.System.UpdateCheck;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -24,20 +24,25 @@ import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
-public class Main extends JavaPlugin {
+public class BlockRegen extends JavaPlugin {
 
     @Getter
-    public static Main instance;
+    public static BlockRegen instance;
 
     // Dependencies
     @Getter
-    public Economy economy;
+    private Economy economy;
     @Getter
-    public WorldEditPlugin worldEdit;
+    private WorldEditPlugin worldEdit;
     @Getter
-    public GriefPrevention griefPrevention;
+    private GriefPrevention griefPrevention;
+    @Getter
+    private WorldGuardPlugin worldGuard;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -55,8 +60,6 @@ public class Main extends JavaPlugin {
 
     // Handles every output going to console, easier, more centralized control.
     public ConsoleOutput cO;
-    // Handles exceptions, pretties them and prints info along with them.
-    public ExceptionHandler eH;
 
     public String newVersion = null;
 
@@ -68,16 +71,15 @@ public class Main extends JavaPlugin {
 
         cO = new ConsoleOutput(this);
 
-        cO.setDebug(files.settings.getBoolean("Debug-Enabled", false));
-        cO.setPrefix(Utils.color(Objects.requireNonNull(files.messages.getString("Messages.Prefix"))));
-
-        eH = new ExceptionHandler(this);
+        cO.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
+        cO.setPrefix(Utils.color(Message.PREFIX.get()));
 
         this.registerCommands();
         this.registerEvents();
         this.fillEvents();
         this.setupEconomy();
         this.setupWorldEdit();
+        this.setupWorldGuard();
         this.setupJobs();
 
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
@@ -99,7 +101,7 @@ public class Main extends JavaPlugin {
                         this.newVersion = updater.getLatestVersion();
                     }
                 } catch (Exception e) {
-                    eH.handleException(e, "Could not check for updates!");
+                    cO.warn("Could not check for updates.");
                 }
             }, 20L);
         }
@@ -118,7 +120,7 @@ public class Main extends JavaPlugin {
     }
 
     private void registerClasses() {
-        files = new Files(this);
+        files = new Files();
         Message.load();
         particleUtil = new ParticleUtil(this);
         getters = new Getters(this);
@@ -166,6 +168,15 @@ public class Main extends JavaPlugin {
         worldEdit = (WorldEditPlugin) worldEditPlugin;
     }
 
+    private void setupWorldGuard() {
+        Plugin worldGuardPlugin = this.getServer().getPluginManager().getPlugin("WorldGuard");
+
+        if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
+
+        cO.info("&eWorldGuard found! &aSupporting it's region protection.");
+        this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
+    }
+
     private void setupJobs() {
         boolean useJobs = this.getServer().getPluginManager().getPlugin("Jobs") != null;
 
@@ -174,7 +185,7 @@ public class Main extends JavaPlugin {
     }
 
     public void fillEvents() {
-        FileConfiguration blockList = files.getBlocklist();
+        FileConfiguration blockList = files.getBlocklist().getFileConfiguration();
         ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
 
         List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
@@ -200,11 +211,11 @@ public class Main extends JavaPlugin {
 
     public void recoveryCheck() {
         if (this.getGetters().dataRecovery()) {
-            Set<String> set = files.getData().getKeys(false);
+            Set<String> set = files.getData().getFileConfiguration().getKeys(false);
             if (!set.isEmpty()) {
                 while (set.iterator().hasNext()) {
                     String name = set.iterator().next();
-                    List<String> list = files.getData().getStringList(name);
+                    List<String> list = files.getData().getFileConfiguration().getStringList(name);
                     for (String s : list) {
                         Location loc = Utils.stringToLocation(s);
                         loc.getBlock().setType(Material.valueOf(name));
@@ -213,10 +224,12 @@ public class Main extends JavaPlugin {
                     set.remove(name);
                 }
             }
-            for (String key : files.getData().getKeys(false)) {
-                files.getData().set(key, null);
+
+            for (String key : files.getData().getFileConfiguration().getKeys(false)) {
+                files.getData().getFileConfiguration().set(key, null);
             }
-            files.saveData();
+
+            files.getData().save();
         }
     }
 }
