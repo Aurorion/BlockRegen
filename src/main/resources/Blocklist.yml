@@ -120,38 +120,20 @@ Blocks:
         # Can't use a random (low & high) number here.
         rarity: 50
 
-  SPRUCE_LOG:
-    replace-block: BEDROCK
+  # Blocks chaining example:
+  # Coal regenerates into Iron, Iron into Gold, Gold back to Coal.
+  COAL_ORE:
+    replace-block: STONE
+    regenerate-into: IRON_ORE
     regen-delay: 3
-    money: 5
-    console-command: "say %player% is a badass lumberjack.."
-    natural-break: false
-    drop-item:
-      material: APPLE
-      name: "&eHealthy Snack"
-      lores:
-        - "&fA apple a day"
-        - "&4Keeps Samsung away?"
-      drop-naturally: false
-      exp:
-        drop-naturally: false
-        amount: 100
-      amount:
-        high: 5
-        low: 0
-    event:
-      event-name: Quackers
-      bossbar:
-        name: "&aQuack quack quack"
-        color: GREEN
-      double-drops: false
-      double-exp: false
-      custom-item:
-        enabled: true
-        material: Bread
-        name: "&eGive it to them ducks"
-        lores:
-          - "&dCrumbling"
-          - "&aQuack quack quack"
-        drop-naturally: true
-        rarity: 10
+    drop-naturally: true
+  IRON_ORE:
+    replace-block: STONE
+    regenerate-into: GOLD_ORE
+    regen-delay: 5
+    drop-naturally: true
+  GOLD_ORE:
+    replace-block: STONE
+    regenerate-into: COAL_ORE
+    regen-delay: 10
+    drop-naturally: true

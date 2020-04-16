@@ -87,8 +87,11 @@ public class Getters {
         return null;
     }
 
-    public boolean regenerate(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".regenerate", true);
+    public Material regenBlock(String blockName) {
+        if (blocklist.getString("Blocks." + blockName + ".regenerate-into") != null) {
+            return Material.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + blockName + ".regenerate-into")).toUpperCase());
+        }
+        return replaceBlock(blockName);
     }
 
     public int replaceDelay(String blockName) {

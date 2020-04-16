@@ -446,10 +446,8 @@ public class BlockBreak implements Listener {
             dataLocs.add(Utils.locationToString(location));
             data.set(blockName, dataLocs);
             plugin.getFiles().getData().save();
-        } else {
-            if (plugin.getGetters().regenerate(blockName))
-                Utils.persist.put(location, block.getType());
-        }
+        } else
+            Utils.persist.put(location, block.getType());
 
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
@@ -460,8 +458,6 @@ public class BlockBreak implements Listener {
             }
         }.runTaskLater(plugin, 2L);
 
-        if (!plugin.getGetters().regenerate(blockName)) return;
-
         Utils.regenBlocks.add(location);
 
         // Actual Regeneration -------------------------------------------------------------------------------------
@@ -469,6 +465,11 @@ public class BlockBreak implements Listener {
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
         BlockRegen.getInstance().consoleOutput.debug("Regen Delay: " + regenDelay);
+
+        if (plugin.getGetters().regenBlock(blockName) != state.getType()) {
+            state.setType(plugin.getGetters().regenBlock(blockName));
+            plugin.getConsoleOutput().debug("Regenerate into: " + plugin.getGetters().regenBlock(blockName));
+        }
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
