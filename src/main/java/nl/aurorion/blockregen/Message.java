@@ -1,6 +1,5 @@
 package nl.aurorion.blockregen;
 
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -56,8 +55,8 @@ public enum Message {
         for (Message msg : values()) {
             String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
 
-            if (Strings.isNullOrEmpty(str)) {
-                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set(msg.getPath(), msg.getValue());
+            if (str == null) {
+                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set("Messages." + msg.getPath(), msg.getValue());
                 continue;
             }
 

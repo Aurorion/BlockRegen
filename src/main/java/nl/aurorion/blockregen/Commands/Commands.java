@@ -116,7 +116,7 @@ public class Commands implements CommandExecutor, Listener {
                 break;
             case "convert":
                 this.convert();
-                sender.sendMessage(Message.PREFIX.get() + ChatColor.translateAlternateColorCodes('&', "&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));
+                sender.sendMessage(Message.PREFIX.get() + Utils.color("&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));
                 break;
             case "region":
                 if (checkConsole(sender))
@@ -130,7 +130,7 @@ public class Commands implements CommandExecutor, Listener {
                 }
 
                 if (args.length == 1 || args.length > 3) {
-                    player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
+                    player.sendMessage(Utils.color("&6&m-----&r &3&lBlockRegen &6&m-----"
                             + "\n&3/" + label + "  region set <name> &7: set a region."
                             + "\n&3/" + label + "  region remove <name> &7: remove a region."
                             + "\n&3/" + label + "  region list &7: a list of all your regions."
