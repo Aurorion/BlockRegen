@@ -87,6 +87,10 @@ public class Getters {
         return null;
     }
 
+    public boolean regenerate(String blockName) {
+        return blocklist.getBoolean("Blocks." + blockName + ".regenerate", true);
+    }
+
     public int replaceDelay(String blockName) {
         return Amount.loadAmount(blocklist, "Blocks." + blockName + ".regen-delay", 1).getInt();
     }

@@ -9,7 +9,6 @@ import com.gamingmesh.jobs.actions.BlockActionInfo;
 import com.gamingmesh.jobs.container.ActionType;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.gamingmesh.jobs.container.JobsPlayer;
-import com.gamingmesh.jobs.listeners.JobsPaymentListener;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -447,8 +446,10 @@ public class BlockBreak implements Listener {
             dataLocs.add(Utils.locationToString(location));
             data.set(blockName, dataLocs);
             plugin.getFiles().getData().save();
-        } else
-            Utils.persist.put(location, block.getType());
+        } else {
+            if (plugin.getGetters().regenerate(blockName))
+                Utils.persist.put(location, block.getType());
+        }
 
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
@@ -459,9 +460,12 @@ public class BlockBreak implements Listener {
             }
         }.runTaskLater(plugin, 2L);
 
+        if (!plugin.getGetters().regenerate(blockName)) return;
+
         Utils.regenBlocks.add(location);
 
         // Actual Regeneration -------------------------------------------------------------------------------------
+
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
         BlockRegen.getInstance().consoleOutput.debug("Regen Delay: " + regenDelay);
