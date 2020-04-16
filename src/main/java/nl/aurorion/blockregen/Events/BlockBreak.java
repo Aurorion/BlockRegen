@@ -1,7 +1,15 @@
 package nl.aurorion.blockregen.Events;
 
+import com.bekvon.bukkit.residence.api.ResidenceApi;
+import com.bekvon.bukkit.residence.containers.Flags;
+import com.bekvon.bukkit.residence.protection.ClaimedResidence;
+import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.gamingmesh.jobs.Jobs;
+import com.gamingmesh.jobs.actions.BlockActionInfo;
+import com.gamingmesh.jobs.container.ActionType;
 import com.gamingmesh.jobs.container.JobProgression;
+import com.gamingmesh.jobs.container.JobsPlayer;
+import com.gamingmesh.jobs.listeners.JobsPaymentListener;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -9,7 +17,6 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.Utils;
-import nl.aurorion.blockregen.WorldGuardProvider;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -81,6 +88,16 @@ public class BlockBreak implements Listener {
         // WorldGuard
         if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuard() != null) {
             if (!plugin.getWorldGuardProvider().canBreak(player, block.getLocation())) return;
+        }
+
+        // Residence
+        if (plugin.getGetters().useResidence() && plugin.getResidence() != null) {
+            ClaimedResidence residence = ResidenceApi.getResidenceManager().getByLoc(block.getLocation());
+
+            if (residence != null) {
+                ResidencePermissions permissions = residence.getPermissions();
+                if (!permissions.playerHas(player, Flags.build, true)) return;
+            }
         }
 
         FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();
@@ -346,7 +363,7 @@ public class BlockBreak implements Listener {
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
 
-                BlockRegen.getInstance().cO.debug("Dropping item x" + itemAmount);
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item x" + itemAmount);
 
                 if (dropMeta != null) {
                     if (getters.dropItemName(blockName, player) != null) {
@@ -393,6 +410,13 @@ public class BlockBreak implements Listener {
             }
         }
 
+        // Jobs Rewards ----------------------------------------------------------------------------------------
+
+        if (plugin.getGetters().useJobsRewards() && plugin.getJobs() != null) {
+            JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
+            Jobs.action(jobsPlayer, new BlockActionInfo(block, ActionType.BREAK), block);
+        }
+
         // Vault money -----------------------------------------------------------------------------------------
         if (plugin.getEconomy() != null) {
             int money = getters.money(blockName);
@@ -431,7 +455,7 @@ public class BlockBreak implements Listener {
             @Override
             public void run() {
                 block.setType(getters.replaceBlock(blockName));
-                BlockRegen.getInstance().cO.debug("Replaced block");
+                BlockRegen.getInstance().consoleOutput.debug("Replaced block");
             }
         }.runTaskLater(plugin, 2L);
 
@@ -440,7 +464,7 @@ public class BlockBreak implements Listener {
         // Actual Regeneration -------------------------------------------------------------------------------------
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
-        BlockRegen.getInstance().cO.debug("Regen Delay: " + regenDelay);
+        BlockRegen.getInstance().consoleOutput.debug("Regen Delay: " + regenDelay);
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
@@ -453,7 +477,7 @@ public class BlockBreak implements Listener {
 
     private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
         state.update(true);
-        BlockRegen.getInstance().cO.debug("Regen");
+        BlockRegen.getInstance().consoleOutput.debug("Regen");
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);

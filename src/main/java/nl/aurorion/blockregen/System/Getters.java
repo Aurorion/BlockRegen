@@ -42,6 +42,7 @@ public class Getters {
         return settings.getBoolean("Use-Regions");
     }
 
+
     public boolean useTowny() {
         return settings.getBoolean("Towny-Support", false);
     }
@@ -53,6 +54,15 @@ public class Getters {
     public boolean useWorldGuard() {
         return settings.getBoolean("WorldGuard-Support", false);
     }
+
+    public boolean useResidence() {
+        return settings.getBoolean("Residence-Support", false);
+    }
+
+    public boolean useJobsRewards() {
+        return settings.getBoolean("Jobs-Rewards", false);
+    }
+
 
     public boolean disableOtherBreak() {
         return settings.getBoolean("Disable-Other-Break");

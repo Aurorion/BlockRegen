@@ -18,6 +18,12 @@ GriefPrevention-Support: false
 # Set this to true if you want to tolerate worldguard block-break and build region flags.
 WorldGuard-Support: false
 
+# Enable to respect Residence protection.
+Residence-Support: false
+
+# Enable Jobs rewards.
+Jobs-Rewards: false
+
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
 Disable-Other-Break: false
 

@@ -49,6 +49,10 @@
             <id>placeholderapi</id>
             <url>http://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
+        <repository>
+            <id>devport</id>
+            <url>http://play.pvpcraft.cz:8081/repository/devport/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -77,7 +81,7 @@
         <dependency>
             <groupId>me.clip</groupId>
             <artifactId>placeholderapi</artifactId>
-            <version>2.10.4</version>
+            <version>2.10.5</version>
             <scope>provided</scope>
         </dependency>
         <!-- Vault -->
@@ -109,14 +113,6 @@
             <scope>system</scope>
             <systemPath>${basedir}/libs/GriefPrevention.jar</systemPath>
         </dependency>
-        <!-- Jobs Reborn -->
-        <dependency>
-            <groupId>com.gamingmesh.jobs</groupId>
-            <artifactId>Jobs</artifactId>
-            <version>4.15.5</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/libs/Jobs4.15.5.jar</systemPath>
-        </dependency>
         <dependency>
             <groupId>org.jetbrains</groupId>
             <artifactId>annotations</artifactId>
@@ -128,6 +124,18 @@
             <artifactId>annotations</artifactId>
             <version>17.0.0</version>
             <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.bekvon.bukkit</groupId>
+            <artifactId>Residence</artifactId>
+            <version>4.9.0.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.gamingmesh.jobs</groupId>
+            <artifactId>Jobs</artifactId>
+            <version>4.15.7</version>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 </project>
