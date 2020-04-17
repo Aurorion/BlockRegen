@@ -91,7 +91,7 @@ public class Getters {
         if (blocklist.getString("Blocks." + blockName + ".regenerate-into") != null) {
             return Material.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + blockName + ".regenerate-into")).toUpperCase());
         }
-        return blockName;
+        return Material.valueOf(blockName);
     }
 
     public int replaceDelay(String blockName) {
