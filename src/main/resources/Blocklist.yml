@@ -148,6 +148,7 @@ Blocks:
     replace-block: COBBLESTONE:50;BEDROCK
     regenerate-into: EMERALD_ORE:20;STONE
     regen-delay: 3
+    natural-break: false
   # Then if you mine the emerald ore, it gives you your reward, has a 50% chance to replace with STONE of COBBLE when regenerating.
   # Then it turns into emerald, or stone again.
   EMERALD_ORE:
@@ -160,5 +161,5 @@ Blocks:
     drop-item:
       material: emerald
       name: '&aA cute emerald'
-      lore:
+      lores:
         - '&7Mined with &d<3 &7by &f%player%'

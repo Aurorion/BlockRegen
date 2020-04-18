@@ -24,9 +24,6 @@ Residence-Support: true
 # Enable Jobs rewards.
 Jobs-Rewards: true
 
-# Enable MMOItems drops, configure the drops in MMOItems, this will just make them drop correctly.
-MMOItems-Drops: true
-
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
 Disable-Other-Break: false
 

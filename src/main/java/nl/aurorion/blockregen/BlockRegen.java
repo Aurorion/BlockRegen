@@ -17,7 +17,6 @@ import nl.aurorion.blockregen.System.ConsoleOutput;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.System.UpdateCheck;
 import nl.aurorion.blockregen.provider.JobsProvider;
-import nl.aurorion.blockregen.provider.MMOItemsProvider;
 import nl.aurorion.blockregen.provider.WorldGuardProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -52,8 +51,6 @@ public class BlockRegen extends JavaPlugin {
     private ResidenceApi residence;
     @Getter
     private JobsProvider jobsProvider;
-    @Getter
-    private MMOItemsProvider mmoItemsProvider;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -151,7 +148,6 @@ public class BlockRegen extends JavaPlugin {
         setupResidence();
         setupGriefPrevention();
         setupPlaceholderAPI();
-        setupMMOItems();
     }
 
     private void setupEconomy() {
@@ -223,13 +219,6 @@ public class BlockRegen extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && !usePlaceholderAPI) {
             usePlaceholderAPI = true;
             consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
-        }
-    }
-
-    private void setupMMOItems() {
-        if (getServer().getPluginManager().getPlugin("MMOItems") != null && mmoItemsProvider == null) {
-            mmoItemsProvider = new MMOItemsProvider();
-            consoleOutput.info("Found MMOItems! &aTheir items will be dropped now.");
         }
     }
 

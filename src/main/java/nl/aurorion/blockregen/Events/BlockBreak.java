@@ -31,6 +31,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class BlockBreak implements Listener {
@@ -350,8 +351,8 @@ public class BlockBreak implements Listener {
                     world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
                 }
             }
-        } else if (dropMaterial != null) {
-            if (dropMaterial != Material.AIR) {
+        } else {
+            if (dropMaterial != null && dropMaterial != Material.AIR) {
                 int itemAmount = getters.dropItemAmount(blockName, player);
 
                 if (doubleDrops) {
@@ -397,12 +398,6 @@ public class BlockBreak implements Listener {
                 dropEventItem &&
                 (plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
             drops.add(eventItem);
-        }
-
-        // MMO Items -------------------------------------------------------------------------------------------
-
-        if (plugin.getMmoItemsProvider() != null && plugin.getGetters().useMMOItems()) {
-            drops.addAll(plugin.getMmoItemsProvider().getDrops(block, player));
         }
 
         for (ItemStack drop : drops) {
