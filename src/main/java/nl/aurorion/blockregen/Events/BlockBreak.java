@@ -5,10 +5,7 @@ import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.gamingmesh.jobs.Jobs;
-import com.gamingmesh.jobs.actions.BlockActionInfo;
-import com.gamingmesh.jobs.container.ActionType;
 import com.gamingmesh.jobs.container.JobProgression;
-import com.gamingmesh.jobs.container.JobsPlayer;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
@@ -411,9 +408,8 @@ public class BlockBreak implements Listener {
 
         // Jobs Rewards ----------------------------------------------------------------------------------------
 
-        if (plugin.getGetters().useJobsRewards() && plugin.getJobs() != null) {
-            JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
-            Jobs.action(jobsPlayer, new BlockActionInfo(block, ActionType.BREAK), block);
+        if (plugin.getGetters().useJobsRewards() && plugin.getJobsProvider() != null) {
+            plugin.getJobsProvider().triggerBlockBreakAction(player, block);
         }
 
         // Vault money -----------------------------------------------------------------------------------------

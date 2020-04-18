@@ -17,6 +17,8 @@ import nl.aurorion.blockregen.Particles.ParticleUtil;
 import nl.aurorion.blockregen.System.ConsoleOutput;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.System.UpdateCheck;
+import nl.aurorion.blockregen.provider.JobsProvider;
+import nl.aurorion.blockregen.provider.WorldGuardProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -52,6 +54,8 @@ public class BlockRegen extends JavaPlugin {
     private ResidenceApi residence;
     @Getter
     private Jobs jobs;
+    @Getter
+    private JobsProvider jobsProvider;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -190,6 +194,7 @@ public class BlockRegen extends JavaPlugin {
     private void setupJobs() {
         if (getServer().getPluginManager().getPlugin("Jobs") != null) {
             this.jobs = Jobs.getInstance();
+            this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
         }
     }
