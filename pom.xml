@@ -137,11 +137,5 @@
             <version>4.15.7</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>net.Induyce.mmoitems</groupId>
-            <artifactId>MMOItems</artifactId>
-            <version>5.3.2</version>
-            <scope>provided</scope>
-        </dependency>
     </dependencies>
 </project>
