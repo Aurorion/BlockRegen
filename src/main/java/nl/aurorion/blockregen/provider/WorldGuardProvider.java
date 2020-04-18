@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.provider;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldguard.LocalPlayer;
 import com.sk89q.worldguard.WorldGuard;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
@@ -16,8 +17,11 @@ public class WorldGuardProvider {
 
     private final BlockRegen plugin;
 
+    private final WorldGuardPlugin worldGuard;
+
     public WorldGuardProvider(BlockRegen plugin) {
         this.plugin = plugin;
+        this.worldGuard = (WorldGuardPlugin) plugin.getServer().getPluginManager().getPlugin("WorldGuard");
     }
 
     public boolean canBreak(Player player, Location location) {
@@ -34,7 +38,7 @@ public class WorldGuardProvider {
 
         ApplicableRegionSet set = query.getApplicableRegions(localLocation);
 
-        LocalPlayer localPlayer = plugin.getWorldGuard().wrapPlayer(player);
+        LocalPlayer localPlayer = worldGuard.wrapPlayer(player);
 
         return !(set.queryState(localPlayer, Flags.BLOCK_BREAK) == StateFlag.State.DENY || set.queryState(localPlayer, Flags.BUILD) == StateFlag.State.DENY);
     }

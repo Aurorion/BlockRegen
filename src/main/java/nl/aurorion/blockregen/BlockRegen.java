@@ -7,6 +7,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.Indyuce.mmoitems.MMOItems;
 import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.Commands.Commands;
 import nl.aurorion.blockregen.Configurations.Files;
@@ -18,6 +19,7 @@ import nl.aurorion.blockregen.System.ConsoleOutput;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.System.UpdateCheck;
 import nl.aurorion.blockregen.provider.JobsProvider;
+import nl.aurorion.blockregen.provider.MMOItemsProvider;
 import nl.aurorion.blockregen.provider.WorldGuardProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -47,15 +49,13 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private GriefPrevention griefPrevention;
     @Getter
-    private WorldGuardPlugin worldGuard;
-    @Getter
     private WorldGuardProvider worldGuardProvider;
     @Getter
     private ResidenceApi residence;
     @Getter
-    private Jobs jobs;
-    @Getter
     private JobsProvider jobsProvider;
+    @Getter
+    private MMOItemsProvider mmoItemsProvider;
 
     @Getter
     private boolean usePlaceholderAPI = false;
@@ -98,6 +98,7 @@ public class BlockRegen extends JavaPlugin {
         setupResidence();
         setupGriefPrevention();
         setupPlaceholderAPI();
+        setupMMOItems();
 
         Utils.fillFireworkColors();
         this.recoveryCheck();
@@ -185,15 +186,12 @@ public class BlockRegen extends JavaPlugin {
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
-        consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
-        this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
-
         this.worldGuardProvider = new WorldGuardProvider(this);
+        consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
     }
 
     private void setupJobs() {
         if (getServer().getPluginManager().getPlugin("Jobs") != null) {
-            this.jobs = Jobs.getInstance();
             this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
         }
@@ -217,6 +215,13 @@ public class BlockRegen extends JavaPlugin {
         if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             usePlaceholderAPI = true;
             consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
+        }
+    }
+
+    private void setupMMOItems() {
+        if (getServer().getPluginManager().getPlugin("MMOItems") != null) {
+            mmoItemsProvider = new MMOItemsProvider();
+            consoleOutput.info("Found MMOItems! &aTheir items will be dropped now.");
         }
     }
 

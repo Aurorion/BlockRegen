@@ -82,7 +82,7 @@ public class BlockBreak implements Listener {
         }
 
         // WorldGuard
-        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuard() != null) {
+        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuardProvider() != null) {
             if (!plugin.getWorldGuardProvider().canBreak(player, block.getLocation())) return;
         }
 
@@ -288,6 +288,8 @@ public class BlockBreak implements Listener {
         BlockState state = block.getState();
         Location location = block.getLocation();
 
+        List<ItemStack> drops = new ArrayList<>();
+
         // Events ---------------------------------------------------------------------------------------------
         boolean doubleDrops = false;
         boolean doubleExp = false;
@@ -338,7 +340,7 @@ public class BlockBreak implements Listener {
                 }
 
                 ItemStack dropItem = new ItemStack(mat, amount);
-                world.dropItemNaturally(block.getLocation(), dropItem);
+                drops.add(dropItem);
             }
 
             if (expToDrop > 0) {
@@ -374,12 +376,7 @@ public class BlockBreak implements Listener {
                 }
 
                 if (itemAmount > 0)
-                    if (getters.dropItemDropNaturally(blockName)) {
-                        world.dropItemNaturally(location, dropItem);
-                    } else {
-                        player.getInventory().addItem(dropItem);
-                        player.updateInventory();
-                    }
+                    drops.add(dropItem);
             }
 
             int expAmount = getters.dropItemExpAmount(blockName);
@@ -396,14 +393,22 @@ public class BlockBreak implements Listener {
             }
         }
 
-        if (eventItem != null) {
-            if ((plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
-                if (dropEventItem) {
-                    world.dropItemNaturally(location, eventItem);
-                } else {
-                    player.getInventory().addItem(eventItem);
-                }
-            }
+        if (eventItem != null &&
+                dropEventItem &&
+                (plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
+            drops.add(eventItem);
+        }
+
+        // MMO Items -------------------------------------------------------------------------------------------
+
+        if (plugin.getMmoItemsProvider() != null && plugin.getGetters().useMMOItems()) {
+            drops.addAll(plugin.getMmoItemsProvider().getDrops(block, player));
+        }
+
+        for (ItemStack drop : drops) {
+            if (plugin.getGetters().dropItemsNaturally(blockName))
+                world.dropItemNaturally(location, drop);
+            else player.getInventory().addItem(drop);
         }
 
         // Jobs Rewards ----------------------------------------------------------------------------------------

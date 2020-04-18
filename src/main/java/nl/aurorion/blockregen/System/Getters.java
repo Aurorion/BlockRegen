@@ -44,23 +44,27 @@ public class Getters {
 
 
     public boolean useTowny() {
-        return settings.getBoolean("Towny-Support", false);
+        return settings.getBoolean("Towny-Support", true);
     }
 
     public boolean useGriefPrevention() {
-        return settings.getBoolean("GriefPrevention-Support", false);
+        return settings.getBoolean("GriefPrevention-Support", true);
     }
 
     public boolean useWorldGuard() {
-        return settings.getBoolean("WorldGuard-Support", false);
+        return settings.getBoolean("WorldGuard-Support", true);
     }
 
     public boolean useResidence() {
-        return settings.getBoolean("Residence-Support", false);
+        return settings.getBoolean("Residence-Support", true);
     }
 
     public boolean useJobsRewards() {
-        return settings.getBoolean("Jobs-Rewards", false);
+        return settings.getBoolean("Jobs-Rewards", true);
+    }
+
+    public boolean useMMOItems() {
+        return settings.getBoolean("MMOItems-Drops", true);
     }
 
 
@@ -198,8 +202,8 @@ public class Getters {
         return lore;
     }
 
-    public boolean dropItemDropNaturally(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".drop-item.drop-naturally");
+    public boolean dropItemsNaturally(String blockName) {
+        return blocklist.getBoolean("Blocks." + blockName + ".drop-naturally");
     }
 
     public boolean dropItemExpDrop(String blockName) {

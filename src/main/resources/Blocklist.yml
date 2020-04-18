@@ -56,6 +56,11 @@ Blocks:
     # Set this to false to use custom drops.
     natural-break: false
 
+    # Affects all item drops, except for events.
+    # false == places the item in players inventory, if it's full, drops it on the ground.
+    # true == drops it on the ground.
+    drop-naturally: false
+
     # Only works when natural-break is set to false.
     drop-item:
 
@@ -70,10 +75,6 @@ Blocks:
         - ' '
         - '&7A little diamond, mined by &f%player%'
         - ' '
-
-      # false == places the item in players inventory, if it's full, drops it on the ground.
-      # true == drops it on the ground.
-      drop-naturally: false
 
       exp:
         # false == exp is added directly to players exp bar.

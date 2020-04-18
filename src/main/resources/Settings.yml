@@ -10,19 +10,22 @@ Update-Checker: true
 Use-Regions: false
 
 # Set this to true if you dont want blocks to be regenerated in Towny towns
-Towny-Support: false
+Towny-Support: true
 
 # Set this to true if you have issues with GriefPrevention
-GriefPrevention-Support: false
+GriefPrevention-Support: true
 
-# Set this to true if you want to tolerate worldguard block-break and build region flags.
-WorldGuard-Support: false
+# Set this to true if you want to tolerate WorldGuard block-break and build region flags.
+WorldGuard-Support: true
 
 # Enable to respect Residence protection.
-Residence-Support: false
+Residence-Support: true
 
 # Enable Jobs rewards.
-Jobs-Rewards: false
+Jobs-Rewards: true
+
+# Enable MMOItems drops, configure the drops in MMOItems, this will just make them drop correctly.
+MMOItems-Drops: true
 
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
 Disable-Other-Break: false
@@ -38,5 +41,5 @@ Data-Recovery: false
 
 # Add the worlds you wish to use BlockRegen in to this list
 Worlds-Enabled:
-    - world
-    - world_nether
+  - world
+  - world_nether
