@@ -217,7 +217,7 @@ public class Getters {
 
     public Material dropItemMaterial(String blockName) {
         if (!Strings.isNullOrEmpty(blocklist.getString("Blocks." + blockName + ".drop-item.material")))
-            return Material.valueOf(blocklist.getString("Blocks." + blockName + ".drop-item.material"));
+            return Material.valueOf(blocklist.getString("Blocks." + blockName + ".drop-item.material").toUpperCase());
         return null;
     }
 
