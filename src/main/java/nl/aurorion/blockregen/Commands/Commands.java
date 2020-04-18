@@ -57,6 +57,8 @@ public class Commands implements CommandExecutor, Listener {
                     return true;
                 }
 
+                plugin.checkDependencies();
+
                 plugin.getFiles().getSettings().load();
                 plugin.consoleOutput.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
 

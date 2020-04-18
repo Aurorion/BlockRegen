@@ -450,12 +450,14 @@ public class BlockBreak implements Listener {
         } else
             Utils.persist.put(location, block.getType());
 
+        Material replaceMaterial = getters.replaceBlock(blockName);
+
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
             @Override
             public void run() {
-                block.setType(getters.replaceBlock(blockName));
-                BlockRegen.getInstance().consoleOutput.debug("Replaced block");
+                block.setType(replaceMaterial);
+                BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
             }
         }.runTaskLater(plugin, 2L);
 
@@ -467,9 +469,11 @@ public class BlockBreak implements Listener {
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
         BlockRegen.getInstance().consoleOutput.debug("Regen Delay: " + regenDelay);
 
-        if (plugin.getGetters().regenBlock(blockName) != state.getType()) {
-            state.setType(plugin.getGetters().regenBlock(blockName));
-            plugin.getConsoleOutput().debug("Regenerate into: " + plugin.getGetters().regenBlock(blockName));
+        Material regenerateInto = plugin.getGetters().regenBlock(blockName);
+
+        if (regenerateInto != state.getType()) {
+            state.setType(regenerateInto);
+            plugin.getConsoleOutput().debug("Regenerate into: " + regenerateInto.toString());
         }
 
         BukkitTask task = new BukkitRunnable() {
@@ -483,7 +487,7 @@ public class BlockBreak implements Listener {
 
     private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
         state.update(true);
-        BlockRegen.getInstance().consoleOutput.debug("Regen");
+        BlockRegen.getInstance().consoleOutput.debug("Regenerated block " + blockName);
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);

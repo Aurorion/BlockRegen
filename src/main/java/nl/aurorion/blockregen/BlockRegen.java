@@ -2,12 +2,10 @@ package nl.aurorion.blockregen;
 
 import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.api.ResidenceApi;
-import com.gamingmesh.jobs.Jobs;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
-import net.Indyuce.mmoitems.MMOItems;
 import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.Commands.Commands;
 import nl.aurorion.blockregen.Configurations.Files;
@@ -91,14 +89,7 @@ public class BlockRegen extends JavaPlugin {
         registerListeners();
         fillEvents();
 
-        setupEconomy();
-        setupWorldEdit();
-        setupWorldGuard();
-        setupJobs();
-        setupResidence();
-        setupGriefPrevention();
-        setupPlaceholderAPI();
-        setupMMOItems();
+        checkDependencies();
 
         Utils.fillFireworkColors();
         this.recoveryCheck();
@@ -152,8 +143,21 @@ public class BlockRegen extends JavaPlugin {
         pm.registerEvents(new PlayerJoin(this), this);
     }
 
+    public void checkDependencies() {
+        setupEconomy();
+        setupWorldEdit();
+        setupWorldGuard();
+        setupJobs();
+        setupResidence();
+        setupGriefPrevention();
+        setupPlaceholderAPI();
+        setupMMOItems();
+    }
+
     private void setupEconomy() {
-        if (this.getServer().getPluginManager().getPlugin("Vault") == null) {
+        if (economy != null) return;
+
+        if (getServer().getPluginManager().getPlugin("Vault") == null) {
             consoleOutput.info("Didn't find Vault. &cEconomy functions disabled.");
             return;
         }
@@ -170,7 +174,9 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void setupWorldEdit() {
-        Plugin worldEditPlugin = this.getServer().getPluginManager().getPlugin("WorldEdit");
+        if (worldEdit != null) return;
+
+        Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
 
         if (!(worldEditPlugin instanceof WorldEditPlugin)) {
             consoleOutput.warn("Didn't find WorldEdit. &cRegion functions disabled.");
@@ -182,6 +188,8 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void setupWorldGuard() {
+        if (worldGuardProvider != null) return;
+
         Plugin worldGuardPlugin = this.getServer().getPluginManager().getPlugin("WorldGuard");
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
@@ -191,35 +199,35 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void setupJobs() {
-        if (getServer().getPluginManager().getPlugin("Jobs") != null) {
+        if (getServer().getPluginManager().getPlugin("Jobs") != null && jobsProvider == null) {
             this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
         }
     }
 
     private void setupGriefPrevention() {
-        if (getServer().getPluginManager().getPlugin("GriefPrevention") != null) {
+        if (getServer().getPluginManager().getPlugin("GriefPrevention") != null && griefPrevention == null) {
             this.griefPrevention = GriefPrevention.instance;
             consoleOutput.info("GriefPrevention found! &aSupport it's protection.");
         }
     }
 
     private void setupResidence() {
-        if (getServer().getPluginManager().getPlugin("Residence") != null) {
+        if (getServer().getPluginManager().getPlugin("Residence") != null && residence == null) {
             this.residence = Residence.getInstance().getAPI();
             consoleOutput.info("Found Residence! &aRespecting it's protection.");
         }
     }
 
     private void setupPlaceholderAPI() {
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && !usePlaceholderAPI) {
             usePlaceholderAPI = true;
             consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
         }
     }
 
     private void setupMMOItems() {
-        if (getServer().getPluginManager().getPlugin("MMOItems") != null) {
+        if (getServer().getPluginManager().getPlugin("MMOItems") != null && mmoItemsProvider == null) {
             mmoItemsProvider = new MMOItemsProvider();
             consoleOutput.info("Found MMOItems! &aTheir items will be dropped now.");
         }

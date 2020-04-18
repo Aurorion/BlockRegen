@@ -113,7 +113,7 @@ public class Getters {
             int chance = Integer.parseInt(material.split(":")[1]);
             total += chance;
 
-            for (int i = 0; i < chance; i++) valued.add(material);
+            for (int i = 0; i < chance; i++) valued.add(material.split(":")[0]);
         }
 
         if (defaultMaterial != null) {
