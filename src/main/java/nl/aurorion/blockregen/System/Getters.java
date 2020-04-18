@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -84,16 +85,64 @@ public class Getters {
         return settings.getBoolean("Data-Recovery");
     }
 
+    public Material pickRandomBlock(String blocks) {
+
+        if (Strings.isNullOrEmpty(blocks)) return null;
+
+        List<String> materials = new ArrayList<>();
+
+        if (blocks.contains(";")) {
+            materials.addAll(new ArrayList<>(Arrays.asList(blocks.split(";"))));
+        } else materials.add(blocks);
+
+        if (materials.isEmpty()) return null;
+        else if (materials.size() == 1) {
+            return Material.valueOf(materials.get(0));
+        }
+
+        List<String> valued = new ArrayList<>();
+        String defaultMaterial = null;
+        int total = 0;
+
+        for (String material : materials) {
+            if (!material.contains(":")) {
+                defaultMaterial = material;
+                continue;
+            }
+
+            int chance = Integer.parseInt(material.split(":")[1]);
+            total += chance;
+
+            for (int i = 0; i < chance; i++) valued.add(material);
+        }
+
+        if (defaultMaterial != null) {
+            for (int i = 0; i < (100 - total); i++) valued.add(defaultMaterial);
+        }
+
+        String pickedMaterial = valued.get(plugin.getRandom().nextInt(valued.size())).toUpperCase();
+
+        Material material;
+        try {
+            material = Material.valueOf(pickedMaterial);
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Could not parse material " + pickedMaterial);
+            return null;
+        }
+
+        return material;
+    }
+
     public Material replaceBlock(String blockName) {
         if (blocklist.getString("Blocks." + blockName + ".replace-block") != null) {
-            return Material.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + blockName + ".replace-block")).toUpperCase());
+            return pickRandomBlock(blocklist.getString("Blocks." + blockName + ".replace-block"));
         }
         return null;
     }
 
     public Material regenBlock(String blockName) {
         if (blocklist.getString("Blocks." + blockName + ".regenerate-into") != null) {
-            return Material.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + blockName + ".regenerate-into")).toUpperCase());
+            return pickRandomBlock(blocklist.getString("Blocks." + blockName + ".regenerate-into"));
         }
         return Material.valueOf(blockName);
     }
