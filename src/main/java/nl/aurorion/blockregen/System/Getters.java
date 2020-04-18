@@ -142,7 +142,8 @@ public class Getters {
 
     public Material regenBlock(String blockName) {
         if (blocklist.getString("Blocks." + blockName + ".regenerate-into") != null) {
-            return pickRandomBlock(blocklist.getString("Blocks." + blockName + ".regenerate-into"));
+            Material picked = pickRandomBlock(blocklist.getString("Blocks." + blockName + ".regenerate-into"));
+            return picked != null ? picked : Material.valueOf(blockName);
         }
         return Material.valueOf(blockName);
     }
