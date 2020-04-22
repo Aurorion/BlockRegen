@@ -340,6 +340,8 @@ public class BlockBreak implements Listener {
                 }
 
                 ItemStack dropItem = new ItemStack(mat, amount);
+
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
                 drops.add(dropItem);
             }
 
@@ -354,15 +356,13 @@ public class BlockBreak implements Listener {
             if (dropMaterial != null && dropMaterial != Material.AIR) {
                 int itemAmount = getters.dropItemAmount(blockName);
 
-                if (getters.applyFortune(blockName))
+                if (getters.applyFortune(blockName) && itemAmount > 0)
                     itemAmount = Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemAmount;
 
                 if (doubleDrops) itemAmount = itemAmount * 2;
 
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
-
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item x" + itemAmount);
 
                 if (dropMeta != null) {
                     if (getters.dropItemName(blockName, player) != null) {
@@ -376,6 +376,7 @@ public class BlockBreak implements Listener {
                     dropItem.setItemMeta(dropMeta);
                 }
 
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
                 if (itemAmount > 0) drops.add(dropItem);
             }
 

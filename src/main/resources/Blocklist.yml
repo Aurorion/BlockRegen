@@ -160,6 +160,7 @@ Blocks:
     natural-break: false
     drop-item:
       material: emerald
+      amount: 1
       name: '&aA cute emerald'
       lores:
         - '&7Mined with &d<3 &7by &f%player%'

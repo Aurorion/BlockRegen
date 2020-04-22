@@ -44,14 +44,17 @@ public class Amount {
     // Load Amount from yaml
     public static Amount loadAmount(FileConfiguration yaml, String path, double defaultValue) {
 
+        if (!yaml.contains(path)) return new Amount(defaultValue);
+
         ConfigurationSection section = yaml.getConfigurationSection(path);
 
-        if (section == null)
+        if (section == null) {
             try {
                 return new Amount(yaml.getDouble(path));
             } catch (NullPointerException e) {
                 return new Amount(defaultValue);
             }
+        }
 
         if (!section.contains("high") || !section.contains("low")) {
             try {
@@ -75,10 +78,6 @@ public class Amount {
 
     public int getInt() {
         return fixed ? (int) fixedValue : Math.max(BlockRegen.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
-    }
-
-    public double getDouble() {
-        return fixed ? fixedValue : Math.max((BlockRegen.getInstance().getRandom().nextDouble() * highValue), lowValue);
     }
 
     public String toString() {

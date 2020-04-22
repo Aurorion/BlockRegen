@@ -76,10 +76,9 @@ public class Utils {
         if (fortune > 0) {
             int i = BlockRegen.getInstance().getRandom().nextInt(fortune + 2) - 1;
 
-            if (i < 0)
-                i = 0;
+            if (i < 0) i = 0;
 
-            return quantityDropped(mat) * (i + 1);
+            return quantityDropped(mat) * i;
         } else return quantityDropped(mat);
     }
 }
