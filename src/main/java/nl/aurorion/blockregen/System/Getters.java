@@ -212,6 +212,10 @@ public class Getters {
         return blocklist.getString("Blocks." + blockName + ".particles");
     }
 
+    public boolean applyFortune(String blockName) {
+        return blocklist.getBoolean("Blocks." + blockName + ".apply-fortune", true);
+    }
+
     public boolean naturalBreak(String blockName) {
         return blocklist.getBoolean("Blocks." + blockName + ".natural-break", true);
     }
@@ -264,17 +268,8 @@ public class Getters {
         return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.exp.amount", 1).getInt();
     }
 
-    public int dropItemAmount(String blockName, Player player) {
-        int amount = Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.amount", 1).getInt();
-
-        ItemStack item = player.getInventory().getItemInMainHand();
-
-        if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-            int enchantLevel = Objects.requireNonNull(item.getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
-            amount = amount + enchantLevel;
-        }
-
-        return amount;
+    public int dropItemAmount(String blockName) {
+        return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.amount", 1).getInt();
     }
 
     public String eventName(String blockName) {

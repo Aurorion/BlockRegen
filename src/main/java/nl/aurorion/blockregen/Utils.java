@@ -2,7 +2,9 @@ package nl.aurorion.blockregen;
 
 import org.bukkit.*;
 import org.bukkit.boss.BossBar;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
@@ -53,5 +55,31 @@ public class Utils {
 
     public static String color(String msg) {
         return msg != null ? ChatColor.translateAlternateColorCodes('&', msg) : null;
+    }
+
+    /**
+     * Returns the quantity of items to drop on block destruction.
+     */
+    private static int quantityDropped(Material mat) {
+        return mat == Material.LAPIS_ORE ? 4 + BlockRegen.getInstance().getRandom().nextInt(5) : 1;
+    }
+
+    /**
+     * Get the quantity dropped based on the given fortune level
+     */
+    public static int applyFortune(Material mat, ItemStack tool) {
+        if (tool.getItemMeta() == null || !tool.getItemMeta().hasEnchants() || !tool.getItemMeta().hasEnchant(Enchantment.LOOT_BONUS_BLOCKS))
+            return 0;
+
+        int fortune = tool.getItemMeta().getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
+
+        if (fortune > 0) {
+            int i = BlockRegen.getInstance().getRandom().nextInt(fortune + 2) - 1;
+
+            if (i < 0)
+                i = 0;
+
+            return quantityDropped(mat) * (i + 1);
+        } else return quantityDropped(mat);
     }
 }

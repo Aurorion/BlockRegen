@@ -31,7 +31,6 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class BlockBreak implements Listener {
@@ -353,11 +352,12 @@ public class BlockBreak implements Listener {
             }
         } else {
             if (dropMaterial != null && dropMaterial != Material.AIR) {
-                int itemAmount = getters.dropItemAmount(blockName, player);
+                int itemAmount = getters.dropItemAmount(blockName);
 
-                if (doubleDrops) {
-                    itemAmount = itemAmount * 2;
-                }
+                if (getters.applyFortune(blockName))
+                    itemAmount = Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemAmount;
+
+                if (doubleDrops) itemAmount = itemAmount * 2;
 
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
@@ -376,8 +376,7 @@ public class BlockBreak implements Listener {
                     dropItem.setItemMeta(dropMeta);
                 }
 
-                if (itemAmount > 0)
-                    drops.add(dropItem);
+                if (itemAmount > 0) drops.add(dropItem);
             }
 
             int expAmount = getters.dropItemExpAmount(blockName);
