@@ -70,7 +70,7 @@ public class Commands implements CommandExecutor, Listener {
                 plugin.getFiles().checkRecovery();
 
                 plugin.getFiles().getBlocklist().load();
-                plugin.getGetters().reload();
+                plugin.getGetters().load();
 
                 Utils.events.clear();
                 plugin.fillEvents();

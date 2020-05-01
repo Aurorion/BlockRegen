@@ -25,10 +25,10 @@ public class Getters {
     public Getters(BlockRegen plugin) {
         this.plugin = plugin;
 
-        reload();
+        load();
     }
 
-    public void reload() {
+    public void load() {
         this.blocklist = plugin.getFiles().getBlocklist().getFileConfiguration();
         this.settings = plugin.getFiles().getSettings().getFileConfiguration();
     }
@@ -62,10 +62,6 @@ public class Getters {
 
     public boolean useJobsRewards() {
         return settings.getBoolean("Jobs-Rewards", true);
-    }
-
-    public boolean useMMOItems() {
-        return settings.getBoolean("MMOItems-Drops", true);
     }
 
 

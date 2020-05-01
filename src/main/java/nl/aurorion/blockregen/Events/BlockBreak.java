@@ -237,24 +237,27 @@ public class BlockBreak implements Listener {
     }
 
     private boolean enchantCheck(String string, Player player) {
-        String[] enchants = string.split(", ");
-        boolean check = false;
-        for (String all : enchants) {
-            Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(all.toLowerCase()));
-            if (enchant == null)
-                continue;
 
-            ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
-            if (meta != null) {
-                if (meta.hasEnchant(enchant)) {
-                    check = true;
-                    break;
-                }
-            } else check = true;
+        if (player.getInventory().getItemInMainHand().getType() != Material.AIR) {
+            String[] enchants = string.split(", ");
+            boolean check = false;
+            for (String all : enchants) {
+                Enchantment enchant = Enchantment.getByKey(NamespacedKey.minecraft(all.toLowerCase()));
+                if (enchant == null)
+                    continue;
+
+                ItemMeta meta = player.getInventory().getItemInMainHand().getItemMeta();
+                if (meta != null) {
+                    if (meta.hasEnchant(enchant)) {
+                        check = true;
+                        break;
+                    }
+                } else check = true;
+            }
+
+            if (check)
+                return true;
         }
-
-        if (check)
-            return true;
 
         player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", string.toLowerCase().replace("_", " ")));
         return false;
