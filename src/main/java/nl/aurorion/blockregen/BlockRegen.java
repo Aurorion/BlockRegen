@@ -27,6 +27,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import sun.nio.cs.ext.MacCentralEurope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -236,8 +237,8 @@ public class BlockRegen extends JavaPlugin {
         }
 
         getServer().getConsoleSender().sendMessage(Utils.color(Utils.events.isEmpty() ?
-                "&6[&3BlockRegen&6] &cFound no events. Skip adding to the system." :
-                "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " event(s) found. Added all to the system."));
+                Message.PREFIX.get() + "&cFound no events. Skip adding to the system." :
+                Message.PREFIX.get() + "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system."));
     }
 
     public void enableMetrics() {
