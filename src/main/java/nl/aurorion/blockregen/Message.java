@@ -1,6 +1,5 @@
 package nl.aurorion.blockregen;
 
-import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,26 +10,53 @@ import lombok.Setter;
  */
 public enum Message {
 
-    PREFIX("Prefix", "&6&l[&3BlockRegen&6&l] &f"),
+    PREFIX("Prefix", "&6[&3BlockRegen&6] &r"),
+
+    /**
+     * Command general messages.
+     */
     NO_PERM("Insufficient-Permission", "&cYou don't have the permissions to do this!"),
     NO_PLAYER("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
-    RELOAD("Reload", "&a&lSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
+    INVALID_COMMAND("Invalid-Command", "&cThis is not a valid command!"),
+
+    RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
+
+    /**
+     * Bypass
+     */
     BYPASS_ON("Bypass-On", "&aBypass toggled on!"),
     BYPASS_OFF("Bypass-Off", "&cBypass toggled off!"),
-    INVALID_COMMAND("Invalid-Command", "&cThis is not a valid command!"),
+
+
+    /**
+     * Data check
+     */
     DATA_CHECK("Data-Check", "&eThe correct name to enter in the config is: &d%block%"),
     DATA_CHECK_ON("Data-Check-On", "&aEntered Data-Check mode!"),
     DATA_CHECK_OFF("Data-Check-Off", "&cLeft Data-Check mode!"),
+
+
+    /**
+     * Regions
+     */
     NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID region first!"),
     DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&aRegion successfully saved!"),
     REMOVE_REGION("Remove-Region", "&aRegion successfully removed!"),
     UNKNOWN_REGION("Unknown-Region", "&cThere is no region with that name!"),
+
+    /**
+     * Events
+     */
     ACTIVATE_EVENT("Activate-Event", "&aYou activated the event: &2%event%"),
     DEACTIVATE_EVENT("De-Activate-Event", "&cYou de-activated the event: &4%event%"),
     EVENT_NOT_FOUND("Event-Not-Found", "&cThis event is not found in the system. Reminder: event names are case sensitive!"),
     EVENT_ALREADY_ACTIVE("Event-Already-Active", "&cThis event is already active!"),
-    EVENT_NOT_ACTIVE("Event-Not_Active", "&cThis event is currently not active!"),
+    EVENT_NOT_ACTIVE("Event-Not-Active", "&cThis event is currently not active!"),
+
+    /**
+     * Messages on block break errs.
+     */
     TOOL_REQUIRED_ERROR("Tool-Required-Error", "&cYou can only break this block with the following tool(s): &b%tool%&c."),
     ENCHANT_REQUIRED_ERROR("Enchant-Required-Error", "&cYour tool need to have the following enchantment(s): &b%enchant%&c."),
     JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to be a level &b%level% %job% &cto break this block."),
@@ -56,8 +82,8 @@ public enum Message {
         for (Message msg : values()) {
             String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
 
-            if (Strings.isNullOrEmpty(str)) {
-                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set(msg.getPath(), msg.getValue());
+            if (str == null) {
+                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set("Messages." + msg.getPath(), msg.getValue());
                 continue;
             }
 

@@ -11,6 +11,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,17 +43,31 @@ public class Getters {
         return settings.getBoolean("Use-Regions");
     }
 
+
     public boolean useTowny() {
-        return settings.getBoolean("Towny-Support", false);
+        return settings.getBoolean("Towny-Support", true);
     }
 
     public boolean useGriefPrevention() {
-        return settings.getBoolean("GriefPrevention-Support", false);
+        return settings.getBoolean("GriefPrevention-Support", true);
     }
 
     public boolean useWorldGuard() {
-        return settings.getBoolean("WorldGuard-Support", false);
+        return settings.getBoolean("WorldGuard-Support", true);
     }
+
+    public boolean useResidence() {
+        return settings.getBoolean("Residence-Support", true);
+    }
+
+    public boolean useJobsRewards() {
+        return settings.getBoolean("Jobs-Rewards", true);
+    }
+
+    public boolean useMMOItems() {
+        return settings.getBoolean("MMOItems-Drops", true);
+    }
+
 
     public boolean disableOtherBreak() {
         return settings.getBoolean("Disable-Other-Break");
@@ -70,11 +85,67 @@ public class Getters {
         return settings.getBoolean("Data-Recovery");
     }
 
+    public Material pickRandomBlock(String blocks) {
+
+        if (Strings.isNullOrEmpty(blocks)) return null;
+
+        List<String> materials = new ArrayList<>();
+
+        if (blocks.contains(";")) {
+            materials.addAll(new ArrayList<>(Arrays.asList(blocks.split(";"))));
+        } else materials.add(blocks);
+
+        if (materials.isEmpty()) return null;
+        else if (materials.size() == 1) {
+            return Material.valueOf(materials.get(0));
+        }
+
+        List<String> valued = new ArrayList<>();
+        String defaultMaterial = null;
+        int total = 0;
+
+        for (String material : materials) {
+            if (!material.contains(":")) {
+                defaultMaterial = material;
+                continue;
+            }
+
+            int chance = Integer.parseInt(material.split(":")[1]);
+            total += chance;
+
+            for (int i = 0; i < chance; i++) valued.add(material.split(":")[0]);
+        }
+
+        if (defaultMaterial != null) {
+            for (int i = 0; i < (100 - total); i++) valued.add(defaultMaterial);
+        }
+
+        String pickedMaterial = valued.get(plugin.getRandom().nextInt(valued.size())).toUpperCase();
+
+        Material material;
+        try {
+            material = Material.valueOf(pickedMaterial);
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Could not parse material " + pickedMaterial);
+            return null;
+        }
+
+        return material;
+    }
+
     public Material replaceBlock(String blockName) {
         if (blocklist.getString("Blocks." + blockName + ".replace-block") != null) {
-            return Material.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + blockName + ".replace-block")).toUpperCase());
+            return pickRandomBlock(blocklist.getString("Blocks." + blockName + ".replace-block"));
         }
         return null;
+    }
+
+    public Material regenBlock(String blockName) {
+        if (blocklist.getString("Blocks." + blockName + ".regenerate-into") != null) {
+            Material picked = pickRandomBlock(blocklist.getString("Blocks." + blockName + ".regenerate-into"));
+            return picked != null ? picked : Material.valueOf(blockName);
+        }
+        return Material.valueOf(blockName);
     }
 
     public int replaceDelay(String blockName) {
@@ -141,13 +212,17 @@ public class Getters {
         return blocklist.getString("Blocks." + blockName + ".particles");
     }
 
+    public boolean applyFortune(String blockName) {
+        return blocklist.getBoolean("Blocks." + blockName + ".apply-fortune", true);
+    }
+
     public boolean naturalBreak(String blockName) {
         return blocklist.getBoolean("Blocks." + blockName + ".natural-break", true);
     }
 
     public Material dropItemMaterial(String blockName) {
         if (!Strings.isNullOrEmpty(blocklist.getString("Blocks." + blockName + ".drop-item.material")))
-            return Material.valueOf(blocklist.getString("Blocks." + blockName + ".drop-item.material"));
+            return Material.valueOf(blocklist.getString("Blocks." + blockName + ".drop-item.material").toUpperCase());
         return null;
     }
 
@@ -181,8 +256,8 @@ public class Getters {
         return lore;
     }
 
-    public boolean dropItemDropNaturally(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".drop-item.drop-naturally");
+    public boolean dropItemsNaturally(String blockName) {
+        return blocklist.getBoolean("Blocks." + blockName + ".drop-naturally");
     }
 
     public boolean dropItemExpDrop(String blockName) {
@@ -193,17 +268,8 @@ public class Getters {
         return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.exp.amount", 1).getInt();
     }
 
-    public int dropItemAmount(String blockName, Player player) {
-        int amount = Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.amount", 1).getInt();
-
-        ItemStack item = player.getInventory().getItemInMainHand();
-
-        if (item.hasItemMeta() && Objects.requireNonNull(item.getItemMeta()).hasEnchant(Enchantment.LOOT_BONUS_BLOCKS)) {
-            int enchantLevel = Objects.requireNonNull(item.getItemMeta()).getEnchantLevel(Enchantment.LOOT_BONUS_BLOCKS);
-            amount = amount + enchantLevel;
-        }
-
-        return amount;
+    public int dropItemAmount(String blockName) {
+        return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.amount", 1).getInt();
     }
 
     public String eventName(String blockName) {

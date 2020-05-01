@@ -1,24 +1,20 @@
 package nl.aurorion.blockregen.Events;
 
+import com.bekvon.bukkit.residence.api.ResidenceApi;
+import com.bekvon.bukkit.residence.containers.Flags;
+import com.bekvon.bukkit.residence.protection.ClaimedResidence;
+import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.JobProgression;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
-import com.sk89q.worldguard.LocalPlayer;
-import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.ApplicableRegionSet;
-import com.sk89q.worldguard.protection.flags.Flags;
-import com.sk89q.worldguard.protection.flags.StateFlag;
-import com.sk89q.worldguard.protection.regions.RegionContainer;
-import com.sk89q.worldguard.protection.regions.RegionQuery;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -86,22 +82,18 @@ public class BlockBreak implements Listener {
         }
 
         // WorldGuard
-        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuard() != null) {
-            RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
-            RegionQuery query = container.createQuery();
+        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuardProvider() != null) {
+            if (!plugin.getWorldGuardProvider().canBreak(player, block.getLocation())) return;
+        }
 
-            com.sk89q.worldedit.util.Location location = new com.sk89q.worldedit.util.Location(
-                    BukkitAdapter.adapt(block.getWorld()),
-                    block.getLocation().getX(),
-                    block.getLocation().getY(),
-                    block.getLocation().getZ());
+        // Residence
+        if (plugin.getGetters().useResidence() && plugin.getResidence() != null) {
+            ClaimedResidence residence = ResidenceApi.getResidenceManager().getByLoc(block.getLocation());
 
-            ApplicableRegionSet set = query.getApplicableRegions(location);
-
-            LocalPlayer localPlayer = plugin.getWorldGuard().wrapPlayer(player);
-
-            if (set.queryState(localPlayer, Flags.BLOCK_BREAK) == StateFlag.State.DENY ||
-                    set.queryState(localPlayer, Flags.BUILD) == StateFlag.State.DENY) return;
+            if (residence != null) {
+                ResidencePermissions permissions = residence.getPermissions();
+                if (!permissions.playerHas(player, Flags.build, true)) return;
+            }
         }
 
         FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();
@@ -296,6 +288,8 @@ public class BlockBreak implements Listener {
         BlockState state = block.getState();
         Location location = block.getLocation();
 
+        List<ItemStack> drops = new ArrayList<>();
+
         // Events ---------------------------------------------------------------------------------------------
         boolean doubleDrops = false;
         boolean doubleExp = false;
@@ -346,7 +340,9 @@ public class BlockBreak implements Listener {
                 }
 
                 ItemStack dropItem = new ItemStack(mat, amount);
-                world.dropItemNaturally(block.getLocation(), dropItem);
+
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
+                drops.add(dropItem);
             }
 
             if (expToDrop > 0) {
@@ -356,18 +352,17 @@ public class BlockBreak implements Listener {
                     world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
                 }
             }
-        } else if (dropMaterial != null) {
-            if (dropMaterial != Material.AIR) {
-                int itemAmount = getters.dropItemAmount(blockName, player);
+        } else {
+            if (dropMaterial != null && dropMaterial != Material.AIR) {
+                int itemAmount = getters.dropItemAmount(blockName);
 
-                if (doubleDrops) {
-                    itemAmount = itemAmount * 2;
-                }
+                if (getters.applyFortune(blockName) && itemAmount > 0)
+                    itemAmount = Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemAmount;
+
+                if (doubleDrops) itemAmount = itemAmount * 2;
 
                 ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
                 ItemMeta dropMeta = dropItem.getItemMeta();
-
-                BlockRegen.getInstance().cO.debug("Dropping item x" + itemAmount);
 
                 if (dropMeta != null) {
                     if (getters.dropItemName(blockName, player) != null) {
@@ -381,13 +376,8 @@ public class BlockBreak implements Listener {
                     dropItem.setItemMeta(dropMeta);
                 }
 
-                if (itemAmount > 0)
-                    if (getters.dropItemDropNaturally(blockName)) {
-                        world.dropItemNaturally(location, dropItem);
-                    } else {
-                        player.getInventory().addItem(dropItem);
-                        player.updateInventory();
-                    }
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
+                if (itemAmount > 0) drops.add(dropItem);
             }
 
             int expAmount = getters.dropItemExpAmount(blockName);
@@ -404,14 +394,22 @@ public class BlockBreak implements Listener {
             }
         }
 
-        if (eventItem != null) {
-            if ((plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
-                if (dropEventItem) {
-                    world.dropItemNaturally(location, eventItem);
-                } else {
-                    player.getInventory().addItem(eventItem);
-                }
-            }
+        if (eventItem != null &&
+                dropEventItem &&
+                (plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
+            drops.add(eventItem);
+        }
+
+        for (ItemStack drop : drops) {
+            if (plugin.getGetters().dropItemsNaturally(blockName))
+                world.dropItemNaturally(location, drop);
+            else player.getInventory().addItem(drop);
+        }
+
+        // Jobs Rewards ----------------------------------------------------------------------------------------
+
+        if (plugin.getGetters().useJobsRewards() && plugin.getJobsProvider() != null) {
+            plugin.getJobsProvider().triggerBlockBreakAction(player, block);
         }
 
         // Vault money -----------------------------------------------------------------------------------------
@@ -447,21 +445,31 @@ public class BlockBreak implements Listener {
         } else
             Utils.persist.put(location, block.getType());
 
+        Material replaceMaterial = getters.replaceBlock(blockName);
+
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
             @Override
             public void run() {
-                block.setType(getters.replaceBlock(blockName));
-                BlockRegen.getInstance().cO.debug("Replaced block");
+                block.setType(replaceMaterial);
+                BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
             }
         }.runTaskLater(plugin, 2L);
 
         Utils.regenBlocks.add(location);
 
         // Actual Regeneration -------------------------------------------------------------------------------------
+
         int regenDelay = getters.replaceDelay(blockName);
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
-        BlockRegen.getInstance().cO.debug("Regen Delay: " + regenDelay);
+        BlockRegen.getInstance().consoleOutput.debug("Regen Delay: " + regenDelay);
+
+        Material regenerateInto = plugin.getGetters().regenBlock(blockName);
+
+        if (regenerateInto != state.getType()) {
+            state.setType(regenerateInto);
+            plugin.getConsoleOutput().debug("Regenerate into: " + regenerateInto.toString());
+        }
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
@@ -474,7 +482,7 @@ public class BlockBreak implements Listener {
 
     private void regen(BlockState state, Location location, FileConfiguration data, String blockName) {
         state.update(true);
-        BlockRegen.getInstance().cO.debug("Regen");
+        BlockRegen.getInstance().consoleOutput.debug("Regenerated block " + blockName);
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);
