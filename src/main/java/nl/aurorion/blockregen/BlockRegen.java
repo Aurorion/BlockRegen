@@ -10,6 +10,7 @@ import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.Commands.Commands;
 import nl.aurorion.blockregen.Configurations.Files;
 import nl.aurorion.blockregen.Events.BlockBreak;
+import nl.aurorion.blockregen.Events.DependencyEnable;
 import nl.aurorion.blockregen.Events.PlayerInteract;
 import nl.aurorion.blockregen.Events.PlayerJoin;
 import nl.aurorion.blockregen.Particles.ParticleUtil;
@@ -27,7 +28,6 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
-import sun.nio.cs.ext.MacCentralEurope;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,6 +135,7 @@ public class BlockRegen extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pm = this.getServer().getPluginManager();
+        pm.registerEvents(new DependencyEnable(), this);
         pm.registerEvents(new Commands(this), this);
         pm.registerEvents(new BlockBreak(this), this);
         pm.registerEvents(new PlayerInteract(this), this);
@@ -154,7 +155,7 @@ public class BlockRegen extends JavaPlugin {
     private void setupEconomy() {
         if (economy != null) return;
 
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
+        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
             consoleOutput.info("Didn't find Vault. &cEconomy functions disabled.");
             return;
         }
@@ -196,28 +197,28 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void setupJobs() {
-        if (getServer().getPluginManager().getPlugin("Jobs") != null && jobsProvider == null) {
+        if (getServer().getPluginManager().isPluginEnabled("Jobs") && jobsProvider == null) {
             this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
         }
     }
 
     private void setupGriefPrevention() {
-        if (getServer().getPluginManager().getPlugin("GriefPrevention") != null && griefPrevention == null) {
+        if (getServer().getPluginManager().isPluginEnabled("GriefPrevention") && griefPrevention == null) {
             this.griefPrevention = GriefPrevention.instance;
             consoleOutput.info("GriefPrevention found! &aSupport it's protection.");
         }
     }
 
     private void setupResidence() {
-        if (getServer().getPluginManager().getPlugin("Residence") != null && residence == null) {
+        if (getServer().getPluginManager().isPluginEnabled("Residence") && residence == null) {
             this.residence = Residence.getInstance().getAPI();
             consoleOutput.info("Found Residence! &aRespecting it's protection.");
         }
     }
 
     private void setupPlaceholderAPI() {
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && !usePlaceholderAPI) {
+        if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI") && !usePlaceholderAPI) {
             usePlaceholderAPI = true;
             consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
         }
