@@ -40,6 +40,6 @@ public class WorldGuardProvider {
 
         LocalPlayer localPlayer = worldGuard.wrapPlayer(player);
 
-        return !(set.queryState(localPlayer, Flags.BLOCK_BREAK) == StateFlag.State.DENY || set.queryState(localPlayer, Flags.BUILD) == StateFlag.State.DENY);
+        return set.queryState(localPlayer, Flags.BLOCK_BREAK) != StateFlag.State.DENY;
     }
 }
