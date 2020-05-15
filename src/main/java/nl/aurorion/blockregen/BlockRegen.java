@@ -18,6 +18,7 @@ import nl.aurorion.blockregen.System.ConsoleOutput;
 import nl.aurorion.blockregen.System.Getters;
 import nl.aurorion.blockregen.System.UpdateCheck;
 import nl.aurorion.blockregen.provider.JobsProvider;
+import nl.aurorion.blockregen.provider.WorldEditProvider;
 import nl.aurorion.blockregen.provider.WorldGuardProvider;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
@@ -43,7 +44,7 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private Economy economy;
     @Getter
-    private WorldEditPlugin worldEdit;
+    private WorldEditProvider worldEditProvider;
     @Getter
     private GriefPrevention griefPrevention;
     @Getter
@@ -155,34 +156,28 @@ public class BlockRegen extends JavaPlugin {
     private void setupEconomy() {
         if (economy != null) return;
 
-        if (getServer().getPluginManager().isPluginEnabled("Vault")) {
-            consoleOutput.info("Didn't find Vault. &cEconomy functions disabled.");
+        if (!getServer().getPluginManager().isPluginEnabled("Vault"))
             return;
-        }
 
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (rsp == null) {
-            consoleOutput.info("Vault found, but no economy plugin. &cEconomy functions disabled.");
+        if (rsp == null)
             return;
-        }
 
         economy = rsp.getProvider();
         consoleOutput.info("Vault & economy plugin found! &aEnabling economy functions.");
     }
 
     private void setupWorldEdit() {
-        if (worldEdit != null) return;
+        if (worldGuardProvider != null) return;
 
         Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
 
-        if (!(worldEditPlugin instanceof WorldEditPlugin)) {
-            consoleOutput.warn("Didn't find WorldEdit. &cRegion functions disabled.");
+        if (!(worldEditPlugin instanceof WorldEditPlugin))
             return;
-        }
 
+        this.worldEditProvider = new WorldEditProvider();
         consoleOutput.info("WorldEdit found! &aEnabling regions.");
-        worldEdit = (WorldEditPlugin) worldEditPlugin;
     }
 
     private void setupWorldGuard() {
@@ -192,7 +187,7 @@ public class BlockRegen extends JavaPlugin {
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
-        this.worldGuardProvider = new WorldGuardProvider(this);
+        this.worldGuardProvider = new WorldGuardProvider();
         consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
     }
 

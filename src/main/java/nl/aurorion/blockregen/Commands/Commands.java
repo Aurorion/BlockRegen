@@ -1,6 +1,5 @@
 package nl.aurorion.blockregen.Commands;
 
-import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;
 import nl.aurorion.blockregen.BlockRegen;
@@ -159,13 +158,12 @@ public class Commands implements CommandExecutor, Listener {
                 if (args.length == 3) {
                     if (args[1].equalsIgnoreCase("set")) {
 
-                        Region s = null;
-                        try {
-                            s = plugin.getWorldEdit().getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
-                        } catch (IncompleteRegionException e) {
-                            player.sendMessage(Message.NO_SELECTION.get());
-                            e.printStackTrace();
+                        if (plugin.getWorldEditProvider() == null) {
+                            player.sendMessage(Message.WORLD_EDIT_NOT_INSTALLED.get());
+                            return true;
                         }
+
+                        Region selection = plugin.getWorldEditProvider().getSelection(player);
 
                         List<String> regions = new ArrayList<>();
 
@@ -176,14 +174,16 @@ public class Commands implements CommandExecutor, Listener {
 
                         if (regions.contains(args[2])) {
                             player.sendMessage(Message.DUPLICATED_REGION.get());
-                        } else {
-                            plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(s).getMinimumPoint())));
-                            plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), s.getMaximumPoint())));
-                            plugin.getFiles().getRegions().save();
-                            player.sendMessage(Message.SET_REGION.get());
+                            return true;
                         }
+
+                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(selection).getMinimumPoint())));
+                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMaximumPoint())));
+                        plugin.getFiles().getRegions().save();
+                        player.sendMessage(Message.SET_REGION.get());
                         return true;
                     }
+
                     if (args[1].equalsIgnoreCase("remove")) {
                         if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") == null) {
                             player.sendMessage(Message.UNKNOWN_REGION.get());

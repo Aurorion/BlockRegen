@@ -15,13 +15,10 @@ import org.bukkit.entity.Player;
 
 public class WorldGuardProvider {
 
-    private final BlockRegen plugin;
-
     private final WorldGuardPlugin worldGuard;
 
-    public WorldGuardProvider(BlockRegen plugin) {
-        this.plugin = plugin;
-        this.worldGuard = (WorldGuardPlugin) plugin.getServer().getPluginManager().getPlugin("WorldGuard");
+    public WorldGuardProvider() {
+        this.worldGuard = (WorldGuardPlugin) BlockRegen.getInstance().getServer().getPluginManager().getPlugin("WorldGuard");
     }
 
     public boolean canBreak(Player player, Location location) {

@@ -54,6 +54,7 @@ public class BlockBreak implements Listener {
         // Check regen
         if (Utils.regenBlocks.contains(block.getLocation())) {
             event.setCancelled(true);
+            plugin.getConsoleOutput().debug("Cancelled.");
             return;
         }
 
@@ -62,6 +63,7 @@ public class BlockBreak implements Listener {
         // Block data check
         if (Utils.dataCheck.contains(player.getName())) {
             event.setCancelled(true);
+            plugin.getConsoleOutput().debug("Cancelled.");
             player.sendMessage(Message.DATA_CHECK.get().replace("%block%", blockName));
             return;
         }
@@ -123,7 +125,7 @@ public class BlockBreak implements Listener {
 
             boolean isInRegion = false;
 
-            if (useRegions && plugin.getWorldEdit() != null) {
+            if (useRegions && plugin.getWorldEditProvider() != null) {
                 ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
 
                 List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
@@ -156,22 +158,26 @@ public class BlockBreak implements Listener {
                     if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
                         player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
                         event.setCancelled(true);
+                        plugin.getConsoleOutput().debug("Cancelled.");
                         return;
                     }
 
                     if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                         event.setCancelled(true);
+                        plugin.getConsoleOutput().debug("Cancelled.");
                         return;
                     }
 
                     if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
                         event.setCancelled(true);
+                        plugin.getConsoleOutput().debug("Cancelled.");
                         return;
                     }
 
                     if (plugin.getGetters().jobsCheck(blockName) != null) {
                         if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
                             event.setCancelled(true);
+                            plugin.getConsoleOutput().debug("Cancelled.");
                             return;
                         }
                     }
@@ -185,22 +191,26 @@ public class BlockBreak implements Listener {
                         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
                             player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
                             event.setCancelled(true);
+                            plugin.getConsoleOutput().debug("Cancelled.");
                             return;
                         }
 
                         if ((plugin.getGetters().toolRequired(blockName) != null) && (!toolCheck(plugin.getGetters().toolRequired(blockName), player))) {
                             event.setCancelled(true);
+                            plugin.getConsoleOutput().debug("Cancelled.");
                             return;
                         }
 
                         if ((plugin.getGetters().enchantRequired(blockName) != null) && (!enchantCheck(plugin.getGetters().enchantRequired(blockName), player))) {
                             event.setCancelled(true);
+                            plugin.getConsoleOutput().debug("Cancelled.");
                             return;
                         }
 
                         if (plugin.getGetters().jobsCheck(blockName) != null) {
                             if (!jobsCheck(plugin.getGetters().jobsCheck(blockName), player)) {
                                 event.setCancelled(true);
+                                plugin.getConsoleOutput().debug("Cancelled.");
                                 return;
                             }
                         }
@@ -212,9 +222,10 @@ public class BlockBreak implements Listener {
                 }
             } else {
                 if ((isInRegion && BlockRegen.getInstance().getGetters().disableOtherBreakRegion()) ||
-                        BlockRegen.getInstance().getGetters().disableOtherBreak())
-
+                        BlockRegen.getInstance().getGetters().disableOtherBreak()) {
                     event.setCancelled(true);
+                    plugin.getConsoleOutput().debug("Cancelled.");
+                }
             }
         }
     }

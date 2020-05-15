@@ -39,6 +39,7 @@ public enum Message {
     /**
      * Regions
      */
+    WORLD_EDIT_NOT_INSTALLED("WorldEdit-Not-Installed", "&cRegion functions require World Edit."),
     NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID region first!"),
     DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&aRegion successfully saved!"),
