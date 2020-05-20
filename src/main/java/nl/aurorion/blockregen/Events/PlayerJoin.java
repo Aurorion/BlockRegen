@@ -15,6 +15,7 @@ public class PlayerJoin implements Listener {
         this.plugin = instance;
     }
 
+    // Inform about a new version
     @EventHandler
     public void onJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();

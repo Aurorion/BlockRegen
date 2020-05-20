@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen.Events;
 
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -22,24 +23,31 @@ public class PlayerInteract implements Listener {
 
     @EventHandler
     public void onInteract(PlayerInteractEvent event) {
-        if (!plugin.getGetters().boneMealOverride() ||
-                event.getAction() != Action.RIGHT_CLICK_BLOCK)
-            return;
 
         Player player = event.getPlayer();
 
-		if (!player.getInventory().getItemInMainHand().getType().equals(Material.BONE_MEAL) ||
-				event.getClickedBlock() == null)
-			return;
+        if (event.getAction().toString().toUpperCase().contains("BLOCK") && Utils.dataCheck.contains(player.getName())) {
+            if (event.getClickedBlock() == null) return;
 
-		if (!(event.getClickedBlock().getState().getData() instanceof Crops))
+            event.setCancelled(true);
+            player.sendMessage(Message.DATA_CHECK.get().replace("%block%", event.getClickedBlock().getType().toString()));
             return;
+        }
 
-        Location loc = event.getClickedBlock().getLocation();
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && plugin.getGetters().boneMealOverride()) {
+            if (!player.getInventory().getItemInMainHand().getType().equals(Material.BONE_MEAL) ||
+                    event.getClickedBlock() == null)
+                return;
 
-        if (Utils.tasks.containsKey(loc))
-            Bukkit.getScheduler().cancelTask(Utils.tasks.get(loc).getTaskId());
+            if (!(event.getClickedBlock().getState().getData() instanceof Crops))
+                return;
 
-        Utils.regenBlocks.remove(loc);
+            Location loc = event.getClickedBlock().getLocation();
+
+            if (Utils.tasks.containsKey(loc))
+                Bukkit.getScheduler().cancelTask(Utils.tasks.get(loc).getTaskId());
+
+            Utils.regenBlocks.remove(loc);
+        }
     }
 }

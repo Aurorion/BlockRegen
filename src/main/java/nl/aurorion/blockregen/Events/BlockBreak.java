@@ -48,10 +48,11 @@ public class BlockBreak implements Listener {
         Block block = event.getBlock();
 
         // Check bypass
-        if (Utils.bypass.contains(player.getName()))
+        if (Utils.bypass.contains(player.getName())) {
             return;
+        }
 
-        // Check regen
+        // Check if the block is regenerating already
         if (Utils.regenBlocks.contains(block.getLocation())) {
             event.setCancelled(true);
             plugin.getConsoleOutput().debug("Cancelled.");
@@ -62,9 +63,8 @@ public class BlockBreak implements Listener {
 
         // Block data check
         if (Utils.dataCheck.contains(player.getName())) {
+            // Make sure the event gets cancelled.
             event.setCancelled(true);
-            plugin.getConsoleOutput().debug("Cancelled.");
-            player.sendMessage(Message.DATA_CHECK.get().replace("%block%", blockName));
             return;
         }
 
@@ -85,6 +85,8 @@ public class BlockBreak implements Listener {
 
         // WorldGuard
         if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuardProvider() != null) {
+            if (event.isCancelled())
+                plugin.getConsoleOutput().debug("Event is cancelled in a WG check. Probably a flag preventing it?");
             if (!plugin.getWorldGuardProvider().canBreak(player, block.getLocation())) return;
         }
 
@@ -117,9 +119,10 @@ public class BlockBreak implements Listener {
 
         List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
 
+        // TODO: Rework this logic, clean it up
         if (isInWorld) {
 
-            World bworld = block.getWorld();
+            World world = block.getWorld();
 
             boolean useRegions = plugin.getGetters().useRegions();
 
@@ -184,7 +187,7 @@ public class BlockBreak implements Listener {
 
                     event.setDropItems(false);
                     event.setExpToDrop(0);
-                    this.blockBreak(player, block, blockName, bworld, expToDrop);
+                    this.blockBreak(player, block, blockName, world, expToDrop);
                 } else {
                     if (!useRegions) {
 
@@ -217,7 +220,7 @@ public class BlockBreak implements Listener {
 
                         event.setDropItems(false);
                         event.setExpToDrop(0);
-                        this.blockBreak(player, block, blockName, bworld, expToDrop);
+                        this.blockBreak(player, block, blockName, world, expToDrop);
                     }
                 }
             } else {
