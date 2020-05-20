@@ -91,7 +91,7 @@ public class BlockRegen extends JavaPlugin {
         checkDependencies();
 
         Utils.fillFireworkColors();
-        this.recoveryCheck();
+        recoveryCheck();
 
         getCommand("blockregen").setExecutor(new Commands(this));
 
@@ -99,13 +99,13 @@ public class BlockRegen extends JavaPlugin {
         consoleOutput.info("&bReport bugs or suggestions to discord only please.");
         consoleOutput.info("&bAlways backup if you are not sure about things.");
 
-        this.enableMetrics();
-        if (this.getGetters().updateChecker()) {
-            this.getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
+        enableMetrics();
+        if (getGetters().updateChecker()) {
+            getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
                 UpdateCheck updater = new UpdateCheck(this, 9885);
                 try {
                     if (updater.checkForUpdates()) {
-                        this.newVersion = updater.getLatestVersion();
+                        newVersion = updater.getLatestVersion();
                     }
                 } catch (Exception e) {
                     consoleOutput.warn("Could not check for updates.");
