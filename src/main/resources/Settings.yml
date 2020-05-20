@@ -22,6 +22,7 @@ WorldGuard-Support: true
 Residence-Support: true
 
 # Enable Jobs rewards.
+# This triggers a manual Jobs xp and money addition, if you're getting that doubled, disable here.
 Jobs-Rewards: true
 
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
