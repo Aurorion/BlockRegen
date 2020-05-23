@@ -253,11 +253,11 @@ public class Getters {
     }
 
     public boolean dropItemsNaturally(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".drop-naturally");
+        return blocklist.getBoolean("Blocks." + blockName + ".drop-naturally", true);
     }
 
     public boolean dropItemExpDrop(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".drop-item.exp.drop-naturally");
+        return blocklist.getBoolean("Blocks." + blockName + ".drop-item.exp.drop-naturally", true);
     }
 
     public int dropItemExpAmount(String blockName) {
