@@ -1,9 +1,9 @@
-package nl.aurorion.blockregen.Particles;
+package nl.aurorion.blockregen.particles;
 
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Particles.breaking.FireWorks;
-import nl.aurorion.blockregen.Particles.breaking.FlameCrown;
-import nl.aurorion.blockregen.Particles.breaking.WitchSpell;
+import nl.aurorion.blockregen.particles.breaking.FireWorks;
+import nl.aurorion.blockregen.particles.breaking.FlameCrown;
+import nl.aurorion.blockregen.particles.breaking.WitchSpell;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;

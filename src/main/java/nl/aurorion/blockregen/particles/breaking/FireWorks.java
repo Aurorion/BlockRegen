@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.Particles.breaking;
+package nl.aurorion.blockregen.particles.breaking;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;

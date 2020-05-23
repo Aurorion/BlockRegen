@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.System;
+package nl.aurorion.blockregen.system;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;

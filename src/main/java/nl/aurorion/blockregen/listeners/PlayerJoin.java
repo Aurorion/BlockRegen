@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.Events;
+package nl.aurorion.blockregen.listeners;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;

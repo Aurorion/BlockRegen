@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.System;
+package nl.aurorion.blockregen.system;
 
 import com.google.common.base.Strings;
 import me.clip.placeholderapi.PlaceholderAPI;

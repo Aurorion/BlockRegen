@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.provider;
+package nl.aurorion.blockregen.providers;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.actions.BlockActionInfo;

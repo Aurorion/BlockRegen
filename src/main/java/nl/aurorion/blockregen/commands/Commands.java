@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.Commands;
+package nl.aurorion.blockregen.commands;
 
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;

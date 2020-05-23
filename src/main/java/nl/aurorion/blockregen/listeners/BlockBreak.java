@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.Events;
+package nl.aurorion.blockregen.listeners;
 
 import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
@@ -11,7 +11,7 @@ import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.System.Getters;
+import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -48,6 +48,7 @@ public class BlockBreak implements Listener {
         Block block = event.getBlock();
 
         if (event.isCancelled()) {
+            plugin.getConsoleOutput().debug("Event was cancelled before");
             return;
         }
 
