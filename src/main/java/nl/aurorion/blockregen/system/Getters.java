@@ -29,7 +29,7 @@ public class Getters {
     }
 
     public void load() {
-        this.blocklist = plugin.getFiles().getBlocklist().getFileConfiguration();
+        this.blocklist = plugin.getFiles().getBlockList().getFileConfiguration();
         this.settings = plugin.getFiles().getSettings().getFileConfiguration();
     }
 

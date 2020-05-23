@@ -105,7 +105,7 @@ public class BlockBreak implements Listener {
             }
         }
 
-        FileConfiguration blockList = plugin.getFiles().getBlocklist().getFileConfiguration();
+        FileConfiguration blockList = plugin.getFiles().getBlockList().getFileConfiguration();
 
         // Check worlds
         String worldName = player.getWorld().getName();
@@ -452,7 +452,7 @@ public class BlockBreak implements Listener {
 
         // Particles -------------------------------------------------------------------------------------------
         if (getters.particleCheck(blockName) != null)
-            plugin.getParticleUtil().run(getters.particleCheck(blockName).toLowerCase(), block);
+            plugin.getParticleUtil().displayParticle(getters.particleCheck(blockName).toLowerCase(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
         FileConfiguration data = plugin.getFiles().getData().getFileConfiguration();

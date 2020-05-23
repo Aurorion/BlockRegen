@@ -2,37 +2,29 @@ package nl.aurorion.blockregen.particles.breaking;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
-import org.bukkit.Color;
-import org.bukkit.FireworkEffect;
+import org.bukkit.*;
 import org.bukkit.FireworkEffect.Type;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.Random;
 
-public class FireWorks implements Runnable {
+public class FireWorks extends AbstractParticle {
 
-    private final BlockRegen plugin;
-
-    private final Block block;
-
-    public FireWorks(BlockRegen instance, Block block) {
-        this.plugin = instance;
-        this.block = block;
+    @Override
+    public String name() {
+        return "fireworks";
     }
 
     @Override
-    public void run() {
-        World world = block.getWorld();
-        Location loc = block.getLocation();
+    public void display(BlockRegen plugin, Location location) {
+        World world = location.getWorld();
 
-        loc.add(0.5, 0.5, 0.5);
-        Firework fw = (Firework) world.spawnEntity(loc, EntityType.FIREWORK);
+        if (world == null) return;
+
+        location.add(0.5, 0.5, 0.5);
+        Firework fw = (Firework) world.spawnEntity(location, EntityType.FIREWORK);
         FireworkMeta fwm = fw.getFireworkMeta();
 
         fwm.addEffect(FireworkEffect.builder()
@@ -43,11 +35,6 @@ public class FireWorks implements Runnable {
                 .build());
         fw.setFireworkMeta(fwm);
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                fw.detonate();
-            }
-        }.runTaskLaterAsynchronously(plugin, 2L);
+        Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, fw::detonate, 2L);
     }
 }

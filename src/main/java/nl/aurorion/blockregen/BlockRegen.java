@@ -220,7 +220,7 @@ public class BlockRegen extends JavaPlugin {
     }
 
     public void fillEvents() {
-        FileConfiguration blockList = files.getBlocklist().getFileConfiguration();
+        FileConfiguration blockList = files.getBlockList().getFileConfiguration();
         ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
 
         List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));

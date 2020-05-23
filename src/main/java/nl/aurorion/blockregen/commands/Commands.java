@@ -68,7 +68,7 @@ public class Commands implements CommandExecutor, Listener {
 
                 plugin.getFiles().checkRecovery();
 
-                plugin.getFiles().getBlocklist().load();
+                plugin.getFiles().getBlockList().load();
                 plugin.getGetters().load();
 
                 Utils.events.clear();
@@ -255,7 +255,7 @@ public class Commands implements CommandExecutor, Listener {
                                 sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
                                 String barName = null;
                                 BarColor barColor = BarColor.BLUE;
-                                FileConfiguration blocklist = plugin.getFiles().getBlocklist().getFileConfiguration();
+                                FileConfiguration blocklist = plugin.getFiles().getBlockList().getFileConfiguration();
                                 ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
                                 Set<String> setblocks = Objects.requireNonNull(blocks).getKeys(false);
                                 for (String loopBlocks : setblocks) {

@@ -1,46 +1,45 @@
 package nl.aurorion.blockregen.particles;
 
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.particles.breaking.AbstractParticle;
 import nl.aurorion.blockregen.particles.breaking.FireWorks;
 import nl.aurorion.blockregen.particles.breaking.FlameCrown;
 import nl.aurorion.blockregen.particles.breaking.WitchSpell;
-import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
-import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public class ParticleUtil {
 
     private final BlockRegen plugin;
 
-    public ParticleUtil(BlockRegen instance) {
-        this.plugin = instance;
+    private final Map<String, AbstractParticle> particles = new HashMap<>();
+
+    public ParticleUtil(BlockRegen plugin) {
+        this.plugin = plugin;
+
+        // Add default particles
+        new FireWorks().register();
+        new FlameCrown().register();
+        new WitchSpell().register();
     }
 
-    private final HashMap<Block, BukkitTask> tasks = new HashMap<>();
+    public void displayParticle(String particleName, Block block) {
+        Location location = block.getLocation();
 
-    public void run(String particleName, Block block) {
+        if (!particles.containsKey(particleName)) return;
 
-        if (tasks.containsKey(block))
-            Bukkit.getScheduler().cancelTask(tasks.get(block).getTaskId());
+        particles.get(particleName).display(plugin, location);
+    }
 
-        BukkitTask task;
+    public void addParticle(String name, AbstractParticle particle) {
+        particles.put(name, particle);
+    }
 
-        switch (particleName.toLowerCase()) {
-            case "flame_crown":
-                task = Bukkit.getScheduler().runTaskAsynchronously(plugin, new FlameCrown(block));
-                break;
-            case "fireworks":
-                task = Bukkit.getScheduler().runTask(plugin, new FireWorks(plugin, block));
-                break;
-            case "witch_spell":
-                task = Bukkit.getScheduler().runTask(plugin, new WitchSpell(block));
-                break;
-            default:
-                return;
-        }
-
-        tasks.put(block, task);
+    public Map<String, AbstractParticle> getParticles() {
+        return Collections.unmodifiableMap(particles);
     }
 }

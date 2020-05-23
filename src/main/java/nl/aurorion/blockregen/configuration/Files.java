@@ -10,7 +10,7 @@ public class Files {
     @Getter
     private ConfigFile messages;
     @Getter
-    private ConfigFile blocklist;
+    private ConfigFile blockList;
     @Getter
     private ConfigFile regions;
     @Getter
@@ -25,7 +25,7 @@ public class Files {
     public void load() {
         settings = new ConfigFile(BlockRegen.getInstance(), "Settings.yml");
         messages = new ConfigFile(BlockRegen.getInstance(), "Messages.yml");
-        blocklist = new ConfigFile(BlockRegen.getInstance(), "Blocklist.yml");
+        blockList = new ConfigFile(BlockRegen.getInstance(), "Blocklist.yml");
         regions = new ConfigFile(BlockRegen.getInstance(), "Regions.yml");
         data = new ConfigFile(BlockRegen.getInstance(), "Data.yml");
     }
