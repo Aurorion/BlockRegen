@@ -165,6 +165,10 @@ public class Commands implements CommandExecutor, Listener {
 
                         Region selection = plugin.getWorldEditProvider().getSelection(player);
 
+                        if (selection == null) {
+                            return true;
+                        }
+
                         List<String> regions = new ArrayList<>();
 
                         if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") != null) {
@@ -177,7 +181,7 @@ public class Commands implements CommandExecutor, Listener {
                             return true;
                         }
 
-                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), Objects.requireNonNull(selection).getMinimumPoint())));
+                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMinimumPoint())));
                         plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMaximumPoint())));
                         plugin.getFiles().getRegions().save();
                         player.sendMessage(Message.SET_REGION.get());

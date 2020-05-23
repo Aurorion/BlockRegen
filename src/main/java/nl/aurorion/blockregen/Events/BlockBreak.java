@@ -47,6 +47,10 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
+        if (event.isCancelled()) {
+            return;
+        }
+
         // Check bypass
         if (Utils.bypass.contains(player.getName())) {
             return;
