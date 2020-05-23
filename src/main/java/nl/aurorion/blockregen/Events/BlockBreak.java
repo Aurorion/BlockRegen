@@ -123,7 +123,6 @@ public class BlockBreak implements Listener {
 
         List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
 
-        // TODO: Rework this logic, clean it up
         if (isInWorld) {
 
             World world = block.getWorld();
@@ -146,6 +145,9 @@ public class BlockBreak implements Listener {
 
                     Location locA = Utils.stringToLocation(max);
                     Location locB = Utils.stringToLocation(min);
+
+                    if (locA.getWorld() == null || !locA.getWorld().equals(world))
+                        continue;
 
                     CuboidRegion selection = new CuboidRegion(BukkitAdapter.asBlockVector(locA), BukkitAdapter.asBlockVector(locB));
 
