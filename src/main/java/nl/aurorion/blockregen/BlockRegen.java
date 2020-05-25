@@ -14,6 +14,9 @@ import nl.aurorion.blockregen.listeners.DependencyEnable;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
 import nl.aurorion.blockregen.particles.ParticleUtil;
+import nl.aurorion.blockregen.particles.breaking.FireWorks;
+import nl.aurorion.blockregen.particles.breaking.FlameCrown;
+import nl.aurorion.blockregen.particles.breaking.WitchSpell;
 import nl.aurorion.blockregen.system.ConsoleOutput;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.UpdateCheck;
@@ -129,7 +132,14 @@ public class BlockRegen extends JavaPlugin {
     private void registerClasses() {
         files = new Files();
         Message.load();
+
         particleUtil = new ParticleUtil(this);
+
+        // Add default particles
+        new FireWorks().register();
+        new FlameCrown().register();
+        new WitchSpell().register();
+
         getters = new Getters(this);
         random = new Random();
     }

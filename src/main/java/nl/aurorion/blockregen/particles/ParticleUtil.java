@@ -20,11 +20,6 @@ public class ParticleUtil {
 
     public ParticleUtil(BlockRegen plugin) {
         this.plugin = plugin;
-
-        // Add default particles
-        new FireWorks().register();
-        new FlameCrown().register();
-        new WitchSpell().register();
     }
 
     public void displayParticle(String particleName, Block block) {
