@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;

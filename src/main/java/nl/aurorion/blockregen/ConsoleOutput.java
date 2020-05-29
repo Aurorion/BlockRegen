@@ -1,7 +1,5 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen;
 
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Utils;
 import org.bukkit.ChatColor;
 
 public class ConsoleOutput {

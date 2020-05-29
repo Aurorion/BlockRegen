@@ -13,16 +13,16 @@ import nl.aurorion.blockregen.listeners.BlockBreak;
 import nl.aurorion.blockregen.listeners.DependencyEnable;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
-import nl.aurorion.blockregen.particles.ParticleUtil;
+import nl.aurorion.blockregen.particles.ParticleManager;
 import nl.aurorion.blockregen.particles.breaking.FireWorks;
 import nl.aurorion.blockregen.particles.breaking.FlameCrown;
 import nl.aurorion.blockregen.particles.breaking.WitchSpell;
-import nl.aurorion.blockregen.system.ConsoleOutput;
-import nl.aurorion.blockregen.system.Getters;
-import nl.aurorion.blockregen.system.UpdateCheck;
 import nl.aurorion.blockregen.providers.JobsProvider;
 import nl.aurorion.blockregen.providers.WorldEditProvider;
 import nl.aurorion.blockregen.providers.WorldGuardProvider;
+import nl.aurorion.blockregen.system.Getters;
+import nl.aurorion.blockregen.system.PresetManager;
+import nl.aurorion.blockregen.system.RegenerationManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -67,7 +67,7 @@ public class BlockRegen extends JavaPlugin {
     private Getters getters;
 
     @Getter
-    private ParticleUtil particleUtil;
+    private ParticleManager particleManager;
     @Getter
     private Random random;
 
@@ -76,6 +76,13 @@ public class BlockRegen extends JavaPlugin {
     public ConsoleOutput consoleOutput;
 
     public String newVersion = null;
+
+    // Managers
+    @Getter
+    private PresetManager presetManager;
+
+    @Getter
+    private RegenerationManager regenerationManager;
 
     @Override
     public void onEnable() {
@@ -133,15 +140,21 @@ public class BlockRegen extends JavaPlugin {
         files = new Files();
         Message.load();
 
-        particleUtil = new ParticleUtil(this);
+        particleManager = new ParticleManager(this);
 
         // Add default particles
         new FireWorks().register();
         new FlameCrown().register();
         new WitchSpell().register();
 
-        getters = new Getters(this);
         random = new Random();
+
+        presetManager = new PresetManager();
+        presetManager.loadAll();
+
+        regenerationManager = new RegenerationManager();
+
+        getters = new Getters(this);
     }
 
     private void registerListeners() {

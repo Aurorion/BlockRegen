@@ -2,9 +2,6 @@ package nl.aurorion.blockregen.particles;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.particles.breaking.AbstractParticle;
-import nl.aurorion.blockregen.particles.breaking.FireWorks;
-import nl.aurorion.blockregen.particles.breaking.FlameCrown;
-import nl.aurorion.blockregen.particles.breaking.WitchSpell;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 
@@ -12,13 +9,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ParticleUtil {
+public class ParticleManager {
 
     private final BlockRegen plugin;
 
     private final Map<String, AbstractParticle> particles = new HashMap<>();
 
-    public ParticleUtil(BlockRegen plugin) {
+    public ParticleManager(BlockRegen plugin) {
         this.plugin = plugin;
     }
 
@@ -36,5 +33,9 @@ public class ParticleUtil {
 
     public Map<String, AbstractParticle> getParticles() {
         return Collections.unmodifiableMap(particles);
+    }
+
+    public AbstractParticle getParticle(String name) {
+        return particles.getOrDefault(name, null);
     }
 }

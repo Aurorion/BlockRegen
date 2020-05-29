@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.preset;
 
 import com.google.common.base.Strings;
 import lombok.Getter;
@@ -78,6 +78,10 @@ public class Amount {
 
     public int getInt() {
         return fixed ? (int) fixedValue : Math.max(BlockRegen.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
+    }
+
+    public double getDouble() {
+        return fixed ? fixedValue : Math.max(BlockRegen.getInstance().getRandom().nextDouble() * highValue, lowValue);
     }
 
     public String toString() {

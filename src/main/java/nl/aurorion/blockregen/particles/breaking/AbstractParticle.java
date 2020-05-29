@@ -10,6 +10,6 @@ public abstract class AbstractParticle {
     public abstract String name();
 
     public void register() {
-        BlockRegen.getInstance().getParticleUtil().addParticle(name(), this);
+        BlockRegen.getInstance().getParticleManager().addParticle(name(), this);
     }
 }

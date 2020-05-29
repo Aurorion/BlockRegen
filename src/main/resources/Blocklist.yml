@@ -39,8 +39,9 @@ Blocks:
     tool-required: DIAMOND_PICKAXE, IRON_PICKAXE
 
     # Enchants required to break the block.
+    # You can, but don't have to, specify a minimum level required .
     # If they don't have this enchant they get an error message (Messages.yml)
-    enchant-required: FORTUNE, MENDING
+    enchant-required: FORTUNE;2, MENDING
 
     # Jobs Requirement
     # You can check what job and what level a player needs to be.
@@ -49,7 +50,7 @@ Blocks:
     # Remove the comment to enable ^^
 
     # On break there can be particles displayed.
-    # Available particles: flame_crown, witch_spell, fireworks
+    # Available particles as of ${project.version}: flame_crown, witch_spell, fireworks
     particles: flame_crown
 
     # Give drops, exp and amount as it would be in vanilla.
