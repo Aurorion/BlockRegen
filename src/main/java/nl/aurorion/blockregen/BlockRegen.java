@@ -67,19 +67,18 @@ public class BlockRegen extends JavaPlugin {
     private Getters getters;
 
     @Getter
-    private ParticleManager particleManager;
-    @Getter
     private Random random;
 
-    // Handles every output going to console, easier, more centralized control.
     @Getter
     public ConsoleOutput consoleOutput;
 
     public String newVersion = null;
 
-    // Managers
     @Getter
     private PresetManager presetManager;
+
+    @Getter
+    private ParticleManager particleManager;
 
     @Getter
     private RegenerationManager regenerationManager;
@@ -88,6 +87,7 @@ public class BlockRegen extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
+        // TODO: Decentralize
         registerClasses(); // Also generates files
 
         consoleOutput = new ConsoleOutput(this);
