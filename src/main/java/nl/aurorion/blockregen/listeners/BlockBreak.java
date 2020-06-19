@@ -111,10 +111,10 @@ public class BlockBreak implements Listener {
 
         boolean useRegions = plugin.getGetters().useRegions();
 
-        int expToDrop = event.getExpToDrop();
-
         if (useRegions) {
+
             // Regions
+            // TODO: Cache regions / move to a manager
 
             if (plugin.getWorldEditProvider() == null) return;
 
@@ -147,22 +147,7 @@ public class BlockBreak implements Listener {
 
             if (isInRegion) {
                 if (preset != null) {
-                    if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
-                        player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().check(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    event.setDropItems(false);
-                    event.setExpToDrop(0);
-                    this.process(player, block, expToDrop);
+                    process(event);
                 } else {
                     if (BlockRegen.getInstance().getGetters().disableOtherBreakRegion())
                         event.setCancelled(true);
@@ -172,22 +157,7 @@ public class BlockBreak implements Listener {
             // Worlds
             if (isInWorld) {
                 if (preset != null) {
-                    if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
-                        player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().check(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    event.setDropItems(false);
-                    event.setExpToDrop(0);
-                    this.process(player, block, expToDrop);
+                    process(event);
                 } else {
                     if (BlockRegen.getInstance().getGetters().disableOtherBreak())
                         event.setCancelled(true);
@@ -196,14 +166,37 @@ public class BlockBreak implements Listener {
         }
     }
 
-    private void process(Player player, Block block, int expToDrop) {
+    private void process(BlockBreakEvent event) {
+
+        int expToDrop = event.getExpToDrop();
+
+        // TODO: Might want to get rid of this part later on, useless
+        event.setDropItems(false);
+        event.setExpToDrop(0);
+
         Getters getters = plugin.getGetters();
+
+        Player player = event.getPlayer();
+
+        Block block = event.getBlock();
         BlockState state = block.getState();
         Location location = block.getLocation();
         World world = block.getWorld();
 
         String blockName = block.getType().name();
         BlockPreset preset = plugin.getPresetManager().getPreset(blockName);
+
+        // Check permissions and conditions
+        if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
+            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
+            event.setCancelled(true);
+            return;
+        }
+
+        if (!preset.getConditions().check(player)) {
+            event.setCancelled(true);
+            return;
+        }
 
         List<ItemStack> drops = new ArrayList<>();
 
@@ -248,13 +241,10 @@ public class BlockBreak implements Listener {
 
             for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
                 Material mat = drop.getType();
-                int amount;
+                int amount = drop.getAmount();
 
-                if (doubleDrops) {
-                    amount = drop.getAmount() * 2;
-                } else {
-                    amount = drop.getAmount();
-                }
+                if (doubleDrops)
+                    amount *= 2;
 
                 ItemStack dropItem = new ItemStack(mat, amount);
 
@@ -262,6 +252,7 @@ public class BlockBreak implements Listener {
                 drops.add(dropItem);
             }
 
+            // TODO: Get rid of exp section, add drop-exp-naturally to the main Preset section -- simplifies some stuff
             if (expToDrop > 0) {
                 if (doubleExp) expToDrop *= 2;
                 world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
@@ -323,6 +314,7 @@ public class BlockBreak implements Listener {
             plugin.getParticleManager().displayParticle(preset.getParticle(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
+        // TODO: Get this sh*t out of here
         FileConfiguration data = plugin.getFiles().getData().getFileConfiguration();
 
         if (getters.dataRecovery()) {
@@ -337,9 +329,9 @@ public class BlockBreak implements Listener {
         } else
             Utils.persist.put(location, block.getType());
 
+        // Replacing the block ---------------------------------------------------------------------------------
         Material replaceMaterial = preset.getReplaceMaterial().get();
 
-        // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
             @Override
             public void run() {
@@ -353,7 +345,7 @@ public class BlockBreak implements Listener {
         // Actual Regeneration -------------------------------------------------------------------------------------
 
         int regenDelay = preset.getDelay().getInt();
-        regenDelay = regenDelay == 0 ? 1 : regenDelay;
+        regenDelay = Math.max(1, regenDelay);
         plugin.getConsoleOutput().debug("Regen Delay: " + regenDelay);
 
         Material regenerateInto = preset.getRegenMaterial().get();
