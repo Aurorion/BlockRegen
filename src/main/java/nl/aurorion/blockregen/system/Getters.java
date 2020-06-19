@@ -82,60 +82,6 @@ public class Getters {
     }
 
     // moved
-    public Material dropItemMaterial(String blockName) {
-        if (!Strings.isNullOrEmpty(blocklist.getString("Blocks." + blockName + ".drop-item.material")))
-            return Material.valueOf(blocklist.getString("Blocks." + blockName + ".drop-item.material").toUpperCase());
-        return null;
-    }
-
-    // moved
-    public String dropItemName(String blockName, Player player) {
-
-        if (blocklist.getString("Blocks." + blockName + ".drop-item.name") != null) {
-            String displayName = blocklist.getString("Blocks." + blockName + ".drop-item.name");
-
-            if (Strings.isNullOrEmpty(displayName))
-                return null;
-
-            if (BlockRegen.getInstance().isUsePlaceholderAPI())
-                displayName = PlaceholderAPI.setPlaceholders(player, displayName);
-
-            return Utils.color(Utils.parse(displayName, player));
-        }
-
-        return null;
-    }
-
-    // moved
-    public List<String> dropItemLore(String blockName, Player player) {
-        List<String> lore = new ArrayList<>();
-
-        for (String all : blocklist.getStringList("Blocks." + blockName + ".drop-item.lores")) {
-            if (BlockRegen.getInstance().isUsePlaceholderAPI())
-                all = PlaceholderAPI.setPlaceholders(player, all);
-
-            lore.add(Utils.color(Utils.parse(all, player)));
-        }
-
-        return lore;
-    }
-
-    // moved
-    public boolean dropItemExpDrop(String blockName) {
-        return blocklist.getBoolean("Blocks." + blockName + ".drop-item.exp.drop-naturally", true);
-    }
-
-    // moved
-    public int dropItemExpAmount(String blockName) {
-        return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.exp.amount", 1).getInt();
-    }
-
-    // moved
-    public int dropItemAmount(String blockName) {
-        return Amount.loadAmount(blocklist, "Blocks." + blockName + ".drop-item.amount", 1).getInt();
-    }
-
-    // moved
     public String eventName(String blockName) {
         return blocklist.getString("Blocks." + blockName + ".event.event-name");
     }

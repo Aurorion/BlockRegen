@@ -259,7 +259,7 @@ public class BlockBreak implements Listener {
             }
         } else {
             for (ItemDrop drop : preset.getRewards().getDrops()) {
-                ItemStack itemStack = drop.toItemStack();
+                ItemStack itemStack = drop.toItemStack(player);
 
                 if (itemStack == null) continue;
 
