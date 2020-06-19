@@ -1,12 +1,6 @@
 package nl.aurorion.blockregen.system.preset;
 
-import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import org.bukkit.Material;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class BlockPreset {
 
@@ -15,10 +9,10 @@ public class BlockPreset {
     // Type to look for
     private String material;
 
-    private String replaceMaterial;
+    private DynamicMaterial replaceMaterial;
 
     // Regen-to
-    private String regenMaterial;
+    private DynamicMaterial regenMaterial;
 
     private Amount delay;
 
@@ -41,64 +35,6 @@ public class BlockPreset {
         this.plugin = BlockRegen.getInstance();
     }
 
-    public Material pickReplaceMaterial() {
-        return pickRandomMaterial(replaceMaterial);
-    }
-
-    public Material pickRegenMaterial() {
-        Material material = pickRandomMaterial(regenMaterial);
-        return material != null ? material : Material.valueOf(this.material);
-    }
-
-    // TODO: Create a class to handle Chance/Multiple Materials
-    private Material pickRandomMaterial(String input) {
-
-        if (Strings.isNullOrEmpty(input)) return null;
-
-        List<String> materials = new ArrayList<>();
-
-        if (input.contains(";")) {
-            materials.addAll(new ArrayList<>(Arrays.asList(input.split(";"))));
-        } else materials.add(input);
-
-        if (materials.isEmpty()) return null;
-        else if (materials.size() == 1) {
-            return Material.valueOf(materials.get(0));
-        }
-
-        List<String> valued = new ArrayList<>();
-        String defaultMaterial = null;
-        int total = 0;
-
-        for (String material : materials) {
-            if (!material.contains(":")) {
-                defaultMaterial = material;
-                continue;
-            }
-
-            int chance = Integer.parseInt(material.split(":")[1]);
-            total += chance;
-
-            for (int i = 0; i < chance; i++) valued.add(material.split(":")[0]);
-        }
-
-        if (defaultMaterial != null) {
-            for (int i = 0; i < (100 - total); i++) valued.add(defaultMaterial);
-        }
-
-        String pickedMaterial = valued.get(plugin.getRandom().nextInt(valued.size())).toUpperCase();
-
-        Material material;
-        try {
-            material = Material.valueOf(pickedMaterial);
-        } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Could not parse material " + pickedMaterial);
-            return null;
-        }
-
-        return material;
-    }
-
     public String getName() {
         return name;
     }
@@ -111,11 +47,19 @@ public class BlockPreset {
         this.material = material;
     }
 
-    public void setReplaceMaterial(String replaceMaterial) {
+    public DynamicMaterial getReplaceMaterial() {
+        return replaceMaterial;
+    }
+
+    public void setReplaceMaterial(DynamicMaterial replaceMaterial) {
         this.replaceMaterial = replaceMaterial;
     }
 
-    public void setRegenMaterial(String regenMaterial) {
+    public DynamicMaterial getRegenMaterial() {
+        return regenMaterial;
+    }
+
+    public void setRegenMaterial(DynamicMaterial regenMaterial) {
         this.regenMaterial = regenMaterial;
     }
 

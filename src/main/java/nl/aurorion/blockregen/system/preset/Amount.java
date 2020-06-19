@@ -21,12 +21,10 @@ public class Amount {
     @Setter
     private double highValue;
 
-    // Whether or not is the value fixed
     @Getter
     @Setter
     private boolean fixed;
 
-    // Constructor for random value
     public Amount(double low, double high) {
         fixed = false;
 
@@ -34,7 +32,6 @@ public class Amount {
         highValue = Math.max(low, high);
     }
 
-    // Constructor for fixed value
     public Amount(double fixedValue) {
         fixed = true;
 

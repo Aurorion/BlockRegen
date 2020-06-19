@@ -3,16 +3,12 @@ package nl.aurorion.blockregen.system;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.configuration.ConfigFile;
-import nl.aurorion.blockregen.system.preset.Amount;
-import nl.aurorion.blockregen.system.preset.BlockPreset;
-import nl.aurorion.blockregen.system.preset.PresetConditions;
-import nl.aurorion.blockregen.system.preset.PresetRewards;
+import nl.aurorion.blockregen.system.preset.*;
+import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class PresetManager {
 
@@ -20,11 +16,8 @@ public class PresetManager {
 
     private final Map<String, BlockPreset> presets = new HashMap<>();
 
-    private final ConfigFile blockList;
-
     public PresetManager() {
         this.plugin = BlockRegen.getInstance();
-        this.blockList = new ConfigFile(plugin, "Blocklist.yml");
     }
 
     public BlockPreset getPreset(String name) {
@@ -37,7 +30,7 @@ public class PresetManager {
 
     // TODO: Finish exception handle
     public void load(String name) {
-        FileConfiguration file = blockList.getFileConfiguration();
+        FileConfiguration file = plugin.getFiles().getBlockList().getFileConfiguration();
 
         ConfigurationSection section = file.getConfigurationSection("Blocks." + name);
 
@@ -58,7 +51,7 @@ public class PresetManager {
 
         if (Strings.isNullOrEmpty(replaceMaterial)) return;
 
-        preset.setReplaceMaterial(replaceMaterial.toUpperCase());
+        preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
 
         // Regenerate into
         String regenerateInto = section.getString("regenerate-into");
@@ -66,7 +59,7 @@ public class PresetManager {
         if (Strings.isNullOrEmpty(regenerateInto))
             regenerateInto = targetMaterial;
 
-        preset.setRegenMaterial(regenerateInto.toUpperCase());
+        preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
 
         // Delay
         preset.setDelay(Amount.loadAmount(file, "Blocks." + name + ".regen-delay", 3));
@@ -111,6 +104,7 @@ public class PresetManager {
         }
 
         preset.setConditions(conditions);
+        plugin.getConsoleOutput().debug("Conditions loaded");
 
         // Rewards
         PresetRewards rewards = new PresetRewards();
@@ -124,9 +118,50 @@ public class PresetManager {
         // Player commands
         rewards.setPlayerCommands(section.getStringList("player-commands"));
 
-        // TODO: Item Drops and Exp
+        // Items Drops
+        if (section.contains("drop-item")) {
+            List<ItemDrop> drops = new ArrayList<>();
+
+            // Single drop
+            if (section.contains("drop-item.material")) {
+                Material material = null;
+                try {
+                    material = Material.valueOf(section.getString("drop-item.material").trim().toUpperCase());
+                } catch (IllegalArgumentException e) {
+                    plugin.getConsoleOutput().err(e.getMessage());
+                }
+
+                if (material != null) {
+                    ItemDrop drop = new ItemDrop(material);
+
+                    drop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.amount", 1));
+
+                    drop.setDisplayName(section.getString("drop-item.name"));
+
+                    drop.setLore(section.getStringList("drop-item.lores"));
+
+                    drop.setDropNaturally(section.getBoolean("drop-item.drop-naturally"));
+
+                    ExperienceDrop experienceDrop = new ExperienceDrop();
+
+                    experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.exp-drop.amount", 0));
+
+                    drops.add(drop);
+                }
+            } else {
+                // Multiple drops
+                for (String dropName : section.getConfigurationSection("drop-item").getKeys(false)) {
+                    // TODO No need to implement yet.
+                }
+            }
+
+            rewards.setDrops(drops);
+            plugin.getConsoleOutput().debug("Added " + rewards.getDrops().size() + " drop(s)");
+        }
 
         preset.setRewards(rewards);
+
+        // TODO: Events
 
         presets.put(name, preset);
     }
@@ -134,7 +169,7 @@ public class PresetManager {
     public void loadAll() {
         presets.clear();
 
-        ConfigurationSection blocks = blockList.getFileConfiguration().getConfigurationSection("Blocks");
+        ConfigurationSection blocks = plugin.getFiles().getBlockList().getFileConfiguration().getConfigurationSection("Blocks");
 
         if (blocks == null) return;
 

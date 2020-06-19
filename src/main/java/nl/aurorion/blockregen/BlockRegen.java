@@ -26,6 +26,7 @@ import nl.aurorion.blockregen.system.RegenerationManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -87,13 +88,30 @@ public class BlockRegen extends JavaPlugin {
     public void onEnable() {
         instance = this;
 
-        // TODO: Decentralize
-        registerClasses(); // Also generates files
+        random = new Random();
+
+        particleManager = new ParticleManager(this);
+
+        // Add default particles
+        new FireWorks().register();
+        new FlameCrown().register();
+        new WitchSpell().register();
+
+        files = new Files();
+
+        presetManager = new PresetManager();
+        regenerationManager = new RegenerationManager();
+
+        getters = new Getters(this);
 
         consoleOutput = new ConsoleOutput(this);
 
+        Message.load();
+
         consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
+
+        presetManager.loadAll();
 
         registerListeners();
         fillEvents();
@@ -124,6 +142,30 @@ public class BlockRegen extends JavaPlugin {
         }
     }
 
+    public void reload(CommandSender sender) {
+        checkDependencies();
+
+        files.getSettings().load();
+        consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
+
+        files.getMessages().load();
+        Message.load();
+
+        consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
+
+        files.checkRecovery();
+
+        files.getBlockList().load();
+        presetManager.loadAll();
+        getters.load();
+
+        Utils.events.clear();
+        fillEvents();
+        Utils.bars.clear();
+
+        sender.sendMessage(Message.RELOAD.get());
+    }
+
     @Override
     public void onDisable() {
         this.getServer().getScheduler().cancelTasks(this);
@@ -134,27 +176,6 @@ public class BlockRegen extends JavaPlugin {
         }
 
         instance = null;
-    }
-
-    private void registerClasses() {
-        files = new Files();
-        Message.load();
-
-        particleManager = new ParticleManager(this);
-
-        // Add default particles
-        new FireWorks().register();
-        new FlameCrown().register();
-        new WitchSpell().register();
-
-        random = new Random();
-
-        presetManager = new PresetManager();
-        presetManager.loadAll();
-
-        regenerationManager = new RegenerationManager();
-
-        getters = new Getters(this);
     }
 
     private void registerListeners() {

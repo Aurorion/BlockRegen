@@ -12,6 +12,8 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
+import nl.aurorion.blockregen.system.preset.ExperienceDrop;
+import nl.aurorion.blockregen.system.preset.ItemDrop;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -114,7 +116,7 @@ public class BlockBreak implements Listener {
         if (useRegions) {
             // Regions
 
-            if (plugin.getWorldEditProvider() == null || !isInWorld) return;
+            if (plugin.getWorldEditProvider() == null) return;
 
             boolean isInRegion = false;
 
@@ -152,19 +154,7 @@ public class BlockBreak implements Listener {
                         return;
                     }
 
-                    if (!preset.getConditions().checkTools(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().checkEnchants(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().checkJobs(player)) {
+                    if (!preset.getConditions().check(player)) {
                         event.setCancelled(true);
                         plugin.getConsoleOutput().debug("Cancelled.");
                         return;
@@ -189,19 +179,7 @@ public class BlockBreak implements Listener {
                         return;
                     }
 
-                    if (!preset.getConditions().checkTools(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().checkEnchants(player)) {
-                        event.setCancelled(true);
-                        plugin.getConsoleOutput().debug("Cancelled.");
-                        return;
-                    }
-
-                    if (!preset.getConditions().checkJobs(player)) {
+                    if (!preset.getConditions().check(player)) {
                         event.setCancelled(true);
                         plugin.getConsoleOutput().debug("Cancelled.");
                         return;
@@ -265,9 +243,9 @@ public class BlockBreak implements Listener {
             }
 
         // Drop Section-----------------------------------------------------------------------------------------
-        Material dropMaterial = getters.dropItemMaterial(blockName);
-
         if (preset.isNaturalBreak()) {
+            plugin.getConsoleOutput().debug("Natural drops: " + block.getDrops(player.getInventory().getItemInMainHand()).size());
+
             for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
                 Material mat = drop.getType();
                 int amount;
@@ -285,54 +263,41 @@ public class BlockBreak implements Listener {
             }
 
             if (expToDrop > 0) {
-                if (doubleExp) {
-                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop * 2);
-                } else {
-                    world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
-                }
+                if (doubleExp) expToDrop *= 2;
+                world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
             }
         } else {
-            if (dropMaterial != null && dropMaterial != Material.AIR) {
-                int itemAmount = getters.dropItemAmount(blockName);
+            for (ItemDrop drop : preset.getRewards().getDrops()) {
+                ItemStack itemStack = drop.toItemStack();
 
-                if (preset.isApplyFortune() && itemAmount > 0)
-                    itemAmount = Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemAmount;
+                if (itemStack == null) continue;
 
-                if (doubleDrops) itemAmount = itemAmount * 2;
+                if (preset.isApplyFortune())
+                    itemStack.setAmount(Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemStack.getAmount());
 
-                ItemStack dropItem = new ItemStack(dropMaterial, itemAmount);
-                ItemMeta dropMeta = dropItem.getItemMeta();
+                if (doubleDrops)
+                    itemStack.setAmount(itemStack.getAmount() * 2);
 
-                if (dropMeta != null) {
-                    if (getters.dropItemName(blockName, player) != null) {
-                        dropMeta.setDisplayName(getters.dropItemName(blockName, player));
-                    }
+                drops.add(itemStack);
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount());
 
-                    if (!getters.dropItemLore(blockName, player).isEmpty()) {
-                        dropMeta.setLore(getters.dropItemLore(blockName, player));
-                    }
+                if (drop.getExperienceDrop() == null) continue;
 
-                    dropItem.setItemMeta(dropMeta);
-                }
+                ExperienceDrop experienceDrop = drop.getExperienceDrop();
 
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
-                if (itemAmount > 0) drops.add(dropItem);
-            }
+                int expAmount = experienceDrop.getAmount().getInt();
 
-            int expAmount = getters.dropItemExpAmount(blockName);
+                if (expAmount <= 0) continue;
 
-            if (expAmount > 0) {
-                if (doubleExp)
-                    expAmount = expAmount * 2;
+                if (doubleExp) expAmount *= 2;
 
-                if (getters.dropItemExpDrop(blockName)) {
+                if (experienceDrop.isDropNaturally())
                     world.spawn(location, ExperienceOrb.class).setExperience(expAmount);
-                } else {
-                    player.giveExp(expAmount);
-                }
+                else player.giveExp(expAmount);
             }
         }
 
+        // Event item
         if (eventItem != null &&
                 dropEventItem &&
                 (plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
@@ -372,7 +337,7 @@ public class BlockBreak implements Listener {
         } else
             Utils.persist.put(location, block.getType());
 
-        Material replaceMaterial = preset.pickReplaceMaterial();
+        Material replaceMaterial = preset.getReplaceMaterial().get();
 
         // Replacing the block ---------------------------------------------------------------------------------
         new BukkitRunnable() {
@@ -391,11 +356,16 @@ public class BlockBreak implements Listener {
         regenDelay = regenDelay == 0 ? 1 : regenDelay;
         plugin.getConsoleOutput().debug("Regen Delay: " + regenDelay);
 
-        Material regenerateInto = preset.pickRegenMaterial();
+        Material regenerateInto = preset.getRegenMaterial().get();
 
         if (regenerateInto != state.getType()) {
-            state.setType(regenerateInto);
-            plugin.getConsoleOutput().debug("Regenerate into: " + regenerateInto.toString());
+            new BukkitRunnable() {
+                @Override
+                public void run() {
+                    state.setType(regenerateInto);
+                    plugin.getConsoleOutput().debug("Regenerate into: " + regenerateInto.toString());
+                }
+            }.runTaskLater(plugin, 2L);
         }
 
         BukkitTask task = new BukkitRunnable() {

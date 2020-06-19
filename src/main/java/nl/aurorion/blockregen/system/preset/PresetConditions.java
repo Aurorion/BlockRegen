@@ -33,7 +33,13 @@ public class PresetConditions {
         this.plugin = BlockRegen.getInstance();
     }
 
+    public boolean check(Player player) {
+        return checkTools(player) && checkEnchants(player) && checkJobs(player);
+    }
+
     public boolean checkTools(Player player) {
+
+        if (toolsRequired.isEmpty()) return true;
 
         for (Material material : toolsRequired) {
             if (player.getInventory().getItemInMainHand().getType() == material) {
@@ -47,6 +53,8 @@ public class PresetConditions {
     }
 
     public boolean checkEnchants(Player player) {
+
+        if (enchantsRequired.isEmpty()) return true;
 
         ItemStack tool = player.getInventory().getItemInMainHand();
 
@@ -68,7 +76,7 @@ public class PresetConditions {
 
     public boolean checkJobs(Player player) {
 
-        if (BlockRegen.getInstance().getJobsProvider() == null) return true;
+        if (BlockRegen.getInstance().getJobsProvider() == null || jobsRequired.isEmpty()) return true;
 
         JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 

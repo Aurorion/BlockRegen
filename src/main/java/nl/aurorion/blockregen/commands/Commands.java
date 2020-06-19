@@ -56,26 +56,7 @@ public class Commands implements CommandExecutor, Listener {
                     return true;
                 }
 
-                plugin.checkDependencies();
-
-                plugin.getFiles().getSettings().load();
-                plugin.consoleOutput.setDebug(plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-
-                plugin.getFiles().getMessages().load();
-                Message.load();
-
-                plugin.consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
-
-                plugin.getFiles().checkRecovery();
-
-                plugin.getFiles().getBlockList().load();
-                plugin.getGetters().load();
-
-                Utils.events.clear();
-                plugin.fillEvents();
-                Utils.bars.clear();
-
-                sender.sendMessage(Message.RELOAD.get());
+                plugin.reload(sender);
                 break;
             case "bypass":
                 if (checkConsole(sender))

@@ -7,7 +7,7 @@
 Update-Checker: true
 
 # If you have WorldEdit installed and wish to make and use regions then set this to true
-Use-Regions: false
+Use-Regions: true
 
 # Set this to true if you dont want blocks to be regenerated in Towny towns
 Towny-Support: true
@@ -26,10 +26,10 @@ Residence-Support: true
 Jobs-Rewards: true
 
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
-Disable-Other-Break: false
+Disable-Other-Break: true
 
 # If you wish to cancel all other blocks broken in the region then set this to true
-Disable-Other-Break-Region: false
+Disable-Other-Break-Region: true
 
 # This setting cancels the regeneration when a player uses bone meal on a crop
 Bone-Meal-Override: false
