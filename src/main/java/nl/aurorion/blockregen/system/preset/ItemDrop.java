@@ -2,9 +2,7 @@ package nl.aurorion.blockregen.system.preset;
 
 import lombok.Getter;
 import lombok.Setter;
-import me.clip.placeholderapi.PlaceholderAPI;
-import nl.aurorion.blockregen.BlockRegen;
-import org.bukkit.ChatColor;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -13,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class ItemDrop {
 
@@ -57,19 +54,11 @@ public class ItemDrop {
 
         if (itemMeta == null) return null;
 
-        displayName = displayName.replaceAll("(?i)%player%", player.getName());
-
-        if (BlockRegen.getInstance().isUsePlaceholderAPI())
-            displayName = PlaceholderAPI.setPlaceholders(player, displayName);
-
-        itemMeta.setDisplayName(ChatColor.translateAlternateColorCodes('&', displayName));
+        itemMeta.setDisplayName(Utils.color(Utils.parse(displayName, player)));
 
         itemMeta.setLore(lore);
 
-        lore.replaceAll(o -> o.replaceAll("(?i)%player%", player.getName()));
-
-        if (BlockRegen.getInstance().isUsePlaceholderAPI())
-            lore = lore.stream().map(line -> ChatColor.translateAlternateColorCodes('&', PlaceholderAPI.setPlaceholders(player, line))).collect(Collectors.toList());
+        lore.replaceAll(o -> Utils.color(Utils.parse(o, player)));
 
         itemStack.setItemMeta(itemMeta);
 

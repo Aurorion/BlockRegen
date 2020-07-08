@@ -31,7 +31,6 @@ public class PresetManager {
         return Collections.unmodifiableMap(presets);
     }
 
-    // TODO: Finish exception handle
     public void load(String name) {
         FileConfiguration file = plugin.getFiles().getBlockList().getFileConfiguration();
 
@@ -56,7 +55,12 @@ public class PresetManager {
 
         if (Strings.isNullOrEmpty(replaceMaterial)) return;
 
-        preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
+        try {
+            preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Dynamic material in replace material for " + name + " is invalid, skipping it.");
+            return;
+        }
 
         // Regenerate into
         String regenerateInto = section.getString("regenerate-into");
@@ -64,7 +68,12 @@ public class PresetManager {
         if (Strings.isNullOrEmpty(regenerateInto))
             regenerateInto = targetMaterial;
 
-        preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
+        try {
+            preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Dynamic material in regenerate material for " + name + " is invalid, skipping it.");
+            return;
+        }
 
         // Delay
         preset.setDelay(Amount.loadAmount(file, "Blocks." + name + ".regen-delay", 3));

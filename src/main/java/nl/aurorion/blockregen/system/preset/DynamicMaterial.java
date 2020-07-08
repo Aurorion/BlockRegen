@@ -2,6 +2,7 @@ package nl.aurorion.blockregen.system.preset;
 
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Utils;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
@@ -17,7 +18,6 @@ public class DynamicMaterial {
 
     private Material defaultMaterial;
 
-    // TODO: Exception handling for Material parsing
     public DynamicMaterial(String input) {
         if (Strings.isNullOrEmpty(input)) throw new IllegalArgumentException("Input string cannot be null");
 
@@ -28,14 +28,22 @@ public class DynamicMaterial {
         if (input.contains(";")) {
             materials = new ArrayList<>(new ArrayList<>(Arrays.asList(input.split(";"))));
         } else {
-            defaultMaterial = Material.valueOf(input);
+            defaultMaterial = Utils.parseMaterial(input);
+
+            if (defaultMaterial == null)
+                throw new IllegalArgumentException("Default material cannot be null");
+
             fixed = true;
             return;
         }
 
         if (materials.isEmpty()) throw new IllegalArgumentException("Dynamic material doesn't have the correct syntax");
         else if (materials.size() == 1) {
-            defaultMaterial = Material.valueOf(materials.get(0));
+            defaultMaterial = Utils.parseMaterial(materials.get(0));
+
+            if (defaultMaterial == null)
+                throw new IllegalArgumentException("Default material cannot be null");
+
             fixed = true;
             return;
         }
@@ -43,16 +51,29 @@ public class DynamicMaterial {
         int total = 0;
 
         for (String material : materials) {
+
             if (!material.contains(":")) {
-                defaultMaterial = Material.valueOf(material);
+                defaultMaterial = Utils.parseMaterial(material);
+
+                if (defaultMaterial == null)
+                    throw new IllegalArgumentException("Default material cannot be null");
+
                 continue;
             }
 
             int chance = Integer.parseInt(material.split(":")[1]);
             total += chance;
 
-            for (int i = 0; i < chance; i++)
-                valuedMaterialsCache.add(Material.valueOf(material.split(":")[0]));
+            for (int i = 0; i < chance; i++) {
+                Material mat = Utils.parseMaterial(material.split(":")[0]);
+
+                if (mat == null) {
+                    BlockRegen.getInstance().getConsoleOutput().debug("Invalid material " + material.split(":")[0] + " skipped");
+                    continue;
+                }
+
+                valuedMaterialsCache.add(mat);
+            }
         }
 
         if (defaultMaterial != null) {

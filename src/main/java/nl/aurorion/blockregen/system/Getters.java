@@ -17,6 +17,8 @@ import java.util.Objects;
 
 public class Getters {
 
+    // TODO: Remove completely
+
     private final BlockRegen plugin;
 
     private FileConfiguration blocklist;

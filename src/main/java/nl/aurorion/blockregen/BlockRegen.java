@@ -118,8 +118,6 @@ public class BlockRegen extends JavaPlugin {
 
         checkDependencies();
 
-        Utils.fillFireworkColors();
-
         getCommand("blockregen").setExecutor(new Commands(this));
 
         consoleOutput.info("&bYou are using version " + getDescription().getVersion());
