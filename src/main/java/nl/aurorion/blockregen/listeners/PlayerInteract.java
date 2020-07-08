@@ -44,10 +44,11 @@ public class PlayerInteract implements Listener {
 
             Location loc = event.getClickedBlock().getLocation();
 
-            if (Utils.tasks.containsKey(loc))
+            // TODO
+            /*if (Utils.tasks.containsKey(loc))
                 Bukkit.getScheduler().cancelTask(Utils.tasks.get(loc).getTaskId());
 
-            Utils.regenBlocks.remove(loc);
+            Utils.regenBlocks.remove(loc);*/
         }
     }
 }

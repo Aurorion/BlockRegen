@@ -11,6 +11,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.Getters;
+import nl.aurorion.blockregen.system.RegenerationProcess;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import nl.aurorion.blockregen.system.preset.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.ItemDrop;
@@ -29,8 +30,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +61,7 @@ public class BlockBreak implements Listener {
         }
 
         // Check if the block is regenerating already
-        if (Utils.regenBlocks.contains(block.getLocation())) {
+        if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
             event.setCancelled(true);
             plugin.getConsoleOutput().debug("Cancelled.");
             return;
@@ -119,6 +118,7 @@ public class BlockBreak implements Listener {
             if (plugin.getWorldEditProvider() == null) return;
 
             boolean isInRegion = false;
+            String regionName = null;
 
             ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
 
@@ -141,13 +141,14 @@ public class BlockBreak implements Listener {
 
                 if (selection.contains(BukkitAdapter.asBlockVector(block.getLocation()))) {
                     isInRegion = true;
+                    regionName = region;
                     break;
                 }
             }
 
             if (isInRegion) {
                 if (preset != null) {
-                    process(event);
+                    process(plugin.getRegenerationManager().createProcessInRegion(block, preset, regionName), event);
                 } else {
                     if (BlockRegen.getInstance().getGetters().disableOtherBreakRegion())
                         event.setCancelled(true);
@@ -157,7 +158,7 @@ public class BlockBreak implements Listener {
             // Worlds
             if (isInWorld) {
                 if (preset != null) {
-                    process(event);
+                    process(plugin.getRegenerationManager().createProcessInWorld(block, preset, world.getName()), event);
                 } else {
                     if (BlockRegen.getInstance().getGetters().disableOtherBreak())
                         event.setCancelled(true);
@@ -166,7 +167,7 @@ public class BlockBreak implements Listener {
         }
     }
 
-    private void process(BlockBreakEvent event) {
+    private void process(RegenerationProcess process, BlockBreakEvent event) {
 
         int expToDrop = event.getExpToDrop();
 
@@ -313,55 +314,6 @@ public class BlockBreak implements Listener {
         if (preset.getParticle() != null)
             plugin.getParticleManager().displayParticle(preset.getParticle(), block);
 
-        // Data Recovery ---------------------------------------------------------------------------------------
-        Utils.persist.put(location, block.getType());
-
-        // Replacing the block ---------------------------------------------------------------------------------
-        Material replaceMaterial = preset.getReplaceMaterial().get();
-
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                block.setType(replaceMaterial);
-                BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
-            }
-        }.runTaskLater(plugin, 2L);
-
-        Utils.regenBlocks.add(location);
-
-        // Actual Regeneration -------------------------------------------------------------------------------------
-
-        int regenDelay = preset.getDelay().getInt();
-        regenDelay = Math.max(1, regenDelay);
-        plugin.getConsoleOutput().debug("Regen Delay: " + regenDelay);
-
-        Material regenerateInto = preset.getRegenMaterial().get();
-
-        if (regenerateInto != state.getType()) {
-            new BukkitRunnable() {
-                @Override
-                public void run() {
-                    state.setType(regenerateInto);
-                    plugin.getConsoleOutput().debug("Regenerate into: " + regenerateInto.toString());
-                }
-            }.runTaskLater(plugin, 2L);
-        }
-
-        BukkitTask task = new BukkitRunnable() {
-            public void run() {
-                regenerate(state, location, blockName);
-            }
-        }.runTaskLater(plugin, regenDelay * 20);
-
-        Utils.tasks.put(location, task);
-    }
-
-    private void regenerate(BlockState state, Location location, String blockName) {
-        state.update(true);
-        BlockRegen.getInstance().consoleOutput.debug("Regenerated block " + blockName);
-
-        Utils.persist.remove(location);
-        Utils.regenBlocks.remove(location);
-        Utils.tasks.remove(location);
+        process.start();
     }
 }

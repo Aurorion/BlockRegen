@@ -35,13 +35,8 @@ public class Utils {
         colors.add(Color.YELLOW);
     }
 
-    public final List<Location> regenBlocks = new ArrayList<>();
-
     public final Map<String, Boolean> events = new HashMap<>();
     public final Map<String, BossBar> bars = new HashMap<>();
-
-    public final Map<Location, BukkitTask> tasks = new HashMap<>();
-    public final Map<Location, Material> persist = new HashMap<>();
 
     public String locationToString(Location loc) {
         World world = loc.getWorld();

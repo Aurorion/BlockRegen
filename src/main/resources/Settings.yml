@@ -15,10 +15,10 @@ Use-Regions: true
 # Set this to true if you dont want blocks to be regenerated in Towny towns
 Towny-Support: true
 
-# Set this to true if you have issues with GriefPrevention
+# Set this to true if you have issues with GriefPrevention.
 GriefPrevention-Support: true
 
-# Set this to true if you want to tolerate WorldGuard block-break and build region flags.
+# Set this to true if you want to tolerate WorldGuard protection.
 WorldGuard-Support: true
 
 # Enable to respect Residence protection.

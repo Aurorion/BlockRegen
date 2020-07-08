@@ -23,7 +23,6 @@ import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.PresetManager;
 import nl.aurorion.blockregen.system.RegenerationManager;
-import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -110,6 +109,7 @@ public class BlockRegen extends JavaPlugin {
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
 
         presetManager.loadAll();
+        regenerationManager.load();
 
         registerListeners();
         fillEvents();
@@ -163,13 +163,7 @@ public class BlockRegen extends JavaPlugin {
 
     @Override
     public void onDisable() {
-        this.getServer().getScheduler().cancelTasks(this);
-        if (!this.getGetters().dataRecovery() && !Utils.regenBlocks.isEmpty()) {
-            for (Location loc : Utils.persist.keySet()) {
-                loc.getBlock().setType(Utils.persist.get(loc));
-            }
-        }
-
+        regenerationManager.save();
         instance = null;
     }
 
