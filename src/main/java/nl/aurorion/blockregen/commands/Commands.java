@@ -190,6 +190,15 @@ public class Commands implements CommandExecutor, Listener {
                     }
                 }
                 break;
+            case "debug":
+                if (plugin.getConsoleOutput().getListeners().contains(sender)) {
+                    plugin.getConsoleOutput().removeListener(sender);
+                    sender.sendMessage(Message.DEBUG_OFF.get());
+                } else {
+                    plugin.getConsoleOutput().addListener(sender);
+                    sender.sendMessage(Message.DEBUG_ON.get());
+                }
+                break;
             case "events":
                 if (!sender.hasPermission("blockregen.admin")) {
                     sender.sendMessage(Message.NO_PERM.get());

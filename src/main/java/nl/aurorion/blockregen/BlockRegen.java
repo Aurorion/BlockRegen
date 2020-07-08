@@ -25,7 +25,6 @@ import nl.aurorion.blockregen.system.PresetManager;
 import nl.aurorion.blockregen.system.RegenerationManager;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -37,7 +36,6 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class BlockRegen extends JavaPlugin {
 
@@ -105,6 +103,7 @@ public class BlockRegen extends JavaPlugin {
         getters = new Getters(this);
 
         consoleOutput = new ConsoleOutput(this);
+        consoleOutput.setColors(true);
 
         Message.load();
 
@@ -273,9 +272,9 @@ public class BlockRegen extends JavaPlugin {
                 Utils.events.put(eventName, false);
         }
 
-        getServer().getConsoleSender().sendMessage(Utils.color(Utils.events.isEmpty() ?
+        consoleOutput.info(Utils.events.isEmpty() ?
                 Message.PREFIX.get() + "&cFound no events. Skip adding to the system." :
-                Message.PREFIX.get() + "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system."));
+                Message.PREFIX.get() + "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
     }
 
     public void enableMetrics() {

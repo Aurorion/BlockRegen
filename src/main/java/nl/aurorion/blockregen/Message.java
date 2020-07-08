@@ -33,6 +33,11 @@ public enum Message {
     BYPASS_ON("Bypass-On", "&aBypass toggled on!"),
     BYPASS_OFF("Bypass-Off", "&cBypass toggled off!"),
 
+    /**
+     * Debug
+     */
+    DEBUG_ON("Debug-On", "&aYou are now listening to info, warn, error and if enabled, debug messages."),
+    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to console output."),
 
     /**
      * Data check
