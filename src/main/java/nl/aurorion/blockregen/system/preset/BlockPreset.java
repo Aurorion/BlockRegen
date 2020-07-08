@@ -1,7 +1,9 @@
 package nl.aurorion.blockregen.system.preset;
 
+import lombok.Data;
 import nl.aurorion.blockregen.BlockRegen;
 
+@Data
 public class BlockPreset {
 
     private final String name;
@@ -33,89 +35,5 @@ public class BlockPreset {
     public BlockPreset(String name) {
         this.name = name;
         this.plugin = BlockRegen.getInstance();
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getMaterial() {
-        return material;
-    }
-
-    public void setMaterial(String material) {
-        this.material = material;
-    }
-
-    public DynamicMaterial getReplaceMaterial() {
-        return replaceMaterial;
-    }
-
-    public void setReplaceMaterial(DynamicMaterial replaceMaterial) {
-        this.replaceMaterial = replaceMaterial;
-    }
-
-    public DynamicMaterial getRegenMaterial() {
-        return regenMaterial;
-    }
-
-    public void setRegenMaterial(DynamicMaterial regenMaterial) {
-        this.regenMaterial = regenMaterial;
-    }
-
-    public Amount getDelay() {
-        return delay;
-    }
-
-    public void setDelay(Amount delay) {
-        this.delay = delay;
-    }
-
-    public String getParticle() {
-        return particle;
-    }
-
-    public void setParticle(String particle) {
-        this.particle = particle;
-    }
-
-    public boolean isNaturalBreak() {
-        return naturalBreak;
-    }
-
-    public void setNaturalBreak(boolean naturalBreak) {
-        this.naturalBreak = naturalBreak;
-    }
-
-    public boolean isApplyFortune() {
-        return applyFortune;
-    }
-
-    public void setApplyFortune(boolean applyFortune) {
-        this.applyFortune = applyFortune;
-    }
-
-    public boolean isDropNaturally() {
-        return dropNaturally;
-    }
-
-    public void setDropNaturally(boolean dropNaturally) {
-        this.dropNaturally = dropNaturally;
-    }
-
-    public PresetRewards getRewards() {
-        return rewards;
-    }
-
-    public void setRewards(PresetRewards rewards) {
-        this.rewards = rewards;
-    }
-
-    public PresetConditions getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(PresetConditions conditions) {
-        this.conditions = conditions;
     }
 }

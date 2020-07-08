@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.preset;
 
+import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.Bukkit;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 import java.util.ArrayList;
 import java.util.List;
 
+@NoArgsConstructor
 public class PresetRewards {
 
     private Amount money;
@@ -17,9 +19,6 @@ public class PresetRewards {
     private List<String> playerCommands;
 
     private List<ItemDrop> drops = new ArrayList<>();
-
-    public PresetRewards() {
-    }
 
     public void give(Player player) {
 

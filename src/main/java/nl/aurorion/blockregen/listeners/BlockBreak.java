@@ -50,7 +50,7 @@ public class BlockBreak implements Listener {
         Block block = event.getBlock();
 
         String blockName = block.getType().name().toUpperCase();
-        BlockPreset preset = plugin.getPresetManager().getPreset(blockName);
+        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName);
 
         if (event.isCancelled()) {
             return;
@@ -184,7 +184,7 @@ public class BlockBreak implements Listener {
         World world = block.getWorld();
 
         String blockName = block.getType().name();
-        BlockPreset preset = plugin.getPresetManager().getPreset(blockName);
+        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName);
 
         // Check permissions and conditions
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
@@ -314,20 +314,7 @@ public class BlockBreak implements Listener {
             plugin.getParticleManager().displayParticle(preset.getParticle(), block);
 
         // Data Recovery ---------------------------------------------------------------------------------------
-        // TODO: Get this sh*t out of here
-        FileConfiguration data = plugin.getFiles().getData().getFileConfiguration();
-
-        if (getters.dataRecovery()) {
-            List<String> dataLocs = new ArrayList<>();
-
-            if (data.contains(blockName))
-                dataLocs = data.getStringList(blockName);
-
-            dataLocs.add(Utils.locationToString(location));
-            data.set(blockName, dataLocs);
-            plugin.getFiles().getData().save();
-        } else
-            Utils.persist.put(location, block.getType());
+        Utils.persist.put(location, block.getType());
 
         // Replacing the block ---------------------------------------------------------------------------------
         Material replaceMaterial = preset.getReplaceMaterial().get();
@@ -362,29 +349,19 @@ public class BlockBreak implements Listener {
 
         BukkitTask task = new BukkitRunnable() {
             public void run() {
-                regenerate(state, location, data, blockName);
+                regenerate(state, location, blockName);
             }
         }.runTaskLater(plugin, regenDelay * 20);
 
         Utils.tasks.put(location, task);
     }
 
-    private void regenerate(BlockState state, Location location, FileConfiguration data, String blockName) {
+    private void regenerate(BlockState state, Location location, String blockName) {
         state.update(true);
         BlockRegen.getInstance().consoleOutput.debug("Regenerated block " + blockName);
 
         Utils.persist.remove(location);
         Utils.regenBlocks.remove(location);
         Utils.tasks.remove(location);
-
-        if (data != null && data.contains(blockName)) {
-            List<String> dataLocs = data.getStringList(blockName);
-
-            if (!dataLocs.isEmpty()) {
-                dataLocs.remove(Utils.locationToString(location));
-                data.set(blockName, dataLocs);
-                plugin.getFiles().getData().save();
-            }
-        }
     }
 }

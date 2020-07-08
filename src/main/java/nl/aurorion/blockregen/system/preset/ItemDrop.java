@@ -69,7 +69,7 @@ public class ItemDrop {
         lore.replaceAll(o -> o.replaceAll("(?i)%player%", player.getName()));
 
         if (BlockRegen.getInstance().isUsePlaceholderAPI())
-            lore = lore.stream().map(line -> PlaceholderAPI.setPlaceholders(player, line)).collect(Collectors.toList());
+            lore = lore.stream().map(line -> ChatColor.translateAlternateColorCodes('&', PlaceholderAPI.setPlaceholders(player, line))).collect(Collectors.toList());
 
         itemStack.setItemMeta(itemMeta);
 

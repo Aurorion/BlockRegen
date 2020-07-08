@@ -2,7 +2,6 @@ package nl.aurorion.blockregen.system;
 
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.configuration.ConfigFile;
 import nl.aurorion.blockregen.system.preset.*;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -24,6 +23,10 @@ public class PresetManager {
         return presets.getOrDefault(name, null);
     }
 
+    public BlockPreset getPresetByTarget(String target) {
+        return presets.values().stream().filter(o -> o.getMaterial().equalsIgnoreCase(target)).findAny().orElse(null);
+    }
+
     public Map<String, BlockPreset> getPresets() {
         return Collections.unmodifiableMap(presets);
     }
@@ -43,6 +46,8 @@ public class PresetManager {
 
         if (targetMaterial == null)
             targetMaterial = name;
+
+        plugin.getConsoleOutput().debug("Target material: " + targetMaterial.toUpperCase());
 
         preset.setMaterial(targetMaterial.toUpperCase());
 

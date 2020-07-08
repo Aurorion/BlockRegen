@@ -54,6 +54,16 @@ public class Amount {
         }
 
         if (!section.contains("high") || !section.contains("low")) {
+
+            String data = yaml.getString(path);
+
+            if (Strings.isNullOrEmpty(data))
+                return new Amount(defaultValue);
+
+            if (data.contains("-")) {
+                return new Amount(Double.parseDouble(data.split("-")[0]), Double.parseDouble(data.split("-")[0]));
+            }
+
             try {
                 return new Amount(yaml.getDouble(path));
             } catch (NullPointerException e) {

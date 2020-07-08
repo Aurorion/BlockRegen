@@ -119,7 +119,6 @@ public class BlockRegen extends JavaPlugin {
         checkDependencies();
 
         Utils.fillFireworkColors();
-        recoveryCheck();
 
         getCommand("blockregen").setExecutor(new Commands(this));
 
@@ -284,29 +283,5 @@ public class BlockRegen extends JavaPlugin {
     public void enableMetrics() {
         new MetricsLite(this);
         getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &8MetricsLite enabled"));
-    }
-
-    public void recoveryCheck() {
-        if (this.getGetters().dataRecovery()) {
-            Set<String> set = files.getData().getFileConfiguration().getKeys(false);
-            if (!set.isEmpty()) {
-                while (set.iterator().hasNext()) {
-                    String name = set.iterator().next();
-                    List<String> list = files.getData().getFileConfiguration().getStringList(name);
-                    for (String s : list) {
-                        Location loc = Utils.stringToLocation(s);
-                        loc.getBlock().setType(Material.valueOf(name));
-                        consoleOutput.debug("Recovered " + name + " on position " + Utils.locationToString(loc));
-                    }
-                    set.remove(name);
-                }
-            }
-
-            for (String key : files.getData().getFileConfiguration().getKeys(false)) {
-                files.getData().getFileConfiguration().set(key, null);
-            }
-
-            files.getData().save();
-        }
     }
 }
