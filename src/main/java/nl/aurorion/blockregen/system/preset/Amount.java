@@ -45,23 +45,17 @@ public class Amount {
 
         ConfigurationSection section = yaml.getConfigurationSection(path);
 
-        if (section == null) {
-            try {
-                return new Amount(yaml.getDouble(path));
-            } catch (NullPointerException e) {
-                return new Amount(defaultValue);
-            }
-        }
-
-        if (!section.contains("high") || !section.contains("low")) {
+        if (section == null || !section.contains("high") || !section.contains("low")) {
 
             String data = yaml.getString(path);
+
+            if (data == null) return new Amount(defaultValue);
 
             if (Strings.isNullOrEmpty(data))
                 return new Amount(defaultValue);
 
             if (data.contains("-")) {
-                return new Amount(Double.parseDouble(data.split("-")[0]), Double.parseDouble(data.split("-")[0]));
+                return new Amount(Double.parseDouble(data.split("-")[0]), Double.parseDouble(data.split("-")[1]));
             }
 
             try {

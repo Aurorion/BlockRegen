@@ -23,7 +23,6 @@ import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.PresetManager;
 import nl.aurorion.blockregen.system.RegenerationManager;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
@@ -273,12 +272,12 @@ public class BlockRegen extends JavaPlugin {
         }
 
         consoleOutput.info(Utils.events.isEmpty() ?
-                Message.PREFIX.get() + "&cFound no events. Skip adding to the system." :
-                Message.PREFIX.get() + "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
+                "&cFound no events. Skip adding to the system." :
+                "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
     }
 
     public void enableMetrics() {
         new MetricsLite(this);
-        getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &8MetricsLite enabled"));
+        consoleOutput.info("&8MetricsLite enabled");
     }
 }
