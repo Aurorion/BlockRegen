@@ -13,10 +13,6 @@ public class Files {
     private ConfigFile blockList;
     @Getter
     private ConfigFile regions;
-    @Getter
-    private ConfigFile data;
-    @Getter
-    private ConfigFile recovery;
 
     public Files() {
         load();
@@ -27,11 +23,5 @@ public class Files {
         messages = new ConfigFile(BlockRegen.getInstance(), "Messages.yml");
         blockList = new ConfigFile(BlockRegen.getInstance(), "Blocklist.yml");
         regions = new ConfigFile(BlockRegen.getInstance(), "Regions.yml");
-        data = new ConfigFile(BlockRegen.getInstance(), "Data.yml");
-    }
-
-    public void checkRecovery() {
-        if (settings.getFileConfiguration().getBoolean("Data-Recovery"))
-            recovery = new ConfigFile(BlockRegen.getInstance(), "Recovery.yml");
     }
 }
