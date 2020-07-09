@@ -37,13 +37,14 @@ public class Commands implements CommandExecutor, Listener {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(Utils.color("&6&m-----&r &3BlockRegen &7v.&f" + plugin.getDescription().getVersion() + " &6&m-----"
-                    + "\n&3/" + label + " reload &7: Reload the plugin."
-                    + "\n&3/" + label + " bypass &7: Bypass block breaking."
-                    + "\n&3/" + label + " check &7: Check the name + data of the block to put in the blocklist."
-                    + "\n&3/" + label + " region &7: All the info to set a region."
-                    + "\n&3/" + label + " events &7: Check all your events."
-                    + "\n&6&m-----------------------"));
+            sender.sendMessage(Utils.color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
+                    + "\n&3/" + label + " reload &8- &7Reload the plugin."
+                    + "\n&3/" + label + " bypass &8- &7Bypass block breaking."
+                    + "\n&3/" + label + " check &8- &7Check the name + data of the block to put in the blocklist."
+                    + "\n&3/" + label + " region &8- &7All the info to set a region."
+                    + "\n&3/" + label + " events &8- &7Check all your events."
+                    + "\n&3/" + label + " discord &8- &7Print BlockRegen discord invite."
+                    + "\n&3/" + label + " debug &8- &7Enable player console output."));
             return true;
         }
 

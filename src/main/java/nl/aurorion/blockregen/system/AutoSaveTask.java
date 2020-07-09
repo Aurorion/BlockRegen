@@ -38,7 +38,7 @@ public class AutoSaveTask implements Runnable {
 
         running = true;
         task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this, period * 20, period * 20);
-        plugin.getConsoleOutput().info("Starting auto-save.. with an interval of " + period + "seconds.");
+        plugin.getConsoleOutput().info("Starting auto-save.. with an interval of " + period + " seconds.");
     }
 
     public void load() {

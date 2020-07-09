@@ -63,13 +63,11 @@ public class BlockBreak implements Listener {
         // Check if the block is regenerating already
         if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
             event.setCancelled(true);
-            plugin.getConsoleOutput().debug("Cancelled.");
             return;
         }
 
         // Block data check
         if (Utils.dataCheck.contains(player.getName())) {
-            // Make sure the event gets cancelled.
             event.setCancelled(true);
             return;
         }
@@ -180,7 +178,6 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
 
         Block block = event.getBlock();
-        BlockState state = block.getState();
         Location location = block.getLocation();
         World world = block.getWorld();
 
@@ -238,7 +235,6 @@ public class BlockBreak implements Listener {
 
         // Drop Section-----------------------------------------------------------------------------------------
         if (preset.isNaturalBreak()) {
-            plugin.getConsoleOutput().debug("Natural drops: " + block.getDrops(player.getInventory().getItemInMainHand()).size());
 
             for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
                 Material mat = drop.getType();

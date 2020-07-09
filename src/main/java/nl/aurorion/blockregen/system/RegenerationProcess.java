@@ -2,7 +2,6 @@ package nl.aurorion.blockregen.system;
 
 import lombok.Data;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -42,12 +41,13 @@ public class RegenerationProcess implements Runnable {
     }
 
     public void start() {
-        int regenDelay = Math.max(1, preset.getDelay().getInt());
 
-        if (this.timeLeft == -1)
+        if (this.timeLeft == -1) {
+            int regenDelay = Math.max(1, preset.getDelay().getInt());
             this.timeLeft = regenDelay * 1000;
+        }
 
-        BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft + ", ticks: " + this.timeLeft / 50);
+        BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
@@ -67,13 +67,14 @@ public class RegenerationProcess implements Runnable {
             blockState.setType(regenerateInto);
 
         Bukkit.getScheduler().runTaskLater(BlockRegen.getInstance(), this, timeLeft / 50);
-        BlockRegen.getInstance().getConsoleOutput().debug("Started regeneration process on " + Utils.locationToString(block.getLocation()));
+        BlockRegen.getInstance().getConsoleOutput().debug("Started regeneration...");
     }
 
     @Override
     public void run() {
         blockState.update(true);
-        BlockRegen.getInstance().getConsoleOutput().debug("Regenerated block " + originalMaterial);
         BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+
+        BlockRegen.getInstance().getConsoleOutput().debug("Regenerated block " + originalMaterial);
     }
 }
