@@ -19,7 +19,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ExperienceOrb;
@@ -280,6 +279,8 @@ public class BlockBreak implements Listener {
                 if (expAmount <= 0) continue;
 
                 if (doubleExp) expAmount *= 2;
+
+                plugin.getConsoleOutput().debug("Exp: " + expAmount);
 
                 if (experienceDrop.isDropNaturally())
                     world.spawn(location, ExperienceOrb.class).setExperience(expAmount);

@@ -142,6 +142,8 @@ public class BlockRegen extends JavaPlugin {
     }
 
     public void reload(CommandSender sender) {
+
+        consoleOutput.addListener(sender);
         checkDependencies();
 
         files.getSettings().load();
@@ -163,6 +165,7 @@ public class BlockRegen extends JavaPlugin {
         if (getConfig().getBoolean("Auto-Save.Enabled", false))
             regenerationManager.reloadAutoSave();
 
+        consoleOutput.removeListener(sender);
         sender.sendMessage(Message.RELOAD.get());
     }
 

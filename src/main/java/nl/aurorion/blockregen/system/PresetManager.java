@@ -158,7 +158,12 @@ public class PresetManager {
 
                     ExperienceDrop experienceDrop = new ExperienceDrop();
 
-                    experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.exp-drop.amount", 0));
+                    experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.exp.amount", 0));
+
+                    experienceDrop.setDropNaturally(plugin.getFiles().getBlockList().getFileConfiguration().getBoolean("Blocks." + name + ".drop-item.exp.drop-naturally", false));
+
+                    drop.setExperienceDrop(experienceDrop);
+                    plugin.getConsoleOutput().debug("Exp drop: " + experienceDrop.toString());
 
                     drops.add(drop);
                 }
