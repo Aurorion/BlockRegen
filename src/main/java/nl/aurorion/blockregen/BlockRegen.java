@@ -112,6 +112,9 @@ public class BlockRegen extends JavaPlugin {
         presetManager.loadAll();
         regenerationManager.load();
 
+        if (getConfig().getBoolean("Auto-Save.Enabled", false))
+            regenerationManager.startAutoSave();
+
         registerListeners();
         fillEvents();
 
@@ -149,8 +152,6 @@ public class BlockRegen extends JavaPlugin {
 
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
 
-        files.checkRecovery();
-
         files.getBlockList().load();
         presetManager.loadAll();
         getters.load();
@@ -159,11 +160,17 @@ public class BlockRegen extends JavaPlugin {
         fillEvents();
         Utils.bars.clear();
 
+        if (getConfig().getBoolean("Auto-Save.Enabled", false))
+            regenerationManager.reloadAutoSave();
+
         sender.sendMessage(Message.RELOAD.get());
     }
 
     @Override
     public void onDisable() {
+        if (regenerationManager.getAutoSaveTask() != null)
+            regenerationManager.getAutoSaveTask().stop();
+
         regenerationManager.revert();
         regenerationManager.save();
 

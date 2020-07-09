@@ -4,6 +4,7 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import org.bukkit.Location;
@@ -36,8 +37,28 @@ public class RegenerationManager {
 
     private List<RegenerationProcess> cache = new ArrayList<>();
 
+    @Getter
+    private AutoSaveTask autoSaveTask;
+
     public RegenerationManager() {
         this.plugin = BlockRegen.getInstance();
+    }
+
+    public void startAutoSave() {
+        this.autoSaveTask = new AutoSaveTask();
+
+        autoSaveTask.load();
+        autoSaveTask.start();
+    }
+
+    public void reloadAutoSave() {
+
+        if (autoSaveTask == null)
+            autoSaveTask = new AutoSaveTask();
+
+        autoSaveTask.stop();
+        autoSaveTask.load();
+        autoSaveTask.start();
     }
 
     @Nullable

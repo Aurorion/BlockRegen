@@ -200,8 +200,8 @@ public class Commands implements CommandExecutor, Listener {
                 }
                 break;
             case "discord":
-                sender.sendMessage("&8&m      &3 BlockRegen Discord Server" +
-                        "\n&6>> &7https://discord.gg/ZCxMca5");
+                sender.sendMessage(Utils.color("&8&m      &3 BlockRegen Discord Server" +
+                        "\n&6>> &7https://discord.gg/ZCxMca5"));
                 break;
             case "events":
                 if (!sender.hasPermission("blockregen.admin")) {

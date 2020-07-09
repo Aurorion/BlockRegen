@@ -37,8 +37,11 @@ Disable-Other-Break-Region: true
 # This setting cancels the regeneration when a player uses bone meal on a crop
 Bone-Meal-Override: false
 
-# Having trouble with server crashes? This setting recovers blocks that are stuck in regening when your server crashes
-Data-Recovery: false
+# Automatic saving for regeneration process cache.
+Auto-Save:
+  Enabled: true
+  # Interval in seconds
+  Interval: 600
 
 # Add the worlds you wish to use BlockRegen in to this list
 Worlds-Enabled:
