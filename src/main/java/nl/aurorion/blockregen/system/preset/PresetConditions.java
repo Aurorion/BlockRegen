@@ -48,7 +48,7 @@ public class PresetConditions {
             }
         }
 
-        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get().replace("%tool%", toolsRequired.stream()
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player).replace("%tool%", toolsRequired.stream()
                 .map(Enum::toString)
                 .collect(Collectors.joining(", "))
                 .replace("_", " ")
@@ -74,7 +74,7 @@ public class PresetConditions {
         }
 
         // TODO: Make sure first letter is big in materials. (regex)
-        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
+        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get(player).replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
         return false;
     }
 
@@ -110,7 +110,7 @@ public class PresetConditions {
             }
         }
 
-        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", compressJobRequirements(jobsRequired)));
+        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player).replace("%job%", compressJobRequirements(jobsRequired)));
         return false;
     }
 

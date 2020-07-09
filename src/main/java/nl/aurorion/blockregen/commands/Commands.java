@@ -66,16 +66,16 @@ public class Commands implements CommandExecutor, Listener {
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.bypass")) {
-                    player.sendMessage(Message.NO_PERM.get());
+                    player.sendMessage(Message.NO_PERM.get(player));
                     return true;
                 }
 
                 if (!Utils.bypass.contains(player.getName())) {
                     Utils.bypass.add(player.getName());
-                    player.sendMessage(Message.BYPASS_ON.get());
+                    player.sendMessage(Message.BYPASS_ON.get(player));
                 } else {
                     Utils.bypass.remove(player.getName());
-                    player.sendMessage(Message.BYPASS_OFF.get());
+                    player.sendMessage(Message.BYPASS_OFF.get(player));
                 }
                 break;
             case "check":
@@ -85,16 +85,16 @@ public class Commands implements CommandExecutor, Listener {
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.datacheck")) {
-                    player.sendMessage(Message.NO_PERM.get());
+                    player.sendMessage(Message.NO_PERM.get(player));
                     return true;
                 }
 
                 if (!Utils.dataCheck.contains(player.getName())) {
                     Utils.dataCheck.add(player.getName());
-                    player.sendMessage(Message.DATA_CHECK_ON.get());
+                    player.sendMessage(Message.DATA_CHECK_ON.get(player));
                 } else {
                     Utils.dataCheck.remove(player.getName());
-                    player.sendMessage(Message.DATA_CHECK_OFF.get());
+                    player.sendMessage(Message.DATA_CHECK_OFF.get(player));
                 }
                 break;
             case "convert":
@@ -108,7 +108,7 @@ public class Commands implements CommandExecutor, Listener {
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.admin")) {
-                    player.sendMessage(Message.NO_PERM.get());
+                    player.sendMessage(Message.NO_PERM.get(player));
                     return true;
                 }
 
@@ -141,7 +141,7 @@ public class Commands implements CommandExecutor, Listener {
                     if (args[1].equalsIgnoreCase("set")) {
 
                         if (plugin.getWorldEditProvider() == null) {
-                            player.sendMessage(Message.WORLD_EDIT_NOT_INSTALLED.get());
+                            player.sendMessage(Message.WORLD_EDIT_NOT_INSTALLED.get(player));
                             return true;
                         }
 
@@ -159,20 +159,20 @@ public class Commands implements CommandExecutor, Listener {
                         }
 
                         if (regions.contains(args[2])) {
-                            player.sendMessage(Message.DUPLICATED_REGION.get());
+                            player.sendMessage(Message.DUPLICATED_REGION.get(player));
                             return true;
                         }
 
                         plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMinimumPoint())));
                         plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMaximumPoint())));
                         plugin.getFiles().getRegions().save();
-                        player.sendMessage(Message.SET_REGION.get());
+                        player.sendMessage(Message.SET_REGION.get(player));
                         return true;
                     }
 
                     if (args[1].equalsIgnoreCase("remove")) {
                         if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") == null) {
-                            player.sendMessage(Message.UNKNOWN_REGION.get());
+                            player.sendMessage(Message.UNKNOWN_REGION.get(player));
                         } else {
                             ConfigurationSection regions = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
                             Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
@@ -180,9 +180,9 @@ public class Commands implements CommandExecutor, Listener {
                             if (setregions.contains(args[2])) {
                                 plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2], null);
                                 plugin.getFiles().getRegions().save();
-                                player.sendMessage(Message.REMOVE_REGION.get());
+                                player.sendMessage(Message.REMOVE_REGION.get(player));
                             } else {
-                                player.sendMessage(Message.UNKNOWN_REGION.get());
+                                player.sendMessage(Message.UNKNOWN_REGION.get(player));
                             }
 
                             return true;
@@ -192,12 +192,19 @@ public class Commands implements CommandExecutor, Listener {
                 }
                 break;
             case "debug":
+                if (!(sender instanceof Player)) {
+                    sender.sendMessage(Message.ONLY_PLAYERS.get());
+                    return true;
+                }
+
+                player = (Player) sender;
+
                 if (plugin.getConsoleOutput().getListeners().contains(sender)) {
                     plugin.getConsoleOutput().removeListener(sender);
-                    sender.sendMessage(Message.DEBUG_OFF.get());
+                    sender.sendMessage(Message.DEBUG_OFF.get(player));
                 } else {
                     plugin.getConsoleOutput().addListener(sender);
-                    sender.sendMessage(Message.DEBUG_ON.get());
+                    sender.sendMessage(Message.DEBUG_ON.get(player));
                 }
                 break;
             case "discord":
@@ -357,7 +364,7 @@ public class Commands implements CommandExecutor, Listener {
 
     private boolean checkConsole(CommandSender sender) {
         if (!(sender instanceof Player)) {
-            sender.sendMessage(Message.NO_PLAYER.get());
+            sender.sendMessage(Message.ONLY_PLAYERS.get());
             return true;
         }
 

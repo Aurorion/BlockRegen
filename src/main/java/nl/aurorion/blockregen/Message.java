@@ -2,6 +2,7 @@ package nl.aurorion.blockregen;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.entity.Player;
 
 /**
  * Message system, loaded on enable & reload.
@@ -22,7 +23,7 @@ public enum Message {
      * Command general messages.
      */
     NO_PERM("Insufficient-Permission", "&cYou don't have the permissions to do this!"),
-    NO_PLAYER("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
+    ONLY_PLAYERS("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
     INVALID_COMMAND("Invalid-Command", "&cThis is not a valid command!"),
 
     RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
@@ -83,6 +84,10 @@ public enum Message {
 
     public String get() {
         return Utils.color(this.value);
+    }
+
+    public String get(Player player) {
+        return Utils.color(Utils.parse(this.value, player));
     }
 
     Message(String path, String value) {

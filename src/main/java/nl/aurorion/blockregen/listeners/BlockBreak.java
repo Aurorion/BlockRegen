@@ -186,7 +186,7 @@ public class BlockBreak implements Listener {
 
         // Check permissions and conditions
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
-            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
+            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get(event.getPlayer()));
             event.setCancelled(true);
             plugin.getRegenerationManager().removeProcess(process);
             return;

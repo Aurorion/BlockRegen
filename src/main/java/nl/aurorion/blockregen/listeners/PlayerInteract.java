@@ -30,7 +30,7 @@ public class PlayerInteract implements Listener {
             if (event.getClickedBlock() == null) return;
 
             event.setCancelled(true);
-            player.sendMessage(Message.DATA_CHECK.get().replace("%block%", event.getClickedBlock().getType().toString()));
+            player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));
             return;
         }
 
