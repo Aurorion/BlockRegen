@@ -188,11 +188,13 @@ public class BlockBreak implements Listener {
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
             player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get());
             event.setCancelled(true);
+            plugin.getRegenerationManager().removeProcess(process);
             return;
         }
 
         if (!preset.getConditions().check(player)) {
             event.setCancelled(true);
+            plugin.getRegenerationManager().removeProcess(process);
             return;
         }
 

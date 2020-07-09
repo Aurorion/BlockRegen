@@ -56,9 +56,11 @@ public class ItemDrop {
 
         itemMeta.setDisplayName(Utils.color(Utils.parse(displayName, player)));
 
-        itemMeta.setLore(lore);
+        List<String> lore = new ArrayList<>(this.lore);
 
         lore.replaceAll(o -> Utils.color(Utils.parse(o, player)));
+
+        itemMeta.setLore(lore);
 
         itemStack.setItemMeta(itemMeta);
 

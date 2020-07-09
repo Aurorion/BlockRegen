@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class PresetConditions {
 
@@ -47,8 +48,11 @@ public class PresetConditions {
             }
         }
 
-        // TODO: Parse all tools for the message
-        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get().replace("%tool%", ""));
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get().replace("%tool%", toolsRequired.stream()
+                .map(Enum::toString)
+                .collect(Collectors.joining(", "))
+                .replace("_", " ")
+                .toLowerCase()));
         return false;
     }
 
@@ -69,9 +73,29 @@ public class PresetConditions {
             }
         }
 
-        // TODO: Parse enchants for message
-        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", ""));
+        // TODO: Make sure first letter is big in materials. (regex)
+        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get().replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
         return false;
+    }
+
+    private String compressEnchantRequirements(Map<Enchantment, Integer> input) {
+        List<String> out = new ArrayList<>();
+
+        for (Map.Entry<Enchantment, Integer> enchant : input.entrySet()) {
+            out.add(enchant.getKey().getKey().getKey() + " (" + enchant.getValue().toString() + ")");
+        }
+
+        return String.join(", ", out);
+    }
+
+    private String compressJobRequirements(Map<Job, Integer> input) {
+        List<String> out = new ArrayList<>();
+
+        for (Map.Entry<Job, Integer> job : input.entrySet()) {
+            out.add(job.getKey().getName() + " (" + job.getValue().toString() + ")");
+        }
+
+        return String.join(", ", out);
     }
 
     public boolean checkJobs(Player player) {
@@ -86,8 +110,7 @@ public class PresetConditions {
             }
         }
 
-        // TODO: Parse for message
-        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", "").replace("%level%", ""));
+        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get().replace("%job%", compressJobRequirements(jobsRequired)));
         return false;
     }
 
