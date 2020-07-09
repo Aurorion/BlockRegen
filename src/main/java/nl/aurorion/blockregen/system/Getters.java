@@ -22,7 +22,6 @@ public class Getters {
     private final BlockRegen plugin;
 
     private FileConfiguration blocklist;
-    private FileConfiguration settings;
 
     public Getters(BlockRegen plugin) {
         this.plugin = plugin;
@@ -32,55 +31,6 @@ public class Getters {
 
     public void load() {
         this.blocklist = plugin.getFiles().getBlockList().getFileConfiguration();
-        this.settings = plugin.getFiles().getSettings().getFileConfiguration();
-    }
-
-    public boolean updateChecker() {
-        if (settings.contains("Update-Checker"))
-            return settings.getBoolean("Update-Checker");
-        return true;
-    }
-
-    public boolean useRegions() {
-        return settings.getBoolean("Use-Regions");
-    }
-
-
-    public boolean useTowny() {
-        return settings.getBoolean("Towny-Support", true);
-    }
-
-    public boolean useGriefPrevention() {
-        return settings.getBoolean("GriefPrevention-Support", true);
-    }
-
-    public boolean useWorldGuard() {
-        return settings.getBoolean("WorldGuard-Support", true);
-    }
-
-    public boolean useResidence() {
-        return settings.getBoolean("Residence-Support", true);
-    }
-
-    public boolean useJobsRewards() {
-        return settings.getBoolean("Jobs-Rewards", true);
-    }
-
-
-    public boolean disableOtherBreak() {
-        return settings.getBoolean("Disable-Other-Break");
-    }
-
-    public boolean disableOtherBreakRegion() {
-        return settings.getBoolean("Disable-Other-Break-Region");
-    }
-
-    public boolean boneMealOverride() {
-        return settings.getBoolean("Bone-Meal-Override");
-    }
-
-    public boolean dataRecovery() {
-        return settings.getBoolean("Data-Recovery");
     }
 
     // moved

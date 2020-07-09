@@ -30,6 +30,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -118,12 +119,12 @@ public class BlockRegen extends JavaPlugin {
 
         getCommand("blockregen").setExecutor(new Commands(this));
 
-        consoleOutput.info("&bYou are using version " + getDescription().getVersion());
-        consoleOutput.info("&bReport bugs or suggestions to discord only please.");
+        consoleOutput.info("&bYou are using" + (getDescription().getVersion().contains("-b") ? " &cDEVELOPMENT&b" : "") + " version &f" + getDescription().getVersion());
+        consoleOutput.info("&bReport bugs or suggestions to discord only please. &f( /blockregen discord )");
         consoleOutput.info("&bAlways backup if you are not sure about things.");
 
         enableMetrics();
-        if (getGetters().updateChecker()) {
+        if (getConfig().getBoolean("Update-Checker", false)) {
             getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
                 UpdateCheck updater = new UpdateCheck(this, 9885);
                 try {
@@ -163,7 +164,9 @@ public class BlockRegen extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        regenerationManager.revert();
         regenerationManager.save();
+
         instance = null;
     }
 
@@ -273,5 +276,10 @@ public class BlockRegen extends JavaPlugin {
     public void enableMetrics() {
         new MetricsLite(this);
         consoleOutput.info("&8MetricsLite enabled");
+    }
+
+    @Override
+    public @NotNull FileConfiguration getConfig() {
+        return files.getSettings().getFileConfiguration();
     }
 }

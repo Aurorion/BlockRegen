@@ -34,7 +34,7 @@ public class PlayerInteract implements Listener {
             return;
         }
 
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && plugin.getGetters().boneMealOverride()) {
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && plugin.getConfig().getBoolean("Bone-Meal-Override", false)) {
             if (!player.getInventory().getItemInMainHand().getType().equals(Material.BONE_MEAL) ||
                     event.getClickedBlock() == null)
                 return;

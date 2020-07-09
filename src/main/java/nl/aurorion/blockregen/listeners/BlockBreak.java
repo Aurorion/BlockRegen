@@ -77,25 +77,25 @@ public class BlockBreak implements Listener {
         FileConfiguration settings = plugin.getFiles().getSettings().getFileConfiguration();
 
         // Towny
-        if (plugin.getGetters().useTowny() && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
+        if (plugin.getConfig().getBoolean("Towny-Support", true) && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
             if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
                 if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
                     return;
         }
 
         // Grief Prevention
-        if (plugin.getGetters().useGriefPrevention() && plugin.getGriefPrevention() != null) {
+        if (plugin.getConfig().getBoolean("GriefPrevention-Support", true) && plugin.getGriefPrevention() != null) {
             String noBuildReason = plugin.getGriefPrevention().allowBreak(player, block, block.getLocation(), event);
             if (noBuildReason != null) return;
         }
 
         // WorldGuard
-        if (plugin.getGetters().useWorldGuard() && plugin.getWorldGuardProvider() != null) {
+        if (plugin.getConfig().getBoolean("WorldGuard-Support", true) && plugin.getWorldGuardProvider() != null) {
             if (!plugin.getWorldGuardProvider().canBreak(player, block.getLocation())) return;
         }
 
         // Residence
-        if (plugin.getGetters().useResidence() && plugin.getResidence() != null) {
+        if (plugin.getConfig().getBoolean("Residence-Support", true) && plugin.getResidence() != null) {
             ClaimedResidence residence = ResidenceApi.getResidenceManager().getByLoc(block.getLocation());
 
             if (residence != null) {
@@ -108,7 +108,7 @@ public class BlockBreak implements Listener {
 
         boolean isInWorld = settings.getStringList("Worlds-Enabled").contains(world.getName());
 
-        boolean useRegions = plugin.getGetters().useRegions();
+        boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
 
         if (useRegions) {
 
@@ -148,9 +148,9 @@ public class BlockBreak implements Listener {
 
             if (isInRegion) {
                 if (preset != null) {
-                    process(plugin.getRegenerationManager().createProcessInRegion(block, preset, regionName), event);
+                    process(plugin.getRegenerationManager().createProcess(block, preset, regionName), event);
                 } else {
-                    if (BlockRegen.getInstance().getGetters().disableOtherBreakRegion())
+                    if (plugin.getConfig().getBoolean("Disable-Other-Break-Region"))
                         event.setCancelled(true);
                 }
             }
@@ -158,9 +158,9 @@ public class BlockBreak implements Listener {
             // Worlds
             if (isInWorld) {
                 if (preset != null) {
-                    process(plugin.getRegenerationManager().createProcessInWorld(block, preset, world.getName()), event);
+                    process(plugin.getRegenerationManager().createProcess(block, preset), event);
                 } else {
-                    if (BlockRegen.getInstance().getGetters().disableOtherBreak())
+                    if (plugin.getConfig().getBoolean("Disable-Other-Break", false))
                         event.setCancelled(true);
                 }
             }
@@ -303,7 +303,7 @@ public class BlockBreak implements Listener {
         }
 
         // Trigger Jobs Break if enabled -----------------------------------------------------------------------
-        if (plugin.getGetters().useJobsRewards() && plugin.getJobsProvider() != null) {
+        if (plugin.getConfig().getBoolean("Jobs-Rewards", false) && plugin.getJobsProvider() != null) {
             plugin.getJobsProvider().triggerBlockBreakAction(player, block);
         }
 

@@ -57,15 +57,14 @@ public class RegenerationManager {
         return getProcess(location) != null;
     }
 
-    public RegenerationProcess createProcessInRegion(Block block, BlockPreset preset, String regionName) {
+    public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
         RegenerationProcess process = createProcess(block, preset);
-        process.setRegionName(regionName);
-        return process;
-    }
 
-    public RegenerationProcess createProcessInWorld(Block block, BlockPreset preset, String worldName) {
-        RegenerationProcess process = createProcess(block, preset);
-        process.setRegionName(worldName);
+        process.setWorldName(block.getWorld().getName());
+
+        if (regionName.length > 0)
+            process.setRegionName(regionName[0]);
+
         return process;
     }
 
@@ -101,6 +100,9 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revert() {
+        for (RegenerationProcess process : cache) {
+            process.getBlock().setType(process.getOriginalMaterial());
+        }
     }
 
     public void load() {
@@ -148,6 +150,13 @@ public class RegenerationManager {
             }
 
             process.setPreset(preset);
+
+            plugin.getConsoleOutput().debug("Time left: " + process.getTimeLeft());
+
+            if (process.getTimeLeft() <= 0) {
+                plugin.getConsoleOutput().debug("Making sure time is above 0, changed to 1s.");
+                process.setTimeLeft(1000);
+            }
 
             // Update regen time
             process.setRegenerationTime(System.currentTimeMillis() + process.getTimeLeft());
