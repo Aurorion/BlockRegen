@@ -2,6 +2,7 @@ package nl.aurorion.blockregen;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
 /**
@@ -82,12 +83,15 @@ public enum Message {
     @Setter
     private String value;
 
+    @Getter
+    private static boolean insertPrefix = false;
+
     public String get() {
-        return Utils.color(this.value);
+        return Utils.color(Utils.parse(insertPrefix ? "%prefix%" + this.value : this.value));
     }
 
     public String get(Player player) {
-        return Utils.color(Utils.parse(this.value, player));
+        return Utils.color(Utils.parse(insertPrefix ? "%prefix%" + this.value : this.value, player));
     }
 
     Message(String path, String value) {
@@ -96,11 +100,18 @@ public enum Message {
     }
 
     public static void load() {
+
+        FileConfiguration messages = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration();
+
+        if (!messages.contains("Insert-Prefix"))
+            messages.set("Insert-Prefix", true);
+        insertPrefix = messages.getBoolean("Insert-Prefix", true);
+
         for (Message msg : values()) {
-            String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
+            String str = messages.getString("Messages." + msg.getPath());
 
             if (str == null) {
-                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set("Messages." + msg.getPath(), msg.getValue());
+                messages.set("Messages." + msg.getPath(), msg.getValue());
                 continue;
             }
 

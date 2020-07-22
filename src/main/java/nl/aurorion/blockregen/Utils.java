@@ -49,6 +49,11 @@ public class Utils {
         return newLoc.clone();
     }
 
+    public String parse(String string) {
+        string = string.replaceAll("(?i)%prefix%", Message.PREFIX.getValue());
+        return string;
+    }
+
     public String parse(String string, Player player) {
         string = string.replaceAll("(?i)%player%", player.getName());
         if (BlockRegen.getInstance().isUsePlaceholderAPI())

@@ -86,7 +86,7 @@ public class RegenerationProcess implements Runnable {
         task = null;
 
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
-        Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent);
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
 
         BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
 
