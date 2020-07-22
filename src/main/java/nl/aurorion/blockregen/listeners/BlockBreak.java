@@ -10,11 +10,13 @@ import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.RegenerationProcess;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import nl.aurorion.blockregen.system.preset.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.ItemDrop;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -196,6 +198,13 @@ public class BlockBreak implements Listener {
             plugin.getRegenerationManager().removeProcess(process);
             return;
         }
+
+        // Event API
+        BlockRegenBlockBreakEvent blockRegenBlockBreakEvent = new BlockRegenBlockBreakEvent(event, preset);
+        Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockBreakEvent);
+
+        if (blockRegenBlockBreakEvent.isCancelled())
+            return;
 
         List<ItemStack> drops = new ArrayList<>();
 

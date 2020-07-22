@@ -1,41 +1,56 @@
 package nl.aurorion.blockregen.system;
 
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 @Data
 public class RegenerationProcess implements Runnable {
 
     private SimpleLocation simpleLocation;
 
+    @Getter
     private transient Block block;
 
-    private transient BlockState blockState;
-
+    @Getter
     private Material originalMaterial;
 
+    @Getter
     private String regionName;
+    @Getter
     private String worldName;
 
     private String presetName;
 
+    @Getter
     private transient BlockPreset preset;
 
+    /**
+     * Holds the system time when the block should regenerate.
+     */
+    @Getter
     private transient long regenerationTime;
 
+    @Getter
     private long timeLeft = -1;
+
+    @Getter
+    @Setter
+    private transient Material regenerateInto;
+
+    private transient BukkitTask task;
 
     public RegenerationProcess(Block block, BlockPreset preset) {
         this.block = block;
         this.preset = preset;
         this.presetName = preset.getName();
-        this.blockState = block.getState();
         this.originalMaterial = block.getType();
         this.simpleLocation = new SimpleLocation(block.getLocation());
     }
@@ -53,28 +68,39 @@ public class RegenerationProcess implements Runnable {
 
         Material replaceMaterial = preset.getReplaceMaterial().get();
 
-        new BukkitRunnable() {
-            @Override
-            public void run() {
-                block.setType(replaceMaterial);
-                BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
-            }
-        }.runTaskLater(BlockRegen.getInstance(), 2L);
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(replaceMaterial));
+        BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
 
-        Material regenerateInto = preset.getRegenMaterial().get();
+        regenerateInto = preset.getRegenMaterial().get();
 
-        if (regenerateInto != blockState.getType())
-            blockState.setType(regenerateInto);
+        if (task != null) task.cancel();
 
-        Bukkit.getScheduler().runTaskLater(BlockRegen.getInstance(), this, timeLeft / 50);
+        task = Bukkit.getScheduler().runTaskLaterAsynchronously(BlockRegen.getInstance(), this, timeLeft / 50);
         BlockRegen.getInstance().getConsoleOutput().debug("Started regeneration...");
     }
 
     @Override
     public void run() {
-        blockState.update(true);
+
+        task.cancel();
+        task = null;
+
+        BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
+        Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent);
+
         BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
 
+        if (blockRegenBlockRegenEvent.isCancelled())
+            return;
+
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(regenerateInto));
         BlockRegen.getInstance().getConsoleOutput().debug("Regenerated block " + originalMaterial);
+    }
+
+    public void updateTimeLeft(long timeLeft) {
+        this.timeLeft = timeLeft;
+        if (timeLeft > 0)
+            start();
+        else run();
     }
 }

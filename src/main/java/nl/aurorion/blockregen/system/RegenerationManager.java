@@ -11,7 +11,6 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -23,12 +22,6 @@ import java.util.Iterator;
 import java.util.List;
 
 public class RegenerationManager {
-    // Periodical saving
-    // Reset all
-
-    /*
-     * On disable, replace all blocks with their originals, so if the plugin gets removed, it will be like before.
-     * */
 
     private final BlockRegen plugin;
 
@@ -161,7 +154,6 @@ public class RegenerationManager {
             Location location = simpleLocation.toLocation();
 
             process.setBlock(location.getBlock());
-            process.setBlockState(location.getBlock().getState());
 
             BlockPreset preset = plugin.getPresetManager().getPreset(process.getPresetName());
 
