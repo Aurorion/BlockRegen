@@ -23,7 +23,9 @@ import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.Getters;
 import nl.aurorion.blockregen.system.PresetManager;
 import nl.aurorion.blockregen.system.RegenerationManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -107,7 +109,7 @@ public class BlockRegen extends JavaPlugin {
         Message.load();
 
         consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-        consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
+        consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
 
         presetManager.loadAll();
         regenerationManager.load();
@@ -143,7 +145,9 @@ public class BlockRegen extends JavaPlugin {
 
     public void reload(CommandSender sender) {
 
-        consoleOutput.addListener(sender);
+        if (!(sender instanceof ConsoleCommandSender))
+            consoleOutput.addListener(sender);
+
         checkDependencies();
 
         files.getSettings().load();
@@ -152,7 +156,7 @@ public class BlockRegen extends JavaPlugin {
         files.getMessages().load();
         Message.load();
 
-        consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
+        consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
 
         files.getBlockList().load();
         presetManager.loadAll();

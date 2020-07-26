@@ -168,8 +168,8 @@ public class RegenerationManager {
             plugin.getConsoleOutput().debug("Time left: " + process.getTimeLeft());
 
             if (process.getTimeLeft() <= 0) {
-                plugin.getConsoleOutput().debug("Making sure time is above 0, changed to 1s.");
-                process.setTimeLeft(1000);
+                iter.remove();
+                continue;
             }
 
             // Update regen time

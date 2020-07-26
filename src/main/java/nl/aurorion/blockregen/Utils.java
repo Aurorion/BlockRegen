@@ -55,6 +55,7 @@ public class Utils {
     }
 
     public String parse(String string, Player player) {
+        string = Utils.parse(string);
         string = string.replaceAll("(?i)%player%", player.getName());
         if (BlockRegen.getInstance().isUsePlaceholderAPI())
             string = PlaceholderAPI.setPlaceholders(player, string);
