@@ -58,6 +58,11 @@ public class RegenerationManager {
     @Nullable
     public RegenerationProcess getProcess(Location location) {
         for (RegenerationProcess process : cache) {
+
+            // Try to convert simple location again as it should never be null if everything went well.
+            if (process.getBlock() == null)
+                process.convertSimpleLocation();
+
             if (process.getBlock().getLocation().equals(location))
                 return process;
         }
@@ -144,22 +149,19 @@ public class RegenerationManager {
     }
 
     private void afterLoad() {
-        Iterator<RegenerationProcess> iter = cache.iterator();
-        while (iter.hasNext()) {
+        Iterator<RegenerationProcess> processIterator = cache.iterator();
+        while (processIterator.hasNext()) {
 
-            RegenerationProcess process = iter.next();
+            RegenerationProcess process = processIterator.next();
 
-            SimpleLocation simpleLocation = process.getSimpleLocation();
-
-            Location location = simpleLocation.toLocation();
-
-            process.setBlock(location.getBlock());
+            if (!process.convertSimpleLocation())
+                processIterator.remove();
 
             BlockPreset preset = plugin.getPresetManager().getPreset(process.getPresetName());
 
             if (preset == null) {
                 plugin.getConsoleOutput().err("BlockPreset " + process.getPresetName() + " no longer exists, removing a left over regeneration process.");
-                iter.remove();
+                processIterator.remove();
                 continue;
             }
 
@@ -168,7 +170,7 @@ public class RegenerationManager {
             plugin.getConsoleOutput().debug("Time left: " + process.getTimeLeft());
 
             if (process.getTimeLeft() <= 0) {
-                iter.remove();
+                processIterator.remove();
                 continue;
             }
 

@@ -7,6 +7,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.BlockPreset;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
@@ -102,5 +103,17 @@ public class RegenerationProcess implements Runnable {
         if (timeLeft > 0)
             start();
         else run();
+    }
+
+    public boolean convertSimpleLocation() {
+
+        if (simpleLocation == null) {
+            BlockRegen.getInstance().getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
+            return false;
+        }
+
+        Location location = simpleLocation.toLocation();
+        setBlock(location.getBlock());
+        return true;
     }
 }
