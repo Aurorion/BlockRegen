@@ -8,9 +8,5 @@ public class EventBossBar {
 
     private String text;
 
-    private BarColor color;
-
-    public void display() {
-        // TODO
-    }
+    private BarColor color = BarColor.BLUE;
 }

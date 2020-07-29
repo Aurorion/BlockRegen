@@ -197,8 +197,16 @@ public class PresetManager {
                 if (eventSection.contains("bossbar")) {
                     EventBossBar bossBar = new EventBossBar();
 
-                    bossBar.setText(eventSection.getString("bossbar.name"));
-                    bossBar.setColor(BarColor.valueOf(eventSection.getString("bosssbar.color")));
+                    if (!eventSection.contains("bossbar.name"))
+                        bossBar.setText("&fEvent " + eventName + " &fis active!");
+                    else
+                        bossBar.setText(eventSection.getString("bossbar.name"));
+
+                    if (eventSection.contains("bossbar.color")) {
+                        String barColor = eventSection.getString("bossbar.color");
+                        if (barColor != null)
+                            bossBar.setColor(BarColor.valueOf(barColor.toUpperCase()));
+                    }
 
                     event.setBossBar(bossBar);
                 }
@@ -213,6 +221,9 @@ public class PresetManager {
                     Amount rarity = Amount.loadAmount(file, "Blocks." + name + ".event.custom-item.rarity", 1);
                     event.setItemRarity(rarity);
                 } else event.setItemRarity(new Amount(1));
+
+                plugin.getConsoleOutput().debug("Loaded event " + eventName);
+                preset.setEvent(event);
             } else
                 plugin.getConsoleOutput().err("Event name for block " + name + " has not been set, but the section is present.");
         }
