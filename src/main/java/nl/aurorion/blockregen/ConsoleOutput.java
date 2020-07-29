@@ -39,6 +39,9 @@ public class ConsoleOutput {
     @Getter
     private final List<CommandSender> listeners = new ArrayList<>();
 
+    @Getter
+    private final List<CommandSender> personalDebug = new ArrayList<>();
+
     public ConsoleOutput(JavaPlugin plugin) {
         this.console = plugin.getServer().getConsoleSender();
     }
@@ -66,17 +69,18 @@ public class ConsoleOutput {
     }
 
     /**
-     * Sends a message to debug and command sender.
+     * Sends a message to debug and command sender if he's using personal debug.
      *
      * @param msg    Message to show
      * @param origin CommanderSender who caused the message
      */
     public void debug(String msg, CommandSender origin) {
-        if (debug) {
-            addListener(origin);
-            debug(msg);
-            removeListener(origin);
-        }
+        if (debug)
+            if (personalDebug.contains(origin)) {
+                addListener(origin);
+                debug(msg);
+                removeListener(origin);
+            } else debug(msg);
     }
 
     /**
@@ -140,6 +144,20 @@ public class ConsoleOutput {
      */
     public void removeListener(@NotNull CommandSender listener) {
         listeners.remove(listener);
+    }
+
+    /**
+     * Switch personal debug for a sender.
+     *
+     * @param sender Sender to switch for
+     * @return boolean final state
+     */
+    public boolean switchPersonalDebug(@NotNull CommandSender sender) {
+        if (personalDebug.contains(sender))
+            personalDebug.remove(sender);
+        else
+            personalDebug.add(sender);
+        return personalDebug.contains(sender);
     }
 
     public void toListeners(String message) {

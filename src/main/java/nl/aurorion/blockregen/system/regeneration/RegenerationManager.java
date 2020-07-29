@@ -39,21 +39,21 @@ public class RegenerationManager {
         this.plugin = BlockRegen.getInstance();
     }
 
-    public void startAutoSave() {
-        this.autoSaveTask = new AutoSaveTask();
+    public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
+        RegenerationProcess process = createProcess(block, preset);
 
-        autoSaveTask.load();
-        autoSaveTask.start();
+        process.setWorldName(block.getWorld().getName());
+
+        if (regionName.length > 0)
+            process.setRegionName(regionName[0]);
+
+        return process;
     }
 
-    public void reloadAutoSave() {
-
-        if (autoSaveTask == null)
-            autoSaveTask = new AutoSaveTask();
-
-        autoSaveTask.stop();
-        autoSaveTask.load();
-        autoSaveTask.start();
+    public RegenerationProcess createProcess(Block block, BlockPreset preset) {
+        RegenerationProcess process = new RegenerationProcess(block, preset);
+        cache.add(process);
+        return process;
     }
 
     @Nullable
@@ -72,29 +72,36 @@ public class RegenerationManager {
         return null;
     }
 
-    public void removeProcess(RegenerationProcess process) {
-        cache.remove(process);
-    }
-
     public boolean isRegenerating(Location location) {
         return getProcess(location) != null;
     }
 
-    public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
-        RegenerationProcess process = createProcess(block, preset);
-
-        process.setWorldName(block.getWorld().getName());
-
-        if (regionName.length > 0)
-            process.setRegionName(regionName[0]);
-
-        return process;
+    public void removeProcess(RegenerationProcess process) {
+        cache.remove(process);
     }
 
-    public RegenerationProcess createProcess(Block block, BlockPreset preset) {
-        RegenerationProcess process = new RegenerationProcess(block, preset);
-        cache.add(process);
-        return process;
+    public void startAutoSave() {
+        this.autoSaveTask = new AutoSaveTask();
+
+        autoSaveTask.load();
+        autoSaveTask.start();
+    }
+
+    public void reloadAutoSave() {
+        if (autoSaveTask == null) {
+            startAutoSave();
+        } else {
+            autoSaveTask.stop();
+            autoSaveTask.load();
+            autoSaveTask.start();
+        }
+    }
+
+    // Revert blocks before disabling
+    public void revert() {
+        for (RegenerationProcess process : cache) {
+            process.getBlock().setType(process.getOriginalMaterial());
+        }
     }
 
     public void save() {
@@ -118,13 +125,6 @@ public class RegenerationManager {
             Files.write(path, output.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    // Revert blocks before disabling
-    public void revert() {
-        for (RegenerationProcess process : cache) {
-            process.getBlock().setType(process.getOriginalMaterial());
         }
     }
 
@@ -160,7 +160,7 @@ public class RegenerationManager {
             if (!process.convertSimpleLocation())
                 processIterator.remove();
 
-            BlockPreset preset = plugin.getPresetManager().getPreset(process.getPresetName());
+            BlockPreset preset = plugin.getPresetManager().getPreset(process.getPresetName()).orElse(null);
 
             if (preset == null) {
                 plugin.getConsoleOutput().err("BlockPreset " + process.getPresetName() + " no longer exists, removing a left over regeneration process.");

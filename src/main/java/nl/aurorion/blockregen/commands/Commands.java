@@ -45,7 +45,7 @@ public class Commands implements CommandExecutor, Listener {
                     + "\n&3/" + label + " region &8- &7All the info to set a region."
                     + "\n&3/" + label + " events &8- &7Check all your events."
                     + "\n&3/" + label + " discord &8- &7Print BlockRegen discord invite."
-                    + "\n&3/" + label + " debug &8- &7Enable player console output."));
+                    + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
             return true;
         }
 
@@ -200,13 +200,21 @@ public class Commands implements CommandExecutor, Listener {
 
                 player = (Player) sender;
 
-                if (plugin.getConsoleOutput().getListeners().contains(sender)) {
-                    plugin.getConsoleOutput().removeListener(sender);
-                    sender.sendMessage(Message.DEBUG_OFF.get(player));
-                } else {
-                    plugin.getConsoleOutput().addListener(sender);
-                    sender.sendMessage(Message.DEBUG_ON.get(player));
+                if (args.length > 1 && args[1].equalsIgnoreCase("all")) {
+                    if (plugin.getConsoleOutput().getListeners().contains(sender)) {
+                        plugin.getConsoleOutput().removeListener(sender);
+                        sender.sendMessage(Utils.color(Message.PREFIX.getValue() + " &cYou are no longer listening."));
+                    } else {
+                        plugin.getConsoleOutput().addListener(sender);
+                        sender.sendMessage(Utils.color(Message.PREFIX.getValue() + " &aYou are listening to everything."));
+                    }
+                    return false;
                 }
+
+                if (plugin.getConsoleOutput().switchPersonalDebug(sender))
+                    sender.sendMessage(Message.DEBUG_ON.get(player));
+                else
+                    sender.sendMessage(Message.DEBUG_OFF.get(player));
                 break;
             case "discord":
                 sender.sendMessage(Utils.color("&8&m      &3 BlockRegen Discord Server" +

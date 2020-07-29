@@ -173,12 +173,12 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void registerListeners() {
-        PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvents(new DependencyEnable(), this);
-        pm.registerEvents(new Commands(this), this);
-        pm.registerEvents(new BlockBreak(this), this);
-        pm.registerEvents(new PlayerInteract(this), this);
-        pm.registerEvents(new PlayerJoin(this), this);
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        pluginManager.registerEvents(new DependencyEnable(), this);
+        pluginManager.registerEvents(new Commands(this), this);
+        pluginManager.registerEvents(new BlockBreak(this), this);
+        pluginManager.registerEvents(new PlayerInteract(this), this);
+        pluginManager.registerEvents(new PlayerJoin(this), this);
     }
 
     public void checkDependencies() {

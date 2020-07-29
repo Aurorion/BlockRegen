@@ -48,7 +48,7 @@ public class BlockBreak implements Listener {
         Block block = event.getBlock();
 
         String blockName = block.getType().name().toUpperCase();
-        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName);
+        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName).orElse(null);
 
         if (event.isCancelled()) {
             return;
@@ -179,7 +179,7 @@ public class BlockBreak implements Listener {
         World world = block.getWorld();
 
         String blockName = block.getType().name();
-        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName);
+        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName).orElse(null);
 
         // Check permissions and conditions
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
@@ -238,7 +238,7 @@ public class BlockBreak implements Listener {
 
                 ItemStack dropItem = new ItemStack(mat, amount);
 
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount());
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
                 drops.add(dropItem);
             }
 
@@ -260,7 +260,7 @@ public class BlockBreak implements Listener {
                     itemStack.setAmount(itemStack.getAmount() * 2);
 
                 drops.add(itemStack);
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount());
+                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
 
                 if (drop.getExperienceDrop() == null) continue;
 
@@ -272,7 +272,7 @@ public class BlockBreak implements Listener {
 
                 if (doubleExp) expAmount *= 2;
 
-                plugin.getConsoleOutput().debug("Exp: " + expAmount);
+                plugin.getConsoleOutput().debug("Exp: " + expAmount, player);
 
                 if (experienceDrop.isDropNaturally())
                     world.spawn(location, ExperienceOrb.class).setExperience(expAmount);

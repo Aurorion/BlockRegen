@@ -20,6 +20,18 @@ public class AutoSaveTask implements Runnable {
         this.plugin = BlockRegen.getInstance();
     }
 
+    public void load() {
+        this.period = plugin.getConfig().getInt("Auto-Save.Interval", 300);
+    }
+
+    public void start() {
+        if (running) stop();
+
+        running = true;
+        task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this, period * 20, period * 20);
+        plugin.getConsoleOutput().info("Starting auto-save.. with an interval of " + period + " seconds.");
+    }
+
     public void stop() {
         if (!running) return;
 
@@ -31,18 +43,6 @@ public class AutoSaveTask implements Runnable {
         task.cancel();
         task = null;
         running = false;
-    }
-
-    public void start() {
-        if (running) stop();
-
-        running = true;
-        task = Bukkit.getScheduler().runTaskTimerAsynchronously(plugin, this, period * 20, period * 20);
-        plugin.getConsoleOutput().info("Starting auto-save.. with an interval of " + period + " seconds.");
-    }
-
-    public void load() {
-        this.period = plugin.getConfig().getInt("Auto-Save.Interval", 300);
     }
 
     @Override

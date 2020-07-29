@@ -21,16 +21,32 @@ public class PresetManager {
         this.plugin = BlockRegen.getInstance();
     }
 
-    public BlockPreset getPreset(String name) {
-        return presets.getOrDefault(name, null);
+    public Optional<BlockPreset> getPreset(String name) {
+        return Optional.ofNullable(presets.getOrDefault(name, null));
     }
 
-    public BlockPreset getPresetByTarget(String target) {
-        return presets.values().stream().filter(o -> o.getMaterial().equalsIgnoreCase(target)).findAny().orElse(null);
+    public Optional<BlockPreset> getPresetByTarget(String target) {
+        return presets.values().stream().filter(o -> o.getMaterial().equalsIgnoreCase(target)).findAny();
     }
 
     public Map<String, BlockPreset> getPresets() {
         return Collections.unmodifiableMap(presets);
+    }
+
+    public void loadAll() {
+        presets.clear();
+
+        ConfigurationSection blocks = plugin.getFiles().getBlockList().getFileConfiguration().getConfigurationSection("Blocks");
+
+        if (blocks == null) return;
+
+        for (String key : blocks.getKeys(false)) {
+            load(key);
+        }
+
+        plugin.getConsoleOutput().info("Loaded " + presets.size() + " block preset(s)...");
+
+        cacheEvents();
     }
 
     public void load(String name) {
@@ -252,21 +268,5 @@ public class PresetManager {
         plugin.getConsoleOutput().info(Utils.events.isEmpty() ?
                 "&cFound no events. Skip adding to the system." :
                 "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
-    }
-
-    public void loadAll() {
-        presets.clear();
-
-        ConfigurationSection blocks = plugin.getFiles().getBlockList().getFileConfiguration().getConfigurationSection("Blocks");
-
-        if (blocks == null) return;
-
-        for (String key : blocks.getKeys(false)) {
-            load(key);
-        }
-
-        plugin.getConsoleOutput().info("Loaded " + presets.size() + " block preset(s)...");
-
-        cacheEvents();
     }
 }
