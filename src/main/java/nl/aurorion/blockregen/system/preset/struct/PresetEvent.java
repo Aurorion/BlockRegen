@@ -1,5 +1,8 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
+import lombok.Data;
+
+@Data
 public class PresetEvent {
 
     private String name;
@@ -12,5 +15,7 @@ public class PresetEvent {
 
     private Amount itemRarity;
 
-    private ItemDrop eventItem;
+    private ItemDrop item;
+
+    private EventBossBar bossBar;
 }

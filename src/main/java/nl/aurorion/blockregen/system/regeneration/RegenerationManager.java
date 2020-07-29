@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.regeneration;
 
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
@@ -6,7 +6,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.system.preset.BlockPreset;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
@@ -57,15 +58,17 @@ public class RegenerationManager {
 
     @Nullable
     public RegenerationProcess getProcess(Location location) {
-        for (RegenerationProcess process : cache) {
 
-            // Try to convert simple location again as it should never be null if everything went well.
-            if (process.getBlock() == null)
-                process.convertSimpleLocation();
+        if (location != null)
+            for (RegenerationProcess process : cache) {
 
-            if (process.getBlock().getLocation().equals(location))
-                return process;
-        }
+                // Try to convert simple location again if the block's not there.
+                if (process.getBlock() == null)
+                    process.convertSimpleLocation();
+
+                if (process.getBlock().getLocation().equals(location))
+                    return process;
+            }
         return null;
     }
 

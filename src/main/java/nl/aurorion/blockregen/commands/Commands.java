@@ -5,6 +5,7 @@ import com.sk89q.worldedit.regions.Region;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
@@ -255,33 +256,25 @@ public class Commands implements CommandExecutor, Listener {
                             if (!Utils.events.get(allArgs)) {
                                 Utils.events.put(allArgs, true);
                                 sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
+
                                 String barName = null;
                                 BarColor barColor = BarColor.BLUE;
-                                FileConfiguration blocklist = plugin.getFiles().getBlockList().getFileConfiguration();
-                                ConfigurationSection blocks = blocklist.getConfigurationSection("Blocks");
-                                Set<String> setblocks = Objects.requireNonNull(blocks).getKeys(false);
-                                for (String loopBlocks : setblocks) {
-                                    String eventName = blocklist.getString("Blocks." + loopBlocks + ".event.event-name");
-                                    if (Objects.requireNonNull(eventName).equalsIgnoreCase(allArgs)) {
-                                        if (blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name") == null) {
-                                            barName = "Event " + allArgs + " is now active!";
-                                        } else {
-                                            barName = blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.name");
-                                        }
-                                        if (blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color") == null) {
-                                            barColor = BarColor.YELLOW;
-                                        } else {
-                                            barColor = BarColor.valueOf(Objects.requireNonNull(blocklist.getString("Blocks." + loopBlocks + ".event.bossbar.color")).toUpperCase());
-                                        }
 
-                                        break;
-                                    }
+                                for (BlockPreset preset : plugin.getPresetManager().getPresets().values()) {
+                                    if (preset.getEvent() == null || !preset.getEvent().getName().equalsIgnoreCase(allArgs))
+                                        continue;
+
+                                    if (preset.getEvent().getBossBar() == null)
+                                        return false;
+
+                                    barName = preset.getEvent().getBossBar().getText();
+                                    barColor = preset.getEvent().getBossBar().getColor();
                                 }
 
-                                BossBar bossbar = Bukkit.createBossBar(null, BarColor.BLUE, BarStyle.SOLID);
+                                BossBar bossbar = Bukkit.createBossBar(Utils.color(Utils.parse(barName)), barColor, BarStyle.SOLID);
+
                                 Utils.bars.put(allArgs, bossbar);
-                                bossbar.setTitle(ChatColor.translateAlternateColorCodes('&', Objects.requireNonNull(barName)));
-                                bossbar.setColor(barColor);
+
                                 for (Player online : Bukkit.getOnlinePlayers()) {
                                     bossbar.addPlayer(online);
                                 }

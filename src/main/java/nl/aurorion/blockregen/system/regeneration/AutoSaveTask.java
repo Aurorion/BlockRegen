@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.regeneration;
 
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;

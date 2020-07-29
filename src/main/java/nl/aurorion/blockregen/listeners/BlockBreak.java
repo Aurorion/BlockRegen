@@ -11,11 +11,10 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
-import nl.aurorion.blockregen.system.Getters;
-import nl.aurorion.blockregen.system.RegenerationProcess;
-import nl.aurorion.blockregen.system.preset.BlockPreset;
-import nl.aurorion.blockregen.system.preset.ExperienceDrop;
-import nl.aurorion.blockregen.system.preset.ItemDrop;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.preset.struct.ExperienceDrop;
+import nl.aurorion.blockregen.system.preset.struct.ItemDrop;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -30,7 +29,6 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -174,8 +172,6 @@ public class BlockBreak implements Listener {
         event.setDropItems(false);
         event.setExpToDrop(0);
 
-        Getters getters = plugin.getGetters();
-
         Player player = event.getPlayer();
 
         Block block = event.getBlock();
@@ -209,39 +205,26 @@ public class BlockBreak implements Listener {
         List<ItemStack> drops = new ArrayList<>();
 
         // Events ---------------------------------------------------------------------------------------------
+
         boolean doubleDrops = false;
         boolean doubleExp = false;
-        ItemStack eventItem = null;
-        boolean dropEventItem = false;
-        int rarity = 0;
 
-        if (getters.eventName(blockName) != null && Utils.events.containsKey(getters.eventName(blockName)))
-            if (Utils.events.get(getters.eventName(blockName))) {
+        if (preset.getEvent() != null && Utils.events.containsKey(preset.getEvent().getName())) {
+            if (Utils.events.get(preset.getEvent().getName())) {
 
-                doubleDrops = getters.eventDoubleDrops(blockName);
-                doubleExp = getters.eventDoubleExp(blockName);
+                doubleDrops = preset.getEvent().isDoubleDrops();
+                doubleExp = preset.getEvent().isDoubleExperience();
 
-                if (getters.eventItemMaterial(blockName) != null) {
-                    int amount = getters.eventItemAmount(blockName, player);
+                if (preset.getEvent().getItem() != null) {
+                    ItemStack eventDrop = preset.getEvent().getItem().toItemStack(player);
 
-                    if (amount > 0) {
-                        eventItem = new ItemStack(getters.eventItemMaterial(blockName), amount);
-                        ItemMeta meta = eventItem.getItemMeta();
-
-                        if (meta != null) {
-                            if (getters.eventItemName(blockName, player) != null)
-                                meta.setDisplayName(getters.eventItemName(blockName, player));
-
-                            if (!getters.eventItemLore(blockName, player).isEmpty())
-                                meta.setLore(getters.eventItemLore(blockName, player));
-                        }
-
-                        eventItem.setItemMeta(meta);
-                        dropEventItem = getters.eventItemDropNaturally(blockName);
-                        rarity = getters.eventItemRarity(blockName);
+                    // Event item
+                    if (eventDrop != null && (plugin.getRandom().nextInt((preset.getEvent().getItemRarity().getInt() - 1) + 1) + 1) == 1) {
+                        drops.add(eventDrop);
                     }
                 }
             }
+        }
 
         // Drop Section-----------------------------------------------------------------------------------------
         if (preset.isNaturalBreak()) {
@@ -295,13 +278,6 @@ public class BlockBreak implements Listener {
                     world.spawn(location, ExperienceOrb.class).setExperience(expAmount);
                 else player.giveExp(expAmount);
             }
-        }
-
-        // Event item
-        if (eventItem != null &&
-                dropEventItem &&
-                (plugin.getRandom().nextInt((rarity - 1) + 1) + 1) == 1) {
-            drops.add(eventItem);
         }
 
         for (ItemStack drop : drops) {

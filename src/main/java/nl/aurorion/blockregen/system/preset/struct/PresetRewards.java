@@ -1,8 +1,10 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.system.preset.struct.Amount;
+import nl.aurorion.blockregen.system.preset.struct.ItemDrop;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 

@@ -2,7 +2,7 @@ package nl.aurorion.blockregen.api;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.aurorion.blockregen.system.RegenerationProcess;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Material;
 import org.bukkit.event.Cancellable;
 

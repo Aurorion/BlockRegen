@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.Data;
 import nl.aurorion.blockregen.BlockRegen;
@@ -31,6 +31,8 @@ public class BlockPreset {
     private PresetRewards rewards;
 
     private final BlockRegen plugin;
+
+    private PresetEvent event;
 
     public BlockPreset(String name) {
         this.name = name;

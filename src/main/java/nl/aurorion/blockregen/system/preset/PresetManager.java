@@ -1,9 +1,11 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.preset;
 
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.system.preset.*;
+import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.system.preset.struct.*;
 import org.bukkit.Material;
+import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -146,31 +148,14 @@ public class PresetManager {
                 }
 
                 if (material != null) {
-                    ItemDrop drop = new ItemDrop(material);
+                    ItemDrop drop = loadItemDrop("Blocks." + name + ".drop-item");
 
-                    drop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.amount", 1));
-
-                    drop.setDisplayName(section.getString("drop-item.name"));
-
-                    drop.setLore(section.getStringList("drop-item.lores"));
-
-                    drop.setDropNaturally(section.getBoolean("drop-item.drop-naturally"));
-
-                    ExperienceDrop experienceDrop = new ExperienceDrop();
-
-                    experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), "Blocks." + name + ".drop-item.exp.amount", 0));
-
-                    experienceDrop.setDropNaturally(plugin.getFiles().getBlockList().getFileConfiguration().getBoolean("Blocks." + name + ".drop-item.exp.drop-naturally", false));
-
-                    drop.setExperienceDrop(experienceDrop);
-                    plugin.getConsoleOutput().debug("Exp drop: " + experienceDrop.toString());
-
-                    drops.add(drop);
+                    if (drop != null) drops.add(drop);
                 }
             } else {
                 // Multiple drops
                 for (String dropName : section.getConfigurationSection("drop-item").getKeys(false)) {
-                    // TODO No need to implement yet.
+                    // TODO No need to implement more drops yet.
                 }
             }
 
@@ -180,9 +165,93 @@ public class PresetManager {
 
         preset.setRewards(rewards);
 
-        // TODO: Events
+        ConfigurationSection eventSection = section.getConfigurationSection("event");
+
+        if (eventSection != null) {
+            PresetEvent event = new PresetEvent();
+
+            String eventName = eventSection.getString("event-name");
+
+            if (eventName != null) {
+                event.setName(eventName);
+
+                event.setDoubleDrops(eventSection.getBoolean("double-drops", false));
+                event.setDoubleExperience(eventSection.getBoolean("double-exp", false));
+
+                if (eventSection.contains("bossbar")) {
+                    EventBossBar bossBar = new EventBossBar();
+
+                    bossBar.setText(eventSection.getString("bossbar.name"));
+                    bossBar.setColor(BarColor.valueOf(eventSection.getString("bosssbar.color")));
+
+                    event.setBossBar(bossBar);
+                }
+
+                if (eventSection.contains("custom-item")) {
+                    ItemDrop drop = loadItemDrop("Blocks." + name + ".event.custom-item");
+
+                    if (drop != null) event.setItem(drop);
+                }
+
+                if (eventSection.contains("custom-item.rarity")) {
+                    Amount rarity = Amount.loadAmount(file, "Blocks." + name + ".event.custom-item.rarity", 1);
+                    event.setItemRarity(rarity);
+                } else event.setItemRarity(new Amount(1));
+            } else
+                plugin.getConsoleOutput().err("Event name for block " + name + " has not been set, but the section is present.");
+        }
 
         presets.put(name, preset);
+    }
+
+    private ItemDrop loadItemDrop(String path) {
+
+        if (Strings.isNullOrEmpty(path))
+            return null;
+
+        ConfigurationSection section = plugin.getFiles().getBlockList().getFileConfiguration().getConfigurationSection(path);
+
+        if (section == null)
+            return null;
+
+        Material material = null;
+        try {
+            material = Material.valueOf(section.getString("material").trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err(e.getMessage());
+        }
+
+        if (material != null) {
+            ItemDrop drop = new ItemDrop(material);
+
+            drop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".amount", 1));
+
+            drop.setDisplayName(section.getString("name"));
+
+            drop.setLore(section.getStringList("lores"));
+
+            ExperienceDrop experienceDrop = new ExperienceDrop();
+
+            experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".exp.amount", 0));
+
+            experienceDrop.setDropNaturally(plugin.getFiles().getBlockList().getFileConfiguration().getBoolean(path + ".exp.drop-naturally", false));
+
+            drop.setExperienceDrop(experienceDrop);
+            return drop;
+        }
+        return null;
+    }
+
+    private void cacheEvents() {
+
+        for (BlockPreset preset : getPresets().values()) {
+            if (preset.getEvent() != null)
+                Utils.events.put(preset.getEvent().getName(), false);
+        }
+
+        plugin.getConsoleOutput().info(Utils.events.isEmpty() ?
+                "&cFound no events. Skip adding to the system." :
+                "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
     }
 
     public void loadAll() {
@@ -197,5 +266,7 @@ public class PresetManager {
         }
 
         plugin.getConsoleOutput().info("Loaded " + presets.size() + " block preset(s)...");
+
+        cacheEvents();
     }
 }

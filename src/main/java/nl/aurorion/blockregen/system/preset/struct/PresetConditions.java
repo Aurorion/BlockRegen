@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;

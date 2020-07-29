@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

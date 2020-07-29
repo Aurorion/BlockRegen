@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.preset;
+package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -24,10 +24,6 @@ public class ItemDrop {
     @Getter
     @Setter
     private String displayName;
-
-    @Getter
-    @Setter
-    private boolean dropNaturally = true;
 
     @Getter
     @Setter

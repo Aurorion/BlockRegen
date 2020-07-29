@@ -20,13 +20,11 @@ import nl.aurorion.blockregen.particles.breaking.WitchSpell;
 import nl.aurorion.blockregen.providers.JobsProvider;
 import nl.aurorion.blockregen.providers.WorldEditProvider;
 import nl.aurorion.blockregen.providers.WorldGuardProvider;
-import nl.aurorion.blockregen.system.Getters;
-import nl.aurorion.blockregen.system.PresetManager;
-import nl.aurorion.blockregen.system.RegenerationManager;
-import org.bukkit.Bukkit;
+import nl.aurorion.blockregen.system.preset.PresetManager;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -34,8 +32,6 @@ import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 public class BlockRegen extends JavaPlugin {
@@ -62,9 +58,6 @@ public class BlockRegen extends JavaPlugin {
 
     @Getter
     private Files files;
-
-    @Getter
-    private Getters getters;
 
     @Getter
     private Random random;
@@ -101,8 +94,6 @@ public class BlockRegen extends JavaPlugin {
         presetManager = new PresetManager();
         regenerationManager = new RegenerationManager();
 
-        getters = new Getters(this);
-
         consoleOutput = new ConsoleOutput(this);
         consoleOutput.setColors(true);
 
@@ -118,7 +109,6 @@ public class BlockRegen extends JavaPlugin {
             regenerationManager.startAutoSave();
 
         registerListeners();
-        fillEvents();
 
         checkDependencies();
 
@@ -148,6 +138,9 @@ public class BlockRegen extends JavaPlugin {
         if (!(sender instanceof ConsoleCommandSender))
             consoleOutput.addListener(sender);
 
+        Utils.events.clear();
+        Utils.bars.clear();
+
         checkDependencies();
 
         files.getSettings().load();
@@ -160,11 +153,6 @@ public class BlockRegen extends JavaPlugin {
 
         files.getBlockList().load();
         presetManager.loadAll();
-        getters.load();
-
-        Utils.events.clear();
-        fillEvents();
-        Utils.bars.clear();
 
         if (getConfig().getBoolean("Auto-Save.Enabled", false))
             regenerationManager.reloadAutoSave();
@@ -267,24 +255,6 @@ public class BlockRegen extends JavaPlugin {
             usePlaceholderAPI = true;
             consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
         }
-    }
-
-    public void fillEvents() {
-        FileConfiguration blockList = files.getBlockList().getFileConfiguration();
-        ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
-
-        List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
-
-        for (String loopBlocks : blocks) {
-            String eventName = blockList.getString("Blocks." + loopBlocks + ".event.event-name");
-
-            if (eventName != null)
-                Utils.events.put(eventName, false);
-        }
-
-        consoleOutput.info(Utils.events.isEmpty() ?
-                "&cFound no events. Skip adding to the system." :
-                "&aFound " + Utils.events.keySet().size() + " event(s)... added all to the system.");
     }
 
     public void enableMetrics() {

@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.regeneration.struct;
 
 import lombok.Data;
 import org.bukkit.Bukkit;

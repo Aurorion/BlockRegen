@@ -1,11 +1,11 @@
-package nl.aurorion.blockregen.system;
+package nl.aurorion.blockregen.system.regeneration.struct;
 
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
-import nl.aurorion.blockregen.system.preset.BlockPreset;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
