@@ -204,8 +204,16 @@ public class PresetManager {
 
                     if (eventSection.contains("bossbar.color")) {
                         String barColor = eventSection.getString("bossbar.color");
-                        if (barColor != null)
-                            bossBar.setColor(BarColor.valueOf(barColor.toUpperCase()));
+                        if (barColor != null) {
+                            BarColor color;
+                            try {
+                                color = BarColor.valueOf(barColor.toUpperCase());
+                            } catch (IllegalArgumentException e) {
+                                color = BarColor.BLUE;
+                                plugin.getConsoleOutput().err("Boss bar color " + barColor + " for preset " + name + " is invalid.");
+                            }
+                            bossBar.setColor(color);
+                        }
                     }
 
                     event.setBossBar(bossBar);
