@@ -19,6 +19,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +28,7 @@ public class RegenerationManager {
     private final BlockRegen plugin;
 
     private final Gson gson = new GsonBuilder()
-            .setPrettyPrinting()
+            // .setPrettyPrinting()
             .create();
 
     private List<RegenerationProcess> cache = new ArrayList<>();
@@ -39,6 +40,9 @@ public class RegenerationManager {
         this.plugin = BlockRegen.getInstance();
     }
 
+    /**
+     * Helper for creating regeneration processes.
+     */
     public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
         RegenerationProcess process = createProcess(block, preset);
 
@@ -52,6 +56,9 @@ public class RegenerationManager {
         return process;
     }
 
+    /**
+     * Helper for creating regeneration processes.
+     */
     public RegenerationProcess createProcess(Block block, BlockPreset preset) {
 
         RegenerationProcess process;
@@ -63,26 +70,34 @@ public class RegenerationManager {
                 e.printStackTrace();
             return null;
         }
-
-        cache.add(process);
         return process;
+    }
+
+    /**
+     * Register the process as running.
+     */
+    public void registerProcess(RegenerationProcess process) {
+        if (!cache.contains(process)) {
+            cache.add(process);
+            plugin.getConsoleOutput().debug("Registered regeneration process " + process.toString());
+        }
     }
 
     @Nullable
     public RegenerationProcess getProcess(Location location) {
 
         if (location != null)
-            for (RegenerationProcess process : new ArrayList<>(cache)) {
+            for (RegenerationProcess process : getCache()) {
+
+                // Don't know why I need to do this.
+                if (process == null) continue;
 
                 // Try to convert simple location again if the block's not there.
                 if (process.getBlock() == null)
-                    process.convertSimpleLocation();
-
-                // Process is not running and it's past regen time
-                if (!process.isRunning() && process.getRegenerationTime() <= System.currentTimeMillis()) {
-                    process.regenerate();
-                    continue;
-                }
+                    if (!process.convertSimpleLocation()) {
+                        BlockRegen.getInstance().getConsoleOutput().err("Could not remap a process block location.");
+                        continue;
+                    }
 
                 if (process.getBlock().getLocation().equals(location))
                     return process;
@@ -184,5 +199,9 @@ public class RegenerationManager {
             process.start();
             BlockRegen.getInstance().getConsoleOutput().debug("Prepared regeneration process " + process.toString());
         }
+    }
+
+    public List<RegenerationProcess> getCache() {
+        return Collections.unmodifiableList(cache);
     }
 }

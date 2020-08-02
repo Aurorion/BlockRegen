@@ -203,6 +203,12 @@ public class BlockBreak implements Listener {
         if (blockRegenBlockBreakEvent.isCancelled())
             return;
 
+        // Start regeneration
+
+        process.start();
+
+        // Rewards...
+
         List<ItemStack> drops = new ArrayList<>();
 
         // Events ---------------------------------------------------------------------------------------------
@@ -298,7 +304,5 @@ public class BlockBreak implements Listener {
         // Particles -------------------------------------------------------------------------------------------
         if (preset.getParticle() != null)
             plugin.getParticleManager().displayParticle(preset.getParticle(), block);
-
-        process.start();
     }
 }

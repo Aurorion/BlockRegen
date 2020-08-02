@@ -6,8 +6,11 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -219,6 +222,22 @@ public class Commands implements CommandExecutor, Listener {
             case "discord":
                 sender.sendMessage(Utils.color("&8&m      &3 BlockRegen Discord Server" +
                         "\n&6>> &7https://discord.gg/ZCxMca5"));
+                break;
+            case "test":
+
+                player = (Player) sender;
+
+                RegenerationProcess process = plugin.getRegenerationManager().createProcess(player.getTargetBlock(null, 10), plugin.getPresetManager().getPreset("DIAMOND_ORE").orElse(null));
+
+                if (process == null) {
+                    sender.sendMessage("Block null");
+                    return false;
+                }
+
+                process.setTimeLeft(Long.parseLong(args[1]));
+
+                if (args.length > 2)
+                    process.start();
                 break;
             case "events":
                 if (!sender.hasPermission("blockregen.admin")) {
