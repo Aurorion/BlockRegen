@@ -50,8 +50,15 @@ public class RegenerationProcess implements Runnable {
     private transient BukkitTask task;
 
     public RegenerationProcess(Block block, BlockPreset preset) {
+
+        if (block == null)
+            throw new IllegalArgumentException("Block cannot be null");
+        if (preset == null)
+            throw new IllegalArgumentException("Preset cannot be null");
+
         this.block = block;
         this.preset = preset;
+
         this.presetName = preset.getName();
         this.originalMaterial = block.getType();
         this.simpleLocation = new SimpleLocation(block.getLocation());
@@ -70,19 +77,13 @@ public class RegenerationProcess implements Runnable {
 
         regenerateInto = preset.getRegenMaterial().get();
 
-        // Check if we even need to start the task.
+        this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
-        if (this.timeLeft <= 0) {
+        if (this.regenerationTime <= System.currentTimeMillis()) {
             regenerate();
-            BlockRegen.getInstance().getConsoleOutput().debug("Regenerated the process already. timeLeft <= 0");
+            BlockRegen.getInstance().getConsoleOutput().debug("Regenerated the process already.");
             return;
         }
-
-        BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
-
-        // Calculate the time when to regenerate
-
-        this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
         // Replace the block
 
@@ -97,6 +98,7 @@ public class RegenerationProcess implements Runnable {
 
         task = Bukkit.getScheduler().runTaskLaterAsynchronously(BlockRegen.getInstance(), this, timeLeft / 50);
         BlockRegen.getInstance().getConsoleOutput().debug("Started regeneration...");
+        BlockRegen.getInstance().getConsoleOutput().debug("Regenerate in " + this.timeLeft / 1000 + "s");
     }
 
     @Override

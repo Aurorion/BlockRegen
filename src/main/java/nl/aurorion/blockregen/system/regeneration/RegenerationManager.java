@@ -42,6 +42,8 @@ public class RegenerationManager {
     public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
         RegenerationProcess process = createProcess(block, preset);
 
+        if (process == null) return null;
+
         process.setWorldName(block.getWorld().getName());
 
         if (regionName.length > 0)
@@ -51,7 +53,17 @@ public class RegenerationManager {
     }
 
     public RegenerationProcess createProcess(Block block, BlockPreset preset) {
-        RegenerationProcess process = new RegenerationProcess(block, preset);
+
+        RegenerationProcess process;
+        try {
+            process = new RegenerationProcess(block, preset);
+        } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err(e.getMessage());
+            if (plugin.getConsoleOutput().isDebug())
+                e.printStackTrace();
+            return null;
+        }
+
         cache.add(process);
         return process;
     }
@@ -66,12 +78,11 @@ public class RegenerationManager {
                 if (process.getBlock() == null)
                     process.convertSimpleLocation();
 
-                // If the process is not running, start it again, or regenerate it.
-                if (!process.isRunning())
-                    if (process.getRegenerationTime() <= System.currentTimeMillis())
-                        process.regenerate();
-                    else
-                        process.start();
+                // Process is not running and it's past regen time
+                if (!process.isRunning() && process.getRegenerationTime() <= System.currentTimeMillis()) {
+                    process.regenerate();
+                    continue;
+                }
 
                 if (process.getBlock().getLocation().equals(location))
                     return process;
