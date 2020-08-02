@@ -76,7 +76,9 @@ public class PresetManager {
         try {
             preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
         } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Dynamic material in replace material for " + name + " is invalid, skipping it.");
+            if (plugin.getConsoleOutput().isDebug())
+                e.printStackTrace();
+            plugin.getConsoleOutput().err("Dynamic material syntax ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid, skipping it.");
             return;
         }
 
@@ -89,7 +91,9 @@ public class PresetManager {
         try {
             preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
         } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Dynamic material in regenerate material for " + name + " is invalid, skipping it.");
+            if (plugin.getConsoleOutput().isDebug())
+                e.printStackTrace();
+            plugin.getConsoleOutput().err("Dynamic material syntax ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid, skipping it.");
             return;
         }
 
@@ -161,6 +165,8 @@ public class PresetManager {
                     material = Material.valueOf(section.getString("drop-item.material").trim().toUpperCase());
                 } catch (IllegalArgumentException e) {
                     plugin.getConsoleOutput().err(e.getMessage());
+                    if (plugin.getConsoleOutput().isDebug())
+                        e.printStackTrace();
                 }
 
                 if (material != null) {

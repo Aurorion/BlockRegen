@@ -60,11 +60,18 @@ public class RegenerationManager {
     public RegenerationProcess getProcess(Location location) {
 
         if (location != null)
-            for (RegenerationProcess process : cache) {
+            for (RegenerationProcess process : new ArrayList<>(cache)) {
 
                 // Try to convert simple location again if the block's not there.
                 if (process.getBlock() == null)
                     process.convertSimpleLocation();
+
+                // If the process is not running, start it again, or regenerate it.
+                if (!process.isRunning())
+                    if (process.getRegenerationTime() <= System.currentTimeMillis())
+                        process.regenerate();
+                    else
+                        process.start();
 
                 if (process.getBlock().getLocation().equals(location))
                     return process;
@@ -78,6 +85,7 @@ public class RegenerationManager {
 
     public void removeProcess(RegenerationProcess process) {
         cache.remove(process);
+        BlockRegen.getInstance().getConsoleOutput().debug("Removed process from cache: " + process.toString());
     }
 
     public void startAutoSave() {
@@ -98,10 +106,8 @@ public class RegenerationManager {
     }
 
     // Revert blocks before disabling
-    public void revert() {
-        for (RegenerationProcess process : cache) {
-            process.getBlock().setType(process.getOriginalMaterial());
-        }
+    public void revertAll() {
+        cache.forEach(process -> process.getBlock().setType(process.getOriginalMaterial()));
     }
 
     public void save() {
@@ -157,31 +163,15 @@ public class RegenerationManager {
 
             RegenerationProcess process = processIterator.next();
 
-            if (!process.convertSimpleLocation())
+            if (!process.convertSimpleLocation() || !process.convertPreset()) {
                 processIterator.remove();
-
-            BlockPreset preset = plugin.getPresetManager().getPreset(process.getPresetName()).orElse(null);
-
-            if (preset == null) {
-                plugin.getConsoleOutput().err("BlockPreset " + process.getPresetName() + " no longer exists, removing a left over regeneration process.");
-                processIterator.remove();
+                BlockRegen.getInstance().getConsoleOutput().debug("Removed regeneration process " + process.toString());
                 continue;
             }
-
-            process.setPreset(preset);
-
-            plugin.getConsoleOutput().debug("Time left: " + process.getTimeLeft());
-
-            if (process.getTimeLeft() <= 0) {
-                processIterator.remove();
-                continue;
-            }
-
-            // Update regen time
-            process.setRegenerationTime(System.currentTimeMillis() + process.getTimeLeft());
 
             // Start it
             process.start();
+            BlockRegen.getInstance().getConsoleOutput().debug("Prepared regeneration process " + process.toString());
         }
     }
 }

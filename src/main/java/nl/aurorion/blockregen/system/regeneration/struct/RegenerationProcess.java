@@ -10,7 +10,6 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
-import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitTask;
 
 @Data
@@ -36,6 +35,7 @@ public class RegenerationProcess implements Runnable {
 
     /**
      * Holds the system time when the block should regenerate.
+     * -- is set after #start()
      */
     @Getter
     private transient long regenerationTime;
@@ -59,21 +59,39 @@ public class RegenerationProcess implements Runnable {
 
     public void start() {
 
+        // If timeLeft is -1, generate a new one from preset regen delay.
+
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
             this.timeLeft = regenDelay * 1000;
         }
 
+        // Pick a regenerateInto material
+
+        regenerateInto = preset.getRegenMaterial().get();
+
+        // Check if we even need to start the task.
+
+        if (this.timeLeft <= 0) {
+            regenerate();
+            BlockRegen.getInstance().getConsoleOutput().debug("Regenerated the process already. timeLeft <= 0");
+            return;
+        }
+
         BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
 
+        // Calculate the time when to regenerate
+
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
+
+        // Replace the block
 
         Material replaceMaterial = preset.getReplaceMaterial().get();
 
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(replaceMaterial));
         BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
 
-        regenerateInto = preset.getRegenMaterial().get();
+        // Start the regeneration task
 
         if (task != null) task.cancel();
 
@@ -83,9 +101,15 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public void run() {
+        regenerate();
+    }
 
-        task.cancel();
-        task = null;
+    public void regenerate() {
+
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
 
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
@@ -97,6 +121,22 @@ public class RegenerationProcess implements Runnable {
 
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(regenerateInto));
         BlockRegen.getInstance().getConsoleOutput().debug("Regenerated block " + originalMaterial);
+    }
+
+    /**
+     * Revert process to original material.
+     */
+    public void revert() {
+
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
+        BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(originalMaterial));
+        BlockRegen.getInstance().getConsoleOutput().debug("Reverted block " + originalMaterial);
     }
 
     public void updateTimeLeft(long timeLeft) {
@@ -116,5 +156,26 @@ public class RegenerationProcess implements Runnable {
         Location location = simpleLocation.toLocation();
         setBlock(location.getBlock());
         return true;
+    }
+
+    public boolean convertPreset() {
+        BlockPreset preset = BlockRegen.getInstance().getPresetManager().getPreset(presetName).orElse(null);
+
+        if (preset == null) {
+            BlockRegen.getInstance().getConsoleOutput().err("BlockPreset " + presetName + " no longer exists, removing a left over regeneration process.");
+            return false;
+        }
+
+        this.preset = preset;
+        return true;
+    }
+
+    public boolean isRunning() {
+        return task != null;
+    }
+
+    @Override
+    public String toString() {
+        return "id: " + (task != null ? task.getTaskId() : "NaN") + "=" + presetName + " : " + (block != null ? block.getLocation().toString() : simpleLocation.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
     }
 }

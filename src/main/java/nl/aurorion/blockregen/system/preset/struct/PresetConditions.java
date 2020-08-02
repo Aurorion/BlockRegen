@@ -4,6 +4,7 @@ import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.JobsPlayer;
 import com.google.common.base.Strings;
+import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import org.bukkit.Material;
@@ -20,19 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@NoArgsConstructor
 public class PresetConditions {
 
-    private List<Material> toolsRequired = new ArrayList<>();
+    private final List<Material> toolsRequired = new ArrayList<>();
 
-    private Map<Enchantment, Integer> enchantsRequired = new HashMap<>();
+    private final Map<Enchantment, Integer> enchantsRequired = new HashMap<>();
 
-    private Map<Job, Integer> jobsRequired = new HashMap<>();
-
-    private final BlockRegen plugin;
-
-    public PresetConditions() {
-        this.plugin = BlockRegen.getInstance();
-    }
+    private final Map<Job, Integer> jobsRequired = new HashMap<>();
 
     public boolean check(Player player) {
         return checkTools(player) && checkEnchants(player) && checkJobs(player);
@@ -78,6 +74,22 @@ public class PresetConditions {
         return false;
     }
 
+    public boolean checkJobs(Player player) {
+
+        if (BlockRegen.getInstance().getJobsProvider() == null || jobsRequired.isEmpty()) return true;
+
+        JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
+
+        for (Map.Entry<Job, Integer> entry : jobsRequired.entrySet()) {
+            if (Jobs.getPlayerManager().getJobsPlayer(player).isInJob(entry.getKey()) && jobsPlayer.getJobProgression(entry.getKey()).getLevel() >= entry.getValue()) {
+                return true;
+            }
+        }
+
+        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player).replace("%job%", compressJobRequirements(jobsRequired)));
+        return false;
+    }
+
     private String compressEnchantRequirements(Map<Enchantment, Integer> input) {
         List<String> out = new ArrayList<>();
 
@@ -96,22 +108,6 @@ public class PresetConditions {
         }
 
         return String.join(", ", out);
-    }
-
-    public boolean checkJobs(Player player) {
-
-        if (BlockRegen.getInstance().getJobsProvider() == null || jobsRequired.isEmpty()) return true;
-
-        JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
-
-        for (Map.Entry<Job, Integer> entry : jobsRequired.entrySet()) {
-            if (Jobs.getPlayerManager().getJobsPlayer(player).isInJob(entry.getKey()) && jobsPlayer.getJobProgression(entry.getKey()).getLevel() >= entry.getValue()) {
-                return true;
-            }
-        }
-
-        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player).replace("%job%", compressJobRequirements(jobsRequired)));
-        return false;
     }
 
     public void setToolsRequired(@Nullable String input) {

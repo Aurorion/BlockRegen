@@ -11,10 +11,10 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
-import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.ItemDrop;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -61,6 +61,7 @@ public class BlockBreak implements Listener {
 
         // Check if the block is regenerating already
         if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
+            plugin.getConsoleOutput().debug("Block is regenerating...");
             event.setCancelled(true);
             return;
         }

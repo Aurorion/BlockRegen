@@ -21,7 +21,6 @@ import nl.aurorion.blockregen.providers.JobsProvider;
 import nl.aurorion.blockregen.providers.WorldEditProvider;
 import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.preset.PresetManager;
-import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -166,7 +165,7 @@ public class BlockRegen extends JavaPlugin {
         if (regenerationManager.getAutoSaveTask() != null)
             regenerationManager.getAutoSaveTask().stop();
 
-        regenerationManager.revert();
+        regenerationManager.revertAll();
         regenerationManager.save();
 
         instance = null;
