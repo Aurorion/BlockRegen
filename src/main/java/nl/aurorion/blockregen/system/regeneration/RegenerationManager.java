@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 public class RegenerationManager {
@@ -31,7 +30,7 @@ public class RegenerationManager {
             // .setPrettyPrinting()
             .create();
 
-    private List<RegenerationProcess> cache = new ArrayList<>();
+    private final List<RegenerationProcess> cache = new ArrayList<>();
 
     @Getter
     private AutoSaveTask autoSaveTask;
@@ -133,7 +132,16 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revertAll() {
-        cache.forEach(process -> process.getBlock().setType(process.getOriginalMaterial()));
+        for (RegenerationProcess process : cache) {
+            Block block = process.getBlock();
+
+            if (block == null) {
+                plugin.getConsoleOutput().err("Could not revert process " + process.toString() + ", block is null.");
+                continue;
+            }
+
+            block.setType(process.getOriginalMaterial());
+        }
     }
 
     public void save() {
@@ -161,7 +169,8 @@ public class RegenerationManager {
     }
 
     public void load() {
-        cache.clear();
+
+        // From json
 
         Path path = Paths.get(plugin.getDataFolder().getPath() + "/Data.json");
 
@@ -177,20 +186,16 @@ public class RegenerationManager {
 
         if (Strings.isNullOrEmpty(input)) return;
 
-        cache = gson.fromJson(input, new TypeToken<List<RegenerationProcess>>() {
+        List<RegenerationProcess> loadedProcesses = gson.fromJson(input, new TypeToken<List<RegenerationProcess>>() {
         }.getType());
 
-        afterLoad();
-    }
+        // Load into cache
 
-    private void afterLoad() {
-        Iterator<RegenerationProcess> processIterator = cache.iterator();
-        while (processIterator.hasNext()) {
+        cache.clear();
 
-            RegenerationProcess process = processIterator.next();
+        for (RegenerationProcess process : loadedProcesses) {
 
             if (!process.convertSimpleLocation() || !process.convertPreset()) {
-                processIterator.remove();
                 BlockRegen.getInstance().getConsoleOutput().debug("Removed regeneration process " + process.toString());
                 continue;
             }

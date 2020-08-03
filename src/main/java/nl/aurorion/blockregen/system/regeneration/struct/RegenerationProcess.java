@@ -18,7 +18,6 @@ public class RegenerationProcess implements Runnable {
 
     private SimpleLocation simpleLocation;
 
-    @Getter
     private transient Block block;
 
     @Getter
@@ -73,6 +72,8 @@ public class RegenerationProcess implements Runnable {
         BlockRegen.getInstance().getRegenerationManager().registerProcess(this);
 
         // If timeLeft is -1, generate a new one from preset regen delay.
+
+        BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
 
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
@@ -182,6 +183,12 @@ public class RegenerationProcess implements Runnable {
 
     public boolean isRunning() {
         return task != null;
+    }
+
+    public Block getBlock() {
+        if (this.block == null)
+            convertSimpleLocation();
+        return block;
     }
 
     @Override
