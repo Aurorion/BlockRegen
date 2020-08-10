@@ -149,7 +149,8 @@ public class RegenerationManager {
         final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
 
         for (RegenerationProcess process : finalCache) {
-            process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
+            if (process != null)
+                process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
         }
 
         plugin.getConsoleOutput().debug("Saving " + cache.size() + " regeneration processes..");
@@ -196,7 +197,7 @@ public class RegenerationManager {
         for (RegenerationProcess process : loadedProcesses) {
 
             if (!process.convertSimpleLocation() || !process.convertPreset()) {
-                BlockRegen.getInstance().getConsoleOutput().debug("Removed regeneration process " + process.toString());
+                BlockRegen.getInstance().getConsoleOutput().debug("Could not load regeneration process " + process.toString());
                 continue;
             }
 
