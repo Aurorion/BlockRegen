@@ -76,15 +76,23 @@ public class Utils {
     }
 
     @Nullable
-    public Material parseMaterial(@Nullable String input) {
+    public Material parseMaterial(@Nullable String input, boolean... blocksOnly) {
         if (Strings.isNullOrEmpty(input)) return null;
 
+        Material material;
         try {
-            return Material.valueOf(input.trim().toUpperCase());
+             material = Material.valueOf(input.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             BlockRegen.getInstance().getConsoleOutput().debug("Could not parse material " + input);
             return null;
         }
+
+        if (blocksOnly.length > 0 && blocksOnly[0] && !material.isBlock()) {
+            BlockRegen.getInstance().getConsoleOutput().debug("Material " + input + " is not a block.");
+            return null;
+        }
+
+        return material;
     }
 
     /**

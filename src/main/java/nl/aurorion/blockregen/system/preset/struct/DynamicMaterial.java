@@ -28,10 +28,10 @@ public class DynamicMaterial {
         if (input.contains(";")) {
             materials = new ArrayList<>(new ArrayList<>(Arrays.asList(input.split(";"))));
         } else {
-            defaultMaterial = Utils.parseMaterial(input);
+            defaultMaterial = Utils.parseMaterial(input, true);
 
             if (defaultMaterial == null)
-                throw new IllegalArgumentException("Default material cannot be null");
+                throw new IllegalArgumentException("Invalid block material");
 
             fixed = true;
             return;
@@ -39,10 +39,10 @@ public class DynamicMaterial {
 
         if (materials.isEmpty()) throw new IllegalArgumentException("Dynamic material doesn't have the correct syntax");
         else if (materials.size() == 1) {
-            defaultMaterial = Utils.parseMaterial(materials.get(0));
+            defaultMaterial = Utils.parseMaterial(materials.get(0), true);
 
             if (defaultMaterial == null)
-                throw new IllegalArgumentException("Default material cannot be null");
+                throw new IllegalArgumentException("Invalid block material");
 
             fixed = true;
             return;
@@ -53,10 +53,10 @@ public class DynamicMaterial {
         for (String material : materials) {
 
             if (!material.contains(":")) {
-                defaultMaterial = Utils.parseMaterial(material);
+                defaultMaterial = Utils.parseMaterial(material, true);
 
                 if (defaultMaterial == null)
-                    throw new IllegalArgumentException("Default material cannot be null");
+                    throw new IllegalArgumentException("Invalid block material");
 
                 continue;
             }
@@ -65,7 +65,7 @@ public class DynamicMaterial {
             total += chance;
 
             for (int i = 0; i < chance; i++) {
-                Material mat = Utils.parseMaterial(material.split(":")[0]);
+                Material mat = Utils.parseMaterial(material.split(":")[0], true);
 
                 if (mat == null) {
                     BlockRegen.getInstance().getConsoleOutput().debug("Invalid material " + material.split(":")[0] + " skipped");

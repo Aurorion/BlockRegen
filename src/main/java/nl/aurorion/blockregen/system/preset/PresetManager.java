@@ -78,7 +78,7 @@ public class PresetManager {
         } catch (IllegalArgumentException e) {
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material syntax ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid, skipping it.");
+            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid, skipping it.");
             return;
         }
 
@@ -93,7 +93,7 @@ public class PresetManager {
         } catch (IllegalArgumentException e) {
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material syntax ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid, skipping it.");
+            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid, skipping it.");
             return;
         }
 
