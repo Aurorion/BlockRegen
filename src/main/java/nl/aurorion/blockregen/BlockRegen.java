@@ -198,15 +198,17 @@ public class BlockRegen extends JavaPlugin {
 
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
 
-        if (rsp == null)
+        if (rsp == null) {
+            consoleOutput.info("Found Vault, but no Economy Provider is registered.");
             return;
+        }
 
         economy = rsp.getProvider();
         consoleOutput.info("Vault & economy plugin found! &aEnabling economy functions.");
     }
 
     private void setupWorldEdit() {
-        if (worldGuardProvider != null) return;
+        if (worldEditProvider != null) return;
 
         Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
 
@@ -238,7 +240,7 @@ public class BlockRegen extends JavaPlugin {
     private void setupGriefPrevention() {
         if (getServer().getPluginManager().isPluginEnabled("GriefPrevention") && griefPrevention == null) {
             this.griefPrevention = GriefPrevention.instance;
-            consoleOutput.info("GriefPrevention found! &aSupport it's protection.");
+            consoleOutput.info("GriefPrevention found! &aSupporting it's protection.");
         }
     }
 
@@ -252,7 +254,7 @@ public class BlockRegen extends JavaPlugin {
     private void setupPlaceholderAPI() {
         if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI") && !usePlaceholderAPI) {
             usePlaceholderAPI = true;
-            consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
+            consoleOutput.info("Found PlaceholderAPI! &aUsing it for placeholders.");
         }
     }
 
