@@ -6,35 +6,42 @@
 # Get notified when there is a new version available
 Update-Checker: true
 
+# Enable if you want to see more information about the plugins functions.
+Debug-Enabled: false
+
 # If you have WorldEdit installed and wish to make and use regions then set this to true
-Use-Regions: false
+Use-Regions: true
 
 # Set this to true if you dont want blocks to be regenerated in Towny towns
 Towny-Support: true
 
-# Set this to true if you have issues with GriefPrevention
+# Set this to true if you have issues with GriefPrevention.
 GriefPrevention-Support: true
 
-# Set this to true if you want to tolerate WorldGuard block-break and build region flags.
+# Set this to true if you want to tolerate WorldGuard protection.
 WorldGuard-Support: true
 
 # Enable to respect Residence protection.
 Residence-Support: true
 
 # Enable Jobs rewards.
+# This triggers a manual Jobs xp and money addition, if you're getting that doubled, disable here.
 Jobs-Rewards: true
 
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
-Disable-Other-Break: false
+Disable-Other-Break: true
 
 # If you wish to cancel all other blocks broken in the region then set this to true
-Disable-Other-Break-Region: false
+Disable-Other-Break-Region: true
 
 # This setting cancels the regeneration when a player uses bone meal on a crop
 Bone-Meal-Override: false
 
-# Having trouble with server crashes? This setting recovers blocks that are stuck in regening when your server crashes
-Data-Recovery: false
+# Automatic saving for regeneration process cache.
+Auto-Save:
+  Enabled: true
+  # Interval in seconds
+  Interval: 600
 
 # Add the worlds you wish to use BlockRegen in to this list
 Worlds-Enabled:

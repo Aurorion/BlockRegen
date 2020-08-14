@@ -2,6 +2,8 @@ package nl.aurorion.blockregen;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 /**
  * Message system, loaded on enable & reload.
@@ -12,11 +14,17 @@ public enum Message {
 
     PREFIX("Prefix", "&6[&3BlockRegen&6] &r"),
 
+    UPDATE("Update", "&6&m-----&r &3&lBlockRegen &6&m-----\n" +
+            "&eA new update was found!\n" +
+            "&eCurrent version: &c%version%\n" +
+            "&eNew version: &a%newVersion%\n" +
+            "&6&m-----------------------"),
+
     /**
      * Command general messages.
      */
     NO_PERM("Insufficient-Permission", "&cYou don't have the permissions to do this!"),
-    NO_PLAYER("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
+    ONLY_PLAYERS("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
     INVALID_COMMAND("Invalid-Command", "&cThis is not a valid command!"),
 
     RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
@@ -27,6 +35,11 @@ public enum Message {
     BYPASS_ON("Bypass-On", "&aBypass toggled on!"),
     BYPASS_OFF("Bypass-Off", "&cBypass toggled off!"),
 
+    /**
+     * Debug
+     */
+    DEBUG_ON("Debug-On", "&aYou are now listening to debug about actions caused by you."),
+    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to debug."),
 
     /**
      * Data check
@@ -39,6 +52,7 @@ public enum Message {
     /**
      * Regions
      */
+    WORLD_EDIT_NOT_INSTALLED("WorldEdit-Not-Installed", "&cRegion functions require World Edit."),
     NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID region first!"),
     DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&aRegion successfully saved!"),
@@ -58,8 +72,8 @@ public enum Message {
      * Messages on block break errs.
      */
     TOOL_REQUIRED_ERROR("Tool-Required-Error", "&cYou can only break this block with the following tool(s): &b%tool%&c."),
-    ENCHANT_REQUIRED_ERROR("Enchant-Required-Error", "&cYour tool need to have the following enchantment(s): &b%enchant%&c."),
-    JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to be a level &b%level% %job% &cto break this block."),
+    ENCHANT_REQUIRED_ERROR("Enchant-Required-Error", "&cYour tool has to have at least one of the following enchantment(s): &b%enchant%&c."),
+    JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to reach following job levels in order to break this block: &b%job%"),
     PERMISSION_BLOCK_ERROR("Permission-Error", "&cYou don't have the permission to break this block.");
 
     @Getter
@@ -69,8 +83,15 @@ public enum Message {
     @Setter
     private String value;
 
+    @Getter
+    private static boolean insertPrefix = false;
+
     public String get() {
-        return Utils.color(this.value);
+        return Utils.color(Utils.parse(insertPrefix ? "%prefix%" + this.value : this.value));
+    }
+
+    public String get(Player player) {
+        return Utils.color(Utils.parse(insertPrefix ? "%prefix%" + this.value : this.value, player));
     }
 
     Message(String path, String value) {
@@ -79,11 +100,18 @@ public enum Message {
     }
 
     public static void load() {
+
+        FileConfiguration messages = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration();
+
+        if (!messages.contains("Insert-Prefix"))
+            messages.set("Insert-Prefix", true);
+        insertPrefix = messages.getBoolean("Insert-Prefix", true);
+
         for (Message msg : values()) {
-            String str = BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().getString("Messages." + msg.getPath());
+            String str = messages.getString("Messages." + msg.getPath());
 
             if (str == null) {
-                BlockRegen.getInstance().getFiles().getMessages().getFileConfiguration().set("Messages." + msg.getPath(), msg.getValue());
+                messages.set("Messages." + msg.getPath(), msg.getValue());
                 continue;
             }
 

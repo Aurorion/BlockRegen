@@ -7,31 +7,31 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
-import nl.aurorion.blockregen.Commands.Commands;
-import nl.aurorion.blockregen.Configurations.Files;
-import nl.aurorion.blockregen.Events.BlockBreak;
-import nl.aurorion.blockregen.Events.PlayerInteract;
-import nl.aurorion.blockregen.Events.PlayerJoin;
-import nl.aurorion.blockregen.Particles.ParticleUtil;
-import nl.aurorion.blockregen.System.ConsoleOutput;
-import nl.aurorion.blockregen.System.Getters;
-import nl.aurorion.blockregen.System.UpdateCheck;
-import nl.aurorion.blockregen.provider.JobsProvider;
-import nl.aurorion.blockregen.provider.WorldGuardProvider;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.configuration.ConfigurationSection;
+import nl.aurorion.blockregen.commands.Commands;
+import nl.aurorion.blockregen.configuration.Files;
+import nl.aurorion.blockregen.listeners.BlockBreak;
+import nl.aurorion.blockregen.listeners.DependencyEnable;
+import nl.aurorion.blockregen.listeners.PlayerInteract;
+import nl.aurorion.blockregen.listeners.PlayerJoin;
+import nl.aurorion.blockregen.particles.ParticleManager;
+import nl.aurorion.blockregen.particles.breaking.FireWorks;
+import nl.aurorion.blockregen.particles.breaking.FlameCrown;
+import nl.aurorion.blockregen.particles.breaking.WitchSpell;
+import nl.aurorion.blockregen.providers.JobsProvider;
+import nl.aurorion.blockregen.providers.WorldEditProvider;
+import nl.aurorion.blockregen.providers.WorldGuardProvider;
+import nl.aurorion.blockregen.system.preset.PresetManager;
+import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 public class BlockRegen extends JavaPlugin {
 
@@ -42,7 +42,7 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private Economy economy;
     @Getter
-    private WorldEditPlugin worldEdit;
+    private WorldEditProvider worldEditProvider;
     @Getter
     private GriefPrevention griefPrevention;
     @Getter
@@ -59,51 +59,71 @@ public class BlockRegen extends JavaPlugin {
     private Files files;
 
     @Getter
-    private Getters getters;
-
-    @Getter
-    private ParticleUtil particleUtil;
-    @Getter
     private Random random;
 
-    // Handles every output going to console, easier, more centralized control.
     @Getter
     public ConsoleOutput consoleOutput;
 
     public String newVersion = null;
 
+    @Getter
+    private PresetManager presetManager;
+
+    @Getter
+    private ParticleManager particleManager;
+
+    @Getter
+    private RegenerationManager regenerationManager;
+
     @Override
     public void onEnable() {
         instance = this;
 
-        registerClasses(); // Also generates files
+        random = new Random();
+
+        particleManager = new ParticleManager(this);
+
+        // Add default particles
+        new FireWorks().register();
+        new FlameCrown().register();
+        new WitchSpell().register();
+
+        files = new Files();
+
+        presetManager = new PresetManager();
+        regenerationManager = new RegenerationManager();
 
         consoleOutput = new ConsoleOutput(this);
+        consoleOutput.setColors(true);
+
+        Message.load();
 
         consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-        consoleOutput.setPrefix(Utils.color(Message.PREFIX.get()));
+        consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
+
+        presetManager.loadAll();
+        regenerationManager.load();
+
+        if (getConfig().getBoolean("Auto-Save.Enabled", false))
+            regenerationManager.startAutoSave();
 
         registerListeners();
-        fillEvents();
 
         checkDependencies();
 
-        Utils.fillFireworkColors();
-        this.recoveryCheck();
-
         getCommand("blockregen").setExecutor(new Commands(this));
 
-        consoleOutput.info("&bYou are using version " + getDescription().getVersion());
-        consoleOutput.info("&bReport bugs or suggestions to discord only please.");
+        consoleOutput.info("&bYou are using" + (getDescription().getVersion().contains("-b") ? " &cDEVELOPMENT&b" : "") + " version &f" + getDescription().getVersion());
+        consoleOutput.info("&bReport bugs or suggestions to discord only please. &f( /blockregen discord )");
         consoleOutput.info("&bAlways backup if you are not sure about things.");
 
-        this.enableMetrics();
-        if (this.getGetters().updateChecker()) {
-            this.getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
+        enableMetrics();
+        if (getConfig().getBoolean("Update-Checker", false)) {
+            getServer().getScheduler().runTaskLaterAsynchronously(this, () -> {
                 UpdateCheck updater = new UpdateCheck(this, 9885);
                 try {
                     if (updater.checkForUpdates()) {
-                        this.newVersion = updater.getLatestVersion();
+                        newVersion = updater.getLatestVersion();
                     }
                 } catch (Exception e) {
                     consoleOutput.warn("Could not check for updates.");
@@ -112,32 +132,52 @@ public class BlockRegen extends JavaPlugin {
         }
     }
 
+    public void reload(CommandSender sender) {
+
+        if (!(sender instanceof ConsoleCommandSender))
+            consoleOutput.addListener(sender);
+
+        Utils.events.clear();
+        Utils.bars.clear();
+
+        checkDependencies();
+
+        files.getSettings().load();
+        consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
+
+        files.getMessages().load();
+        Message.load();
+
+        consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
+
+        files.getBlockList().load();
+        presetManager.loadAll();
+
+        if (getConfig().getBoolean("Auto-Save.Enabled", false))
+            regenerationManager.reloadAutoSave();
+
+        consoleOutput.removeListener(sender);
+        sender.sendMessage(Message.RELOAD.get());
+    }
+
     @Override
     public void onDisable() {
-        this.getServer().getScheduler().cancelTasks(this);
-        if (!this.getGetters().dataRecovery() && !Utils.regenBlocks.isEmpty()) {
-            for (Location loc : Utils.persist.keySet()) {
-                loc.getBlock().setType(Utils.persist.get(loc));
-            }
-        }
+        if (regenerationManager.getAutoSaveTask() != null)
+            regenerationManager.getAutoSaveTask().stop();
+
+        regenerationManager.revertAll();
+        regenerationManager.save();
 
         instance = null;
     }
 
-    private void registerClasses() {
-        files = new Files();
-        Message.load();
-        particleUtil = new ParticleUtil(this);
-        getters = new Getters(this);
-        random = new Random();
-    }
-
     private void registerListeners() {
-        PluginManager pm = this.getServer().getPluginManager();
-        pm.registerEvents(new Commands(this), this);
-        pm.registerEvents(new BlockBreak(this), this);
-        pm.registerEvents(new PlayerInteract(this), this);
-        pm.registerEvents(new PlayerJoin(this), this);
+        PluginManager pluginManager = this.getServer().getPluginManager();
+        pluginManager.registerEvents(new DependencyEnable(), this);
+        pluginManager.registerEvents(new Commands(this), this);
+        pluginManager.registerEvents(new BlockBreak(this), this);
+        pluginManager.registerEvents(new PlayerInteract(this), this);
+        pluginManager.registerEvents(new PlayerJoin(this), this);
     }
 
     public void checkDependencies() {
@@ -153,15 +193,13 @@ public class BlockRegen extends JavaPlugin {
     private void setupEconomy() {
         if (economy != null) return;
 
-        if (getServer().getPluginManager().getPlugin("Vault") == null) {
-            consoleOutput.info("Didn't find Vault. &cEconomy functions disabled.");
+        if (!getServer().getPluginManager().isPluginEnabled("Vault"))
             return;
-        }
 
         RegisteredServiceProvider<Economy> rsp = getServer().getServicesManager().getRegistration(Economy.class);
 
         if (rsp == null) {
-            consoleOutput.info("Vault found, but no economy plugin. &cEconomy functions disabled.");
+            consoleOutput.info("Found Vault, but no Economy Provider is registered.");
             return;
         }
 
@@ -170,17 +208,15 @@ public class BlockRegen extends JavaPlugin {
     }
 
     private void setupWorldEdit() {
-        if (worldEdit != null) return;
+        if (worldEditProvider != null) return;
 
         Plugin worldEditPlugin = getServer().getPluginManager().getPlugin("WorldEdit");
 
-        if (!(worldEditPlugin instanceof WorldEditPlugin)) {
-            consoleOutput.warn("Didn't find WorldEdit. &cRegion functions disabled.");
+        if (!(worldEditPlugin instanceof WorldEditPlugin))
             return;
-        }
 
+        this.worldEditProvider = new WorldEditProvider();
         consoleOutput.info("WorldEdit found! &aEnabling regions.");
-        worldEdit = (WorldEditPlugin) worldEditPlugin;
     }
 
     private void setupWorldGuard() {
@@ -190,82 +226,45 @@ public class BlockRegen extends JavaPlugin {
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
-        this.worldGuardProvider = new WorldGuardProvider(this);
+        this.worldGuardProvider = new WorldGuardProvider();
         consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
     }
 
     private void setupJobs() {
-        if (getServer().getPluginManager().getPlugin("Jobs") != null && jobsProvider == null) {
+        if (getServer().getPluginManager().isPluginEnabled("Jobs") && jobsProvider == null) {
             this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
         }
     }
 
     private void setupGriefPrevention() {
-        if (getServer().getPluginManager().getPlugin("GriefPrevention") != null && griefPrevention == null) {
+        if (getServer().getPluginManager().isPluginEnabled("GriefPrevention") && griefPrevention == null) {
             this.griefPrevention = GriefPrevention.instance;
-            consoleOutput.info("GriefPrevention found! &aSupport it's protection.");
+            consoleOutput.info("GriefPrevention found! &aSupporting it's protection.");
         }
     }
 
     private void setupResidence() {
-        if (getServer().getPluginManager().getPlugin("Residence") != null && residence == null) {
+        if (getServer().getPluginManager().isPluginEnabled("Residence") && residence == null) {
             this.residence = Residence.getInstance().getAPI();
             consoleOutput.info("Found Residence! &aRespecting it's protection.");
         }
     }
 
     private void setupPlaceholderAPI() {
-        if (getServer().getPluginManager().getPlugin("PlaceholderAPI") != null && !usePlaceholderAPI) {
+        if (getServer().getPluginManager().isPluginEnabled("PlaceholderAPI") && !usePlaceholderAPI) {
             usePlaceholderAPI = true;
-            consoleOutput.info("Found PlaceholderAPI! &aUsing is for placeholders.");
+            consoleOutput.info("Found PlaceholderAPI! &aUsing it for placeholders.");
         }
-    }
-
-    public void fillEvents() {
-        FileConfiguration blockList = files.getBlocklist().getFileConfiguration();
-        ConfigurationSection blockSection = blockList.getConfigurationSection("Blocks");
-
-        List<String> blocks = blockSection == null ? new ArrayList<>() : new ArrayList<>(blockSection.getKeys(false));
-
-        for (String loopBlocks : blocks) {
-            String eventName = blockList.getString("Blocks." + loopBlocks + ".event.event-name");
-
-            if (eventName != null)
-                Utils.events.put(eventName, false);
-        }
-
-        getServer().getConsoleSender().sendMessage(Utils.color(Utils.events.isEmpty() ?
-                "&6[&3BlockRegen&6] &cFound no events. Skip adding to the system." :
-                "&6[&3BlockRegen&6] &aThere are " + Utils.events.keySet().size() + " event(s) found. Added all to the system."));
     }
 
     public void enableMetrics() {
         new MetricsLite(this);
-        getServer().getConsoleSender().sendMessage(ChatColor.translateAlternateColorCodes('&', "&6[&3BlockRegen&6] &8MetricsLite enabled"));
+        consoleOutput.info("&8MetricsLite enabled");
     }
 
-    public void recoveryCheck() {
-        if (this.getGetters().dataRecovery()) {
-            Set<String> set = files.getData().getFileConfiguration().getKeys(false);
-            if (!set.isEmpty()) {
-                while (set.iterator().hasNext()) {
-                    String name = set.iterator().next();
-                    List<String> list = files.getData().getFileConfiguration().getStringList(name);
-                    for (String s : list) {
-                        Location loc = Utils.stringToLocation(s);
-                        loc.getBlock().setType(Material.valueOf(name));
-                        consoleOutput.debug("Recovered " + name + " on position " + Utils.locationToString(loc));
-                    }
-                    set.remove(name);
-                }
-            }
-
-            for (String key : files.getData().getFileConfiguration().getKeys(false)) {
-                files.getData().getFileConfiguration().set(key, null);
-            }
-
-            files.getData().save();
-        }
+    @Override
+    public @NotNull FileConfiguration getConfig() {
+        return files.getSettings().getFileConfiguration();
     }
 }
