@@ -2,7 +2,7 @@
 Updated version of BlockRegen.
 
 As the original author of BlockRegen stepped down I've been developing the plugin further in my free time.
-I don't have access to the spigot page so use this github to get new releases of the plugin, all of them are posted in the discord.
+I don't have access to the spigot page so use [this page](https://github.com/Wertik/BlockRegen/releases) to get new releases of the plugin, all of them are posted in the [discord](https://discord.gg/ZCxMca5).
 
 **BlockRegen WorldGuard Flag**
 
