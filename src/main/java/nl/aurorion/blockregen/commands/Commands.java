@@ -207,22 +207,6 @@ public class Commands implements CommandExecutor, Listener {
                 sender.sendMessage(Utils.color("&8&m      &3 BlockRegen Discord Server" +
                         "\n&6>> &7https://discord.gg/ZCxMca5"));
                 break;
-            case "test":
-
-                player = (Player) sender;
-
-                RegenerationProcess process = plugin.getRegenerationManager().createProcess(player.getTargetBlock(null, 10), plugin.getPresetManager().getPreset("DIAMOND_ORE").orElse(null));
-
-                if (process == null) {
-                    sender.sendMessage("Block null");
-                    return false;
-                }
-
-                process.setTimeLeft(Long.parseLong(args[1]));
-
-                if (args.length > 2)
-                    process.start();
-                break;
             case "events":
                 if (!sender.hasPermission("blockregen.admin")) {
                     sender.sendMessage(Message.NO_PERM.get());
