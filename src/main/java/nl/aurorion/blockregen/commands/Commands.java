@@ -5,7 +5,6 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
-import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -39,11 +38,11 @@ public class Commands implements CommandExecutor, Listener {
         if (args.length == 0) {
             sender.sendMessage(Utils.color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
                     + "\n&3/" + label + " reload &8- &7Reload the plugin."
-                    + "\n&3/" + label + " bypass &8- &7Bypass block breaking."
-                    + "\n&3/" + label + " check &8- &7Check the name + data of the block to put in the blocklist."
-                    + "\n&3/" + label + " region &8- &7All the info to set a regenerationRegion."
-                    + "\n&3/" + label + " events &8- &7Check all your events."
-                    + "\n&3/" + label + " discord &8- &7Print BlockRegen discord invite."
+                    + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
+                    + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
+                    + "\n&3/" + label + " region &8- &7Region management."
+                    + "\n&3/" + label + " events &8- &7Event management."
+                    + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."
                     + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
             return false;
         }
@@ -53,7 +52,7 @@ public class Commands implements CommandExecutor, Listener {
         switch (args[0].toLowerCase()) {
             case "reload":
                 if (!sender.hasPermission("blockregen.admin")) {
-                    sender.sendMessage(Message.NO_PERM.get());
+                    Message.NO_PERM.send(sender);
                     return false;
                 }
 
@@ -66,16 +65,16 @@ public class Commands implements CommandExecutor, Listener {
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.bypass")) {
-                    player.sendMessage(Message.NO_PERM.get(player));
+                    Message.NO_PERM.send(player);
                     return false;
                 }
 
                 if (!Utils.bypass.contains(player.getName())) {
                     Utils.bypass.add(player.getName());
-                    player.sendMessage(Message.BYPASS_ON.get(player));
+                    Message.BYPASS_ON.send(player);
                 } else {
                     Utils.bypass.remove(player.getName());
-                    player.sendMessage(Message.BYPASS_OFF.get(player));
+                    Message.BYPASS_OFF.send(player);
                 }
                 break;
             case "check":
@@ -85,19 +84,19 @@ public class Commands implements CommandExecutor, Listener {
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.datacheck")) {
-                    player.sendMessage(Message.NO_PERM.get(player));
+                    Message.NO_PERM.send(player);
                     return false;
                 }
 
                 if (!Utils.dataCheck.contains(player.getName())) {
                     Utils.dataCheck.add(player.getName());
-                    player.sendMessage(Message.DATA_CHECK_ON.get(player));
+                    Message.DATA_CHECK_ON.send(player);
                 } else {
                     Utils.dataCheck.remove(player.getName());
-                    player.sendMessage(Message.DATA_CHECK_OFF.get(player));
+                    Message.DATA_CHECK_OFF.send(player);
                 }
                 break;
-                //TODO remove
+            //TODO remove
             case "convert":
                 this.convert();
                 sender.sendMessage(Message.PREFIX.get() + Utils.color("&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));

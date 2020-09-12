@@ -8,6 +8,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -68,14 +69,14 @@ public class Utils {
         return msg != null ? ChatColor.stripColor(msg) : null;
     }
 
-    @Nullable
+    @NotNull
     public String color(@Nullable String msg) {
         return color(msg, '&');
     }
 
-    @Nullable
+    @NotNull
     public String color(@Nullable String msg, char colorChar) {
-        return msg == null ? null : ChatColor.translateAlternateColorCodes(colorChar, msg);
+        return msg == null ? "" : ChatColor.translateAlternateColorCodes(colorChar, msg);
     }
 
     @Nullable

@@ -15,11 +15,10 @@ public enum Message {
 
     PREFIX("Prefix", "&6[&3BlockRegen&6] &r"),
 
-    UPDATE("Update", "&6&m-----&r &3&lBlockRegen &6&m-----\n" +
-            "&eA new update was found!\n" +
-            "&eCurrent version: &c%version%\n" +
-            "&eNew version: &a%newVersion%\n" +
-            "&6&m-----------------------"),
+    UPDATE("Update", "&8&m     &r &3BlockRegen &8&m     \n" +
+            "&6A new update was found!\n" +
+            "&6Current version: &c%version%\n" +
+            "&6New version: &a%newVersion%"),
 
     /**
      * Command general messages.
