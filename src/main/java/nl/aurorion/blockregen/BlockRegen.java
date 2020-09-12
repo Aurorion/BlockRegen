@@ -36,8 +36,9 @@ import java.util.Random;
 
 public class BlockRegen extends JavaPlugin {
 
-    @Getter
-    public static BlockRegen instance;
+    public static BlockRegen getInstance() {
+        return getPlugin(BlockRegen.class);
+    }
 
     // Dependencies
     @Getter
@@ -81,8 +82,6 @@ public class BlockRegen extends JavaPlugin {
 
     @Override
     public void onEnable() {
-        instance = this;
-
         random = new Random();
 
         particleManager = new ParticleManager(this);
@@ -92,10 +91,10 @@ public class BlockRegen extends JavaPlugin {
         new FlameCrown().register();
         new WitchSpell().register();
 
-        files = new Files();
+        files = new Files(this);
 
-        presetManager = new PresetManager();
-        regenerationManager = new RegenerationManager();
+        presetManager = new PresetManager(this);
+        regenerationManager = new RegenerationManager(this);
         regionManager = new RegionManager(this);
 
         consoleOutput = new ConsoleOutput(this);
@@ -175,13 +174,11 @@ public class BlockRegen extends JavaPlugin {
         regenerationManager.save();
 
         regionManager.save();
-
-        instance = null;
     }
 
     private void registerListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new DependencyEnable(), this);
+        pluginManager.registerEvents(new DependencyEnable(this), this);
         pluginManager.registerEvents(new Commands(this), this);
         pluginManager.registerEvents(new BlockBreak(this), this);
         pluginManager.registerEvents(new PlayerInteract(this), this);
@@ -234,7 +231,7 @@ public class BlockRegen extends JavaPlugin {
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
-        this.worldGuardProvider = new WorldGuardProvider();
+        this.worldGuardProvider = new WorldGuardProvider(this);
         consoleOutput.info("WorldGuard found! &aSupporting it's regenerationRegion protection.");
     }
 

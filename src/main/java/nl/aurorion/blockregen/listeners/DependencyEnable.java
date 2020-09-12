@@ -9,8 +9,8 @@ public class DependencyEnable implements Listener {
 
     private final BlockRegen plugin;
 
-    public DependencyEnable() {
-        this.plugin = BlockRegen.getInstance();
+    public DependencyEnable(BlockRegen plugin) {
+        this.plugin = plugin;
     }
 
     @EventHandler

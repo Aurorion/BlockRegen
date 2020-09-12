@@ -5,6 +5,8 @@ import nl.aurorion.blockregen.BlockRegen;
 
 public class Files {
 
+    private final BlockRegen plugin;
+
     @Getter
     private ConfigFile settings;
     @Getter
@@ -14,14 +16,15 @@ public class Files {
     @Getter
     private ConfigFile regions;
 
-    public Files() {
+    public Files(BlockRegen plugin) {
         load();
+        this.plugin = plugin;
     }
 
     public void load() {
-        settings = new ConfigFile(BlockRegen.getInstance(), "Settings.yml");
-        messages = new ConfigFile(BlockRegen.getInstance(), "Messages.yml");
-        blockList = new ConfigFile(BlockRegen.getInstance(), "Blocklist.yml");
-        regions = new ConfigFile(BlockRegen.getInstance(), "Regions.yml");
+        settings = new ConfigFile(plugin, "Settings.yml");
+        messages = new ConfigFile(plugin, "Messages.yml");
+        blockList = new ConfigFile(plugin, "Blocklist.yml");
+        regions = new ConfigFile(plugin, "Regions.yml");
     }
 }

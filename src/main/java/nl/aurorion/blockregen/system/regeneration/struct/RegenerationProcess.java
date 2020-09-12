@@ -16,6 +16,8 @@ import org.bukkit.scheduler.BukkitTask;
 @Data
 public class RegenerationProcess implements Runnable {
 
+    private final transient BlockRegen plugin;
+
     private SimpleLocation simpleLocation;
 
     private transient Block block;
@@ -49,7 +51,9 @@ public class RegenerationProcess implements Runnable {
 
     private transient BukkitTask task;
 
-    public RegenerationProcess(Block block, BlockPreset preset) {
+    public RegenerationProcess(BlockRegen plugin, Block block, BlockPreset preset) {
+        
+        this.plugin = plugin;
 
         if (block == null)
             throw new IllegalArgumentException("Block cannot be null");
@@ -69,11 +73,11 @@ public class RegenerationProcess implements Runnable {
     public void start() {
 
         // Register that the process is actually running now
-        BlockRegen.getInstance().getRegenerationManager().registerProcess(this);
+        plugin.getRegenerationManager().registerProcess(this);
 
         // If timeLeft is -1, generate a new one from preset regen delay.
 
-        BlockRegen.getInstance().getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
+        plugin.getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
 
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
@@ -84,7 +88,7 @@ public class RegenerationProcess implements Runnable {
 
         if (this.regenerationTime <= System.currentTimeMillis()) {
             regenerate();
-            BlockRegen.getInstance().getConsoleOutput().debug("Regenerated the process already.");
+            plugin.getConsoleOutput().debug("Regenerated the process already.");
             return;
         }
 
@@ -92,8 +96,8 @@ public class RegenerationProcess implements Runnable {
 
         Material replaceMaterial = preset.getReplaceMaterial().get();
 
-        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(replaceMaterial));
-        BlockRegen.getInstance().consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
+        Bukkit.getScheduler().runTask(plugin, () -> block.setType(replaceMaterial));
+        plugin.consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
 
         if (this.regenerateInto == null)
             this.regenerateInto = preset.getRegenMaterial().get();
@@ -102,9 +106,9 @@ public class RegenerationProcess implements Runnable {
 
         if (task != null) task.cancel();
 
-        task = Bukkit.getScheduler().runTaskLaterAsynchronously(BlockRegen.getInstance(), this, timeLeft / 50);
-        BlockRegen.getInstance().getConsoleOutput().debug("Started regeneration...");
-        BlockRegen.getInstance().getConsoleOutput().debug("Regenerate in " + this.timeLeft / 1000 + "s");
+        task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
+        plugin.getConsoleOutput().debug("Started regeneration...");
+        plugin.getConsoleOutput().debug("Regenerate in " + this.timeLeft / 1000 + "s");
     }
 
     @Override
@@ -123,15 +127,15 @@ public class RegenerationProcess implements Runnable {
             this.regenerateInto = preset.getRegenMaterial().get();
 
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
-        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
 
-        BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+        plugin.getRegenerationManager().removeProcess(this);
 
         if (blockRegenBlockRegenEvent.isCancelled())
             return;
 
-        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(regenerateInto));
-        BlockRegen.getInstance().getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+        Bukkit.getScheduler().runTask(plugin, () -> block.setType(regenerateInto));
+        plugin.getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
     }
 
     /**
@@ -144,10 +148,10 @@ public class RegenerationProcess implements Runnable {
             task = null;
         }
 
-        BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+        plugin.getRegenerationManager().removeProcess(this);
 
-        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> block.setType(originalMaterial));
-        BlockRegen.getInstance().getConsoleOutput().debug("Reverted block " + originalMaterial);
+        Bukkit.getScheduler().runTask(plugin, () -> block.setType(originalMaterial));
+        plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
     }
 
     public void updateTimeLeft(long timeLeft) {
@@ -160,7 +164,7 @@ public class RegenerationProcess implements Runnable {
     public boolean convertSimpleLocation() {
 
         if (simpleLocation == null) {
-            BlockRegen.getInstance().getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
+            plugin.getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
             return false;
         }
 
@@ -170,10 +174,10 @@ public class RegenerationProcess implements Runnable {
     }
 
     public boolean convertPreset() {
-        BlockPreset preset = BlockRegen.getInstance().getPresetManager().getPreset(presetName).orElse(null);
+        BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
 
         if (preset == null) {
-            BlockRegen.getInstance().getConsoleOutput().err("BlockPreset " + presetName + " no longer exists, removing a left over regeneration process.");
+            plugin.getConsoleOutput().err("BlockPreset " + presetName + " no longer exists, removing a left over regeneration process.");
             return false;
         }
 

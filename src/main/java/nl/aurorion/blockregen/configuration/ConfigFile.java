@@ -5,7 +5,6 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
@@ -21,9 +20,9 @@ public class ConfigFile {
     @Getter
     private File file;
 
-    private final JavaPlugin plugin;
+    private final BlockRegen plugin;
 
-    public ConfigFile(JavaPlugin plugin, String path) {
+    public ConfigFile(BlockRegen plugin, String path) {
         this.path = path.contains(".yml") ? path : path + ".yml";
         this.plugin = plugin;
 
@@ -35,20 +34,20 @@ public class ConfigFile {
 
         if (!file.exists()) {
             try {
-                BlockRegen.getInstance().saveResource(this.path, false);
+                plugin.saveResource(this.path, false);
             } catch (IllegalArgumentException e) {
                 try {
                     file.createNewFile();
                 } catch (IOException e1) {
-                    BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &cCould not create " + this.path));
+                    plugin.getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &cCould not create " + this.path));
                     return;
                 }
             }
 
-            BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &aCreated " + this.path));
+            plugin.getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &aCreated " + this.path));
         }
 
-        BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &7Loaded " + this.path));
+        plugin.getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &7Loaded " + this.path));
 
         fileConfiguration = YamlConfiguration.loadConfiguration(file);
     }
@@ -57,7 +56,7 @@ public class ConfigFile {
         try {
             fileConfiguration.save(file);
         } catch (IOException e) {
-            BlockRegen.getInstance().getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &cCould not save " + this.path));
+            plugin.getServer().getConsoleSender().sendMessage(Utils.color("&6[&3BlockRegen&6] &cCould not save " + this.path));
         }
     }
 }

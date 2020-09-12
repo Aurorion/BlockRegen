@@ -17,8 +17,8 @@ public class PresetManager {
 
     private final Map<String, BlockPreset> presets = new HashMap<>();
 
-    public PresetManager() {
-        this.plugin = BlockRegen.getInstance();
+    public PresetManager(BlockRegen plugin) {
+        this.plugin = plugin;
     }
 
     public Optional<BlockPreset> getPreset(String name) {

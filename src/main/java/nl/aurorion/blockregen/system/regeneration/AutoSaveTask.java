@@ -16,8 +16,8 @@ public class AutoSaveTask implements Runnable {
 
     private final BlockRegen plugin;
 
-    public AutoSaveTask() {
-        this.plugin = BlockRegen.getInstance();
+    public AutoSaveTask(BlockRegen plugin) {
+        this.plugin = plugin;
     }
 
     public void load() {

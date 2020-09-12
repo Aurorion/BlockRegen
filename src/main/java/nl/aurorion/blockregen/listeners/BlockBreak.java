@@ -215,7 +215,7 @@ public class BlockBreak implements Listener {
 
                 ItemStack dropItem = new ItemStack(mat, amount);
 
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
+                plugin.getConsoleOutput().debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
                 drops.add(dropItem);
             }
 
@@ -237,7 +237,7 @@ public class BlockBreak implements Listener {
                     itemStack.setAmount(itemStack.getAmount() * 2);
 
                 drops.add(itemStack);
-                BlockRegen.getInstance().consoleOutput.debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
+                plugin.getConsoleOutput().debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
 
                 if (drop.getExperienceDrop() == null) continue;
 

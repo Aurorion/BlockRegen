@@ -27,7 +27,7 @@ public class WorldEditProvider {
         try {
             selection = worldEdit.getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
         } catch (IncompleteRegionException e) {
-            if (BlockRegen.getInstance().getConsoleOutput().isDebug())
+            if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
             return null;
         }
