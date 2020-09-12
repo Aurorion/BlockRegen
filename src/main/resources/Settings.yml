@@ -34,9 +34,6 @@ Disable-Other-Break: true
 # If you wish to cancel all other blocks broken in the region then set this to true
 Disable-Other-Break-Region: true
 
-# This setting cancels the regeneration when a player uses bone meal on a crop
-Bone-Meal-Override: false
-
 # Automatic saving for regeneration process cache.
 Auto-Save:
   Enabled: true
