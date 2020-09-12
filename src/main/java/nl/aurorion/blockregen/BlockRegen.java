@@ -181,7 +181,6 @@ public class BlockRegen extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new Commands(this), this);
         pluginManager.registerEvents(new BlockBreak(this), this);
         pluginManager.registerEvents(new PlayerInteract(this), this);
         pluginManager.registerEvents(new PlayerJoin(this), this);

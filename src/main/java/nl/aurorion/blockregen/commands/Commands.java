@@ -17,15 +17,12 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
 import java.util.Set;
 
-public class Commands implements CommandExecutor, Listener {
+public class Commands implements CommandExecutor {
 
     private final BlockRegen plugin;
 
@@ -311,18 +308,6 @@ public class Commands implements CommandExecutor, Listener {
                 break;
         }
         return false;
-    }
-
-    @EventHandler
-    public void onJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
-
-        if (!Utils.bars.isEmpty()) {
-            for (String bars : Utils.bars.keySet()) {
-                BossBar bar = Utils.bars.get(bars);
-                bar.addPlayer(player);
-            }
-        }
     }
 
     private void convert() {
