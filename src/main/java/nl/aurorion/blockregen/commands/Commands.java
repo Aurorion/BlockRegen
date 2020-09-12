@@ -93,11 +93,6 @@ public class Commands implements CommandExecutor {
                     Message.DATA_CHECK_OFF.send(player);
                 }
                 break;
-            //TODO remove
-            case "convert":
-                this.convert();
-                sender.sendMessage(Message.PREFIX.get() + Utils.color("&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));
-                break;
             case "region":
 
                 if (checkConsole(sender))
@@ -308,30 +303,6 @@ public class Commands implements CommandExecutor {
                 break;
         }
         return false;
-    }
-
-    private void convert() {
-        FileConfiguration regions = plugin.getFiles().getRegions().getFileConfiguration();
-
-        String[] locA;
-        String[] locB;
-        String world;
-
-        ConfigurationSection regionSection = regions.getConfigurationSection("Regions");
-        Set<String> regionSet = Objects.requireNonNull(regionSection).getKeys(false);
-
-        for (String region : regionSet) {
-            if (regions.get("Regions." + region + ".World") != null) {
-                locA = Objects.requireNonNull(regions.getString("Regions." + region + ".Max")).split(";");
-                locB = Objects.requireNonNull(regions.getString("Regions." + region + ".Min")).split(";");
-                world = regions.getString("Regions." + region + ".World");
-                regions.set("Regions." + region + ".Max", world + ";" + locA[0] + ";" + locA[1] + ";" + locA[2]);
-                regions.set("Regions." + region + ".Min", world + ";" + locB[0] + ";" + locB[1] + ";" + locB[2]);
-                regions.set("Regions." + region + ".World", null);
-            }
-        }
-
-        plugin.getFiles().getRegions().save();
     }
 
     private boolean checkConsole(CommandSender sender) {
