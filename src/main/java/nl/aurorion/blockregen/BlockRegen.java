@@ -10,7 +10,6 @@ import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.commands.Commands;
 import nl.aurorion.blockregen.configuration.Files;
 import nl.aurorion.blockregen.listeners.BlockBreak;
-import nl.aurorion.blockregen.listeners.DependencyEnable;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
 import nl.aurorion.blockregen.particles.ParticleManager;
@@ -23,6 +22,7 @@ import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import nl.aurorion.blockregen.system.region.RegionManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -135,6 +135,9 @@ public class BlockRegen extends JavaPlugin {
                 }
             }, 20L);
         }
+
+        // Check for deps later.
+        Bukkit.getScheduler().runTaskLater(this, this::checkDependencies, 1L);
     }
 
     public void reload(CommandSender sender) {
@@ -178,7 +181,6 @@ public class BlockRegen extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new DependencyEnable(this), this);
         pluginManager.registerEvents(new Commands(this), this);
         pluginManager.registerEvents(new BlockBreak(this), this);
         pluginManager.registerEvents(new PlayerInteract(this), this);
