@@ -5,8 +5,6 @@ import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
-import com.sk89q.worldedit.regions.CuboidRegion;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
@@ -15,12 +13,12 @@ import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -109,40 +107,13 @@ public class BlockBreak implements Listener {
         boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
 
         if (useRegions) {
+            if (plugin.getWorldEditProvider() == null)
+                return;
 
-            // Regions
-            // TODO: Cache regions / move to a manager
+            RegenerationRegion region = plugin.getRegionManager().getRegion(block.getLocation());
 
-            if (plugin.getWorldEditProvider() == null) return;
-
-            boolean isInRegion = false;
-            String regionName = null;
-
-            ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
-
-            List<String> regions = regionSection == null ? new ArrayList<>() : new ArrayList<>(regionSection.getKeys(false));
-
-            for (String region : regions) {
-                String max = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Max");
-                String min = plugin.getFiles().getRegions().getFileConfiguration().getString("Regions." + region + ".Min");
-
-                if (min == null || max == null)
-                    continue;
-
-                Location locA = Utils.stringToLocation(max);
-                Location locB = Utils.stringToLocation(min);
-
-                if (locA.getWorld() == null || !locA.getWorld().equals(world))
-                    continue;
-
-                CuboidRegion selection = new CuboidRegion(BukkitAdapter.asBlockVector(locA), BukkitAdapter.asBlockVector(locB));
-
-                if (selection.contains(BukkitAdapter.asBlockVector(block.getLocation()))) {
-                    isInRegion = true;
-                    regionName = region;
-                    break;
-                }
-            }
+            boolean isInRegion = region != null;
+            String regionName = region == null ? null : region.getName();
 
             if (isInRegion) {
                 if (preset != null) {
@@ -153,7 +124,6 @@ public class BlockBreak implements Listener {
                 }
             }
         } else {
-            // Worlds
             if (isInWorld) {
                 if (preset != null) {
                     process(plugin.getRegenerationManager().createProcess(block, preset), event);
@@ -184,7 +154,7 @@ public class BlockBreak implements Listener {
 
         // Check permissions and conditions
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
-            player.sendMessage(Message.PERMISSION_BLOCK_ERROR.get(event.getPlayer()));
+            Message.PERMISSION_BLOCK_ERROR.send(event.getPlayer());
             event.setCancelled(true);
             plugin.getRegenerationManager().removeProcess(process);
             return;

@@ -22,6 +22,7 @@ import nl.aurorion.blockregen.providers.WorldEditProvider;
 import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
+import nl.aurorion.blockregen.system.region.RegionManager;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -75,6 +76,9 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private RegenerationManager regenerationManager;
 
+    @Getter
+    private RegionManager regionManager;
+
     @Override
     public void onEnable() {
         instance = this;
@@ -92,6 +96,7 @@ public class BlockRegen extends JavaPlugin {
 
         presetManager = new PresetManager();
         regenerationManager = new RegenerationManager();
+        regionManager = new RegionManager(this);
 
         consoleOutput = new ConsoleOutput(this);
         consoleOutput.setColors(true);
@@ -102,6 +107,7 @@ public class BlockRegen extends JavaPlugin {
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
 
         presetManager.loadAll();
+        regionManager.load();
         regenerationManager.load();
 
         if (getConfig().getBoolean("Auto-Save.Enabled", false))
@@ -168,6 +174,8 @@ public class BlockRegen extends JavaPlugin {
         regenerationManager.revertAll();
         regenerationManager.save();
 
+        regionManager.save();
+
         instance = null;
     }
 
@@ -215,7 +223,7 @@ public class BlockRegen extends JavaPlugin {
         if (!(worldEditPlugin instanceof WorldEditPlugin))
             return;
 
-        this.worldEditProvider = new WorldEditProvider();
+        this.worldEditProvider = new WorldEditProvider(this);
         consoleOutput.info("WorldEdit found! &aEnabling regions.");
     }
 
@@ -227,7 +235,7 @@ public class BlockRegen extends JavaPlugin {
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
         this.worldGuardProvider = new WorldGuardProvider();
-        consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
+        consoleOutput.info("WorldGuard found! &aSupporting it's regenerationRegion protection.");
     }
 
     private void setupJobs() {

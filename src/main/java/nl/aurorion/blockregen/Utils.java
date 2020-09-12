@@ -42,7 +42,10 @@ public class Utils {
         return world == null ? "" : world.getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
     }
 
-    public Location stringToLocation(String str) {
+    @Nullable
+    public Location stringToLocation(@Nullable String str) {
+        if (Strings.isNullOrEmpty(str)) return null;
+
         String[] arr = str.split(";");
         Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
@@ -81,7 +84,7 @@ public class Utils {
 
         Material material;
         try {
-             material = Material.valueOf(input.trim().toUpperCase());
+            material = Material.valueOf(input.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             BlockRegen.getInstance().getConsoleOutput().debug("Could not parse material " + input);
             return null;

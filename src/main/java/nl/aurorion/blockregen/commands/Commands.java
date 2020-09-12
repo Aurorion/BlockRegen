@@ -1,16 +1,14 @@
 package nl.aurorion.blockregen.commands;
 
-import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.regions.Region;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
@@ -25,8 +23,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -45,11 +41,11 @@ public class Commands implements CommandExecutor, Listener {
                     + "\n&3/" + label + " reload &8- &7Reload the plugin."
                     + "\n&3/" + label + " bypass &8- &7Bypass block breaking."
                     + "\n&3/" + label + " check &8- &7Check the name + data of the block to put in the blocklist."
-                    + "\n&3/" + label + " region &8- &7All the info to set a region."
+                    + "\n&3/" + label + " region &8- &7All the info to set a regenerationRegion."
                     + "\n&3/" + label + " events &8- &7Check all your events."
                     + "\n&3/" + label + " discord &8- &7Print BlockRegen discord invite."
                     + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
-            return true;
+            return false;
         }
 
         Player player;
@@ -58,20 +54,20 @@ public class Commands implements CommandExecutor, Listener {
             case "reload":
                 if (!sender.hasPermission("blockregen.admin")) {
                     sender.sendMessage(Message.NO_PERM.get());
-                    return true;
+                    return false;
                 }
 
                 plugin.reload(sender);
                 break;
             case "bypass":
                 if (checkConsole(sender))
-                    return true;
+                    return false;
 
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.bypass")) {
                     player.sendMessage(Message.NO_PERM.get(player));
-                    return true;
+                    return false;
                 }
 
                 if (!Utils.bypass.contains(player.getName())) {
@@ -84,13 +80,13 @@ public class Commands implements CommandExecutor, Listener {
                 break;
             case "check":
                 if (checkConsole(sender))
-                    return true;
+                    return false;
 
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.datacheck")) {
                     player.sendMessage(Message.NO_PERM.get(player));
-                    return true;
+                    return false;
                 }
 
                 if (!Utils.dataCheck.contains(player.getName())) {
@@ -101,104 +97,92 @@ public class Commands implements CommandExecutor, Listener {
                     player.sendMessage(Message.DATA_CHECK_OFF.get(player));
                 }
                 break;
+                //TODO remove
             case "convert":
                 this.convert();
                 sender.sendMessage(Message.PREFIX.get() + Utils.color("&a&lConverted your regions to BlockRegen 3.4.0 compatibility!"));
                 break;
             case "region":
+
                 if (checkConsole(sender))
-                    return true;
+                    return false;
 
                 player = (Player) sender;
 
                 if (!player.hasPermission("blockregen.admin")) {
                     player.sendMessage(Message.NO_PERM.get(player));
-                    return true;
+                    return false;
                 }
 
                 if (args.length == 1 || args.length > 3) {
-                    player.sendMessage(Utils.color("&6&m-----&r &3&lBlockRegen &6&m-----"
-                            + "\n&3/" + label + "  region set <name> &7: set a region."
-                            + "\n&3/" + label + "  region remove <name> &7: remove a region."
-                            + "\n&3/" + label + "  region list &7: a list of all your regions."
-                            + "\n&6&m-----------------------"));
-                    return true;
+                    player.sendMessage(Utils.color("&8&m     &r &3BlockRegen &8&m     "
+                            + "\n&3/" + label + " region set <name> &7: set a regenerationRegion."
+                            + "\n&3/" + label + " region remove <name> &7: remove a regenerationRegion."
+                            + "\n&3/" + label + " region list &7: a list of all your regions."));
+                    return false;
                 }
 
                 if (args.length == 2) {
                     if (args[1].equalsIgnoreCase("list")) {
-                        ConfigurationSection regions = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
-                        Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eHere is a list of all your regions."));
-                        player.sendMessage(" ");
-                        for (String checkregions : setregions) {
-                            player.sendMessage(ChatColor.AQUA + "- " + checkregions);
+
+                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen &8&m    \n&7Regions:");
+                        for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
+                            message.append("\n&8- &f").append(name);
                         }
-                        player.sendMessage(" ");
-                        player.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----------------------"));
-                        return true;
+                        message.append("\n");
+                        sender.sendMessage(Utils.color(message.toString()));
+                        return false;
                     }
                 }
 
                 if (args.length == 3) {
                     if (args[1].equalsIgnoreCase("set")) {
 
+                        if (plugin.getRegionManager().exists(args[2])) {
+                            Message.DUPLICATED_REGION.send(player);
+                            return false;
+                        }
+
                         if (plugin.getWorldEditProvider() == null) {
-                            player.sendMessage(Message.WORLD_EDIT_NOT_INSTALLED.get(player));
-                            return true;
+                            Message.WORLD_EDIT_NOT_INSTALLED.send(player);
+                            return false;
                         }
 
                         Region selection = plugin.getWorldEditProvider().getSelection(player);
 
                         if (selection == null) {
-                            return true;
+                            Message.NO_SELECTION.send(player);
+                            return false;
                         }
 
-                        List<String> regions = new ArrayList<>();
+                        RegenerationRegion region = plugin.getWorldEditProvider().createFromSelection(args[2], selection);
 
-                        if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") != null) {
-                            ConfigurationSection regionSection = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
-                            regions = new ArrayList<>(Objects.requireNonNull(regionSection).getKeys(false));
+                        if (region == null) {
+                            Message.COULD_NOT_CREATE_REGION.send(player);
+                            return false;
                         }
 
-                        if (regions.contains(args[2])) {
-                            player.sendMessage(Message.DUPLICATED_REGION.get(player));
-                            return true;
-                        }
-
-                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Min", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMinimumPoint())));
-                        plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2] + ".Max", Utils.locationToString(BukkitAdapter.adapt(player.getWorld(), selection.getMaximumPoint())));
-                        plugin.getFiles().getRegions().save();
-                        player.sendMessage(Message.SET_REGION.get(player));
-                        return true;
+                        Message.SET_REGION.send(player);
+                        return false;
                     }
 
                     if (args[1].equalsIgnoreCase("remove")) {
-                        if (plugin.getFiles().getRegions().getFileConfiguration().getString("Regions") == null) {
-                            player.sendMessage(Message.UNKNOWN_REGION.get(player));
-                        } else {
-                            ConfigurationSection regions = plugin.getFiles().getRegions().getFileConfiguration().getConfigurationSection("Regions");
-                            Set<String> setregions = Objects.requireNonNull(regions).getKeys(false);
 
-                            if (setregions.contains(args[2])) {
-                                plugin.getFiles().getRegions().getFileConfiguration().set("Regions." + args[2], null);
-                                plugin.getFiles().getRegions().save();
-                                player.sendMessage(Message.REMOVE_REGION.get(player));
-                            } else {
-                                player.sendMessage(Message.UNKNOWN_REGION.get(player));
-                            }
-
-                            return true;
+                        if (!plugin.getRegionManager().exists(args[2])) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
                         }
-                        return true;
+
+                        plugin.getRegionManager().removeRegion(args[2]);
+                        Message.REMOVE_REGION.send(player);
+                        return false;
                     }
                 }
                 break;
             case "debug":
                 if (!(sender instanceof Player)) {
                     sender.sendMessage(Message.ONLY_PLAYERS.get());
-                    return true;
+                    return false;
                 }
 
                 player = (Player) sender;
@@ -242,7 +226,7 @@ public class Commands implements CommandExecutor, Listener {
             case "events":
                 if (!sender.hasPermission("blockregen.admin")) {
                     sender.sendMessage(Message.NO_PERM.get());
-                    return true;
+                    return false;
                 }
 
                 if (args.length < 3) {
@@ -311,7 +295,7 @@ public class Commands implements CommandExecutor, Listener {
                         } else {
                             sender.sendMessage(Message.EVENT_NOT_FOUND.get());
                         }
-                        return true;
+                        return false;
                     }
 
                     if (args[1].equalsIgnoreCase("deactivate")) {
@@ -338,12 +322,12 @@ public class Commands implements CommandExecutor, Listener {
                             sender.sendMessage(Message.EVENT_NOT_FOUND.get());
                         }
 
-                        return true;
+                        return false;
                     }
                 }
                 break;
         }
-        return true;
+        return false;
     }
 
     @EventHandler
