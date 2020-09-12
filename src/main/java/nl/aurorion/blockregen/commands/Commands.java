@@ -14,13 +14,8 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Objects;
-import java.util.Set;
 
 public class Commands implements CommandExecutor {
 
@@ -206,12 +201,12 @@ public class Commands implements CommandExecutor {
 
                 if (args.length < 3) {
                     if (Utils.events.isEmpty()) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"
-                                + "\n&eYou haven't yet made any events. Make some to up your servers game!"
-                                + "\n&6&m-----------------------"));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m     &r &3BlockRegen &8&m     "
+                                + "\n&cYou haven't made any events yet."
+                                + "\n&8&m                       "));
                     } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----&r &3&lBlockRegen &6&m-----"));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eYou have the following events ready to be activated."));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m     &r &3BlockRegen &8&m     "));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7You have the following events ready to be activated."));
                         sender.sendMessage(" ");
                         for (String events : Utils.events.keySet()) {
                             String state;
@@ -223,9 +218,9 @@ public class Commands implements CommandExecutor {
                             sender.sendMessage(ChatColor.AQUA + "- " + events + " " + state);
                         }
                         sender.sendMessage(" ");
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events activate <event name> &eto activate it."));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&eUse &3/" + label + "  events deactivate <event name> &eto de-activate it."));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&6&m-----------------------"));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7Use &3/" + label + " events activate <event name> &7to activate it."));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7Use &3/" + label + " events deactivate <event name> &7to de-activate it."));
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m                       "));
                     }
                 } else {
                     if (args[1].equalsIgnoreCase("activate")) {
