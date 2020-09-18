@@ -35,8 +35,8 @@ public class RegenerationManager {
     @Getter
     private AutoSaveTask autoSaveTask;
 
-    public RegenerationManager() {
-        this.plugin = BlockRegen.getInstance();
+    public RegenerationManager(BlockRegen plugin) {
+        this.plugin = plugin;
     }
 
     /**
@@ -62,7 +62,7 @@ public class RegenerationManager {
 
         RegenerationProcess process;
         try {
-            process = new RegenerationProcess(block, preset);
+            process = new RegenerationProcess(plugin, block, preset);
         } catch (IllegalArgumentException e) {
             plugin.getConsoleOutput().err(e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
@@ -94,7 +94,7 @@ public class RegenerationManager {
                 // Try to convert simple location again if the block's not there.
                 if (process.getBlock() == null)
                     if (!process.convertSimpleLocation()) {
-                        BlockRegen.getInstance().getConsoleOutput().err("Could not remap a process block location.");
+                        plugin.getConsoleOutput().err("Could not remap a process block location.");
                         continue;
                     }
 
@@ -110,11 +110,11 @@ public class RegenerationManager {
 
     public void removeProcess(RegenerationProcess process) {
         cache.remove(process);
-        BlockRegen.getInstance().getConsoleOutput().debug("Removed process from cache: " + process.toString());
+        plugin.getConsoleOutput().debug("Removed process from cache: " + process.toString());
     }
 
     public void startAutoSave() {
-        this.autoSaveTask = new AutoSaveTask();
+        this.autoSaveTask = new AutoSaveTask(plugin);
 
         autoSaveTask.load();
         autoSaveTask.start();
@@ -197,13 +197,13 @@ public class RegenerationManager {
         for (RegenerationProcess process : loadedProcesses) {
 
             if (!process.convertSimpleLocation() || !process.convertPreset()) {
-                BlockRegen.getInstance().getConsoleOutput().debug("Could not load regeneration process " + process.toString());
+                plugin.getConsoleOutput().debug("Could not load regeneration process " + process.toString());
                 continue;
             }
 
             // Start it
             process.start();
-            BlockRegen.getInstance().getConsoleOutput().debug("Prepared regeneration process " + process.toString());
+            plugin.getConsoleOutput().debug("Prepared regeneration process " + process.toString());
         }
     }
 

@@ -2,6 +2,7 @@ package nl.aurorion.blockregen;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 
@@ -14,11 +15,10 @@ public enum Message {
 
     PREFIX("Prefix", "&6[&3BlockRegen&6] &r"),
 
-    UPDATE("Update", "&6&m-----&r &3&lBlockRegen &6&m-----\n" +
-            "&eA new update was found!\n" +
-            "&eCurrent version: &c%version%\n" +
-            "&eNew version: &a%newVersion%\n" +
-            "&6&m-----------------------"),
+    UPDATE("Update", "&8&m     &r &3BlockRegen &8&m     \n" +
+            "&6A new update was found!\n" +
+            "&6Current version: &c%version%\n" +
+            "&6New version: &a%newVersion%"),
 
     /**
      * Command general messages.
@@ -53,11 +53,12 @@ public enum Message {
      * Regions
      */
     WORLD_EDIT_NOT_INSTALLED("WorldEdit-Not-Installed", "&cRegion functions require World Edit."),
-    NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID region first!"),
-    DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
+    NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID regenerationRegion first!"),
+    DUPLICATED_REGION("Duplicated-Region", "&cThere is already a regenerationRegion with that name!"),
     SET_REGION("Set-Region", "&aRegion successfully saved!"),
     REMOVE_REGION("Remove-Region", "&aRegion successfully removed!"),
-    UNKNOWN_REGION("Unknown-Region", "&cThere is no region with that name!"),
+    UNKNOWN_REGION("Unknown-Region", "&cThere is no regenerationRegion with that name!"),
+    COULD_NOT_CREATE_REGION("Could-Not-Create-Region", "&cCould not created a region."),
 
     /**
      * Events
@@ -92,6 +93,14 @@ public enum Message {
 
     public String get(Player player) {
         return Utils.color(Utils.parse(insertPrefix ? "%prefix%" + this.value : this.value, player));
+    }
+
+    public void send(CommandSender target) {
+        target.sendMessage(get());
+    }
+
+    public void send(Player player) {
+        player.sendMessage(get(player));
     }
 
     Message(String path, String value) {

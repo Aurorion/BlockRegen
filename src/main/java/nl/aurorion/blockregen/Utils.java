@@ -8,6 +8,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -42,22 +43,33 @@ public class Utils {
         return world == null ? "" : world.getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
     }
 
-    public Location stringToLocation(String str) {
+    @Nullable
+    public Location stringToLocation(@Nullable String str) {
+        if (Strings.isNullOrEmpty(str)) return null;
+
         String[] arr = str.split(";");
         Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
     }
 
+    @Nullable
     public String parse(String string) {
+        if (Strings.isNullOrEmpty(string)) return string;
+
         string = string.replaceAll("(?i)%prefix%", Message.PREFIX.getValue());
         return string;
     }
 
+    @Nullable
     public String parse(String string, Player player) {
         string = Utils.parse(string);
+
+        if (Strings.isNullOrEmpty(string)) return string;
+
         string = string.replaceAll("(?i)%player%", player.getName());
         if (BlockRegen.getInstance().isUsePlaceholderAPI())
             string = PlaceholderAPI.setPlaceholders(player, string);
+
         return string;
     }
 
@@ -65,14 +77,14 @@ public class Utils {
         return msg != null ? ChatColor.stripColor(msg) : null;
     }
 
-    @Nullable
+    @NotNull
     public String color(@Nullable String msg) {
         return color(msg, '&');
     }
 
-    @Nullable
+    @NotNull
     public String color(@Nullable String msg, char colorChar) {
-        return msg == null ? null : ChatColor.translateAlternateColorCodes(colorChar, msg);
+        return msg == null ? "" : ChatColor.translateAlternateColorCodes(colorChar, msg);
     }
 
     @Nullable
@@ -81,7 +93,7 @@ public class Utils {
 
         Material material;
         try {
-             material = Material.valueOf(input.trim().toUpperCase());
+            material = Material.valueOf(input.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             BlockRegen.getInstance().getConsoleOutput().debug("Could not parse material " + input);
             return null;

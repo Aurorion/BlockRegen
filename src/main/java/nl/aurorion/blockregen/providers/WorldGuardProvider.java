@@ -10,8 +10,8 @@ public class WorldGuardProvider {
 
     private final WorldGuardPlugin worldGuard;
 
-    public WorldGuardProvider() {
-        this.worldGuard = (WorldGuardPlugin) BlockRegen.getInstance().getServer().getPluginManager().getPlugin("WorldGuard");
+    public WorldGuardProvider(BlockRegen plugin) {
+        this.worldGuard = (WorldGuardPlugin) plugin.getServer().getPluginManager().getPlugin("WorldGuard");
     }
 
     public boolean canBreak(Player player, Location location) {

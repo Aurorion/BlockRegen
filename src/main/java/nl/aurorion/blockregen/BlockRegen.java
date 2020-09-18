@@ -10,7 +10,6 @@ import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.commands.Commands;
 import nl.aurorion.blockregen.configuration.Files;
 import nl.aurorion.blockregen.listeners.BlockBreak;
-import nl.aurorion.blockregen.listeners.DependencyEnable;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
 import nl.aurorion.blockregen.particles.ParticleManager;
@@ -22,6 +21,8 @@ import nl.aurorion.blockregen.providers.WorldEditProvider;
 import nl.aurorion.blockregen.providers.WorldGuardProvider;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
+import nl.aurorion.blockregen.system.region.RegionManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -35,8 +36,9 @@ import java.util.Random;
 
 public class BlockRegen extends JavaPlugin {
 
-    @Getter
-    public static BlockRegen instance;
+    public static BlockRegen getInstance() {
+        return getPlugin(BlockRegen.class);
+    }
 
     // Dependencies
     @Getter
@@ -75,10 +77,11 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private RegenerationManager regenerationManager;
 
+    @Getter
+    private RegionManager regionManager;
+
     @Override
     public void onEnable() {
-        instance = this;
-
         random = new Random();
 
         particleManager = new ParticleManager(this);
@@ -88,10 +91,11 @@ public class BlockRegen extends JavaPlugin {
         new FlameCrown().register();
         new WitchSpell().register();
 
-        files = new Files();
+        files = new Files(this);
 
-        presetManager = new PresetManager();
-        regenerationManager = new RegenerationManager();
+        presetManager = new PresetManager(this);
+        regenerationManager = new RegenerationManager(this);
+        regionManager = new RegionManager(this);
 
         consoleOutput = new ConsoleOutput(this);
         consoleOutput.setColors(true);
@@ -102,6 +106,7 @@ public class BlockRegen extends JavaPlugin {
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
 
         presetManager.loadAll();
+        regionManager.load();
         regenerationManager.load();
 
         if (getConfig().getBoolean("Auto-Save.Enabled", false))
@@ -130,6 +135,9 @@ public class BlockRegen extends JavaPlugin {
                 }
             }, 20L);
         }
+
+        // Check for deps later.
+        Bukkit.getScheduler().runTaskLater(this, this::checkDependencies, 1L);
     }
 
     public void reload(CommandSender sender) {
@@ -168,13 +176,11 @@ public class BlockRegen extends JavaPlugin {
         regenerationManager.revertAll();
         regenerationManager.save();
 
-        instance = null;
+        regionManager.save();
     }
 
     private void registerListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new DependencyEnable(), this);
-        pluginManager.registerEvents(new Commands(this), this);
         pluginManager.registerEvents(new BlockBreak(this), this);
         pluginManager.registerEvents(new PlayerInteract(this), this);
         pluginManager.registerEvents(new PlayerJoin(this), this);
@@ -215,7 +221,7 @@ public class BlockRegen extends JavaPlugin {
         if (!(worldEditPlugin instanceof WorldEditPlugin))
             return;
 
-        this.worldEditProvider = new WorldEditProvider();
+        this.worldEditProvider = new WorldEditProvider(this);
         consoleOutput.info("WorldEdit found! &aEnabling regions.");
     }
 
@@ -226,8 +232,8 @@ public class BlockRegen extends JavaPlugin {
 
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
-        this.worldGuardProvider = new WorldGuardProvider();
-        consoleOutput.info("WorldGuard found! &aSupporting it's region protection.");
+        this.worldGuardProvider = new WorldGuardProvider(this);
+        consoleOutput.info("WorldGuard found! &aSupporting it's regenerationRegion protection.");
     }
 
     private void setupJobs() {
