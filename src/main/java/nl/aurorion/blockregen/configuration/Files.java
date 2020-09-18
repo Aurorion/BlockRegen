@@ -17,8 +17,8 @@ public class Files {
     private ConfigFile regions;
 
     public Files(BlockRegen plugin) {
-        load();
         this.plugin = plugin;
+        load();
     }
 
     public void load() {
