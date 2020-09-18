@@ -23,7 +23,7 @@ public class PlayerJoin implements Listener {
         Player player = event.getPlayer();
 
         // newVersion will be null when the checker is disabled, or there are no new available
-        if (player.hasPermission("blockregen.admin") && plugin.newVersion == null)
+        if (player.hasPermission("blockregen.admin") && plugin.newVersion != null)
             player.sendMessage(Message.UPDATE.get(player)
                     .replaceAll("(?i)%newVersion%", plugin.newVersion)
                     .replaceAll("(?i)%version%", plugin.getDescription().getVersion()));
