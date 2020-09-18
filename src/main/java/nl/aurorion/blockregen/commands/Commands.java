@@ -102,18 +102,18 @@ public class Commands implements CommandExecutor {
 
                 if (args.length == 1 || args.length > 3) {
                     player.sendMessage(Utils.color("&8&m     &r &3BlockRegen &8&m     "
-                            + "\n&3/" + label + " region set <name> &7: set a regenerationRegion."
-                            + "\n&3/" + label + " region remove <name> &7: remove a regenerationRegion."
-                            + "\n&3/" + label + " region list &7: a list of all your regions."));
+                            + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
+                            + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
+                            + "\n&3/" + label + " region list &8- &7List your regions."));
                     return false;
                 }
 
                 if (args.length == 2) {
                     if (args[1].equalsIgnoreCase("list")) {
 
-                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen &8&m    \n&7Regions:");
+                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
                         for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
-                            message.append("\n&8- &f").append(name);
+                            message.append("\n&8  - &f").append(name);
                         }
                         message.append("\n");
                         sender.sendMessage(Utils.color(message.toString()));

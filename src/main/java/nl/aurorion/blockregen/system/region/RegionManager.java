@@ -32,6 +32,7 @@ public class RegionManager {
 
         if (section != null) {
             for (String name : section.getKeys(false)) {
+
                 Location min = Utils.stringToLocation(section.getString(name + ".min"));
                 Location max = Utils.stringToLocation(section.getString(name + ".max"));
 
@@ -62,6 +63,7 @@ public class RegionManager {
             regionSection.set("min", Utils.locationToString(regenerationRegion.getMin()));
             regionSection.set("max", Utils.locationToString(regenerationRegion.getMax()));
         }
+        plugin.getFiles().getRegions().save();
 
         plugin.getConsoleOutput().debug("Saved " + this.loadedRegions.size() + " region(s)...");
     }
