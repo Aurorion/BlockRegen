@@ -32,8 +32,9 @@ public class RegionManager {
 
         if (section != null) {
             for (String name : section.getKeys(false)) {
-                Location min = Utils.stringToLocation(section.getString(name + ".min"));
-                Location max = Utils.stringToLocation(section.getString(name + ".max"));
+
+                Location min = Utils.stringToLocation(section.getString(name + ".Min"));
+                Location max = Utils.stringToLocation(section.getString(name + ".Max"));
 
                 if (min == null || max == null) {
                     plugin.getConsoleOutput().err("Could not load region " + name + ", invalid locations.");
@@ -59,9 +60,10 @@ public class RegionManager {
         for (RegenerationRegion regenerationRegion : this.loadedRegions.values()) {
             ConfigurationSection regionSection = section.createSection(regenerationRegion.getName());
 
-            regionSection.set("min", Utils.locationToString(regenerationRegion.getMin()));
-            regionSection.set("max", Utils.locationToString(regenerationRegion.getMax()));
+            regionSection.set("Min", Utils.locationToString(regenerationRegion.getMin()));
+            regionSection.set("Max", Utils.locationToString(regenerationRegion.getMax()));
         }
+        plugin.getFiles().getRegions().save();
 
         plugin.getConsoleOutput().debug("Saved " + this.loadedRegions.size() + " region(s)...");
     }
