@@ -16,8 +16,6 @@ import org.bukkit.scheduler.BukkitTask;
 @Data
 public class RegenerationProcess implements Runnable {
 
-    private final transient BlockRegen plugin;
-
     private SimpleLocation simpleLocation;
 
     private transient Block block;
@@ -51,9 +49,7 @@ public class RegenerationProcess implements Runnable {
 
     private transient BukkitTask task;
 
-    public RegenerationProcess(BlockRegen plugin, Block block, BlockPreset preset) {
-        
-        this.plugin = plugin;
+    public RegenerationProcess(Block block, BlockPreset preset) {
 
         if (block == null)
             throw new IllegalArgumentException("Block cannot be null");
@@ -71,6 +67,8 @@ public class RegenerationProcess implements Runnable {
     }
 
     public void start() {
+
+        BlockRegen plugin = BlockRegen.getInstance();
 
         // Register that the process is actually running now
         plugin.getRegenerationManager().registerProcess(this);
@@ -126,6 +124,8 @@ public class RegenerationProcess implements Runnable {
         if (this.regenerateInto == null)
             this.regenerateInto = preset.getRegenMaterial().get();
 
+        BlockRegen plugin = BlockRegen.getInstance();
+
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
 
@@ -148,6 +148,8 @@ public class RegenerationProcess implements Runnable {
             task = null;
         }
 
+        BlockRegen plugin = BlockRegen.getInstance();
+
         plugin.getRegenerationManager().removeProcess(this);
 
         Bukkit.getScheduler().runTask(plugin, () -> block.setType(originalMaterial));
@@ -164,7 +166,7 @@ public class RegenerationProcess implements Runnable {
     public boolean convertSimpleLocation() {
 
         if (simpleLocation == null) {
-            plugin.getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
+            BlockRegen.getInstance().getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
             return false;
         }
 
@@ -174,6 +176,8 @@ public class RegenerationProcess implements Runnable {
     }
 
     public boolean convertPreset() {
+        BlockRegen plugin = BlockRegen.getInstance();
+
         BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
 
         if (preset == null) {

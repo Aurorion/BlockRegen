@@ -62,7 +62,7 @@ public class RegenerationManager {
 
         RegenerationProcess process;
         try {
-            process = new RegenerationProcess(plugin, block, preset);
+            process = new RegenerationProcess(block, preset);
         } catch (IllegalArgumentException e) {
             plugin.getConsoleOutput().err(e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
