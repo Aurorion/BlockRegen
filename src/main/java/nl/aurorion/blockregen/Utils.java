@@ -52,16 +52,24 @@ public class Utils {
         return newLoc.clone();
     }
 
+    @Nullable
     public String parse(String string) {
+        if (Strings.isNullOrEmpty(string)) return string;
+
         string = string.replaceAll("(?i)%prefix%", Message.PREFIX.getValue());
         return string;
     }
 
+    @Nullable
     public String parse(String string, Player player) {
         string = Utils.parse(string);
+
+        if (Strings.isNullOrEmpty(string)) return string;
+
         string = string.replaceAll("(?i)%player%", player.getName());
         if (BlockRegen.getInstance().isUsePlaceholderAPI())
             string = PlaceholderAPI.setPlaceholders(player, string);
+
         return string;
     }
 
