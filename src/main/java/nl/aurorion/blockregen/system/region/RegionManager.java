@@ -10,6 +10,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 public class RegionManager {
@@ -57,7 +58,7 @@ public class RegionManager {
 
         ConfigurationSection section = ensureSection(regions, "Regions");
 
-        for (RegenerationRegion regenerationRegion : this.loadedRegions.values()) {
+        for (RegenerationRegion regenerationRegion : new HashSet<>(this.loadedRegions.values())) {
             ConfigurationSection regionSection = section.createSection(regenerationRegion.getName());
 
             regionSection.set("Min", Utils.locationToString(regenerationRegion.getMin()));

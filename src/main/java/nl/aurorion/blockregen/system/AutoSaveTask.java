@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.regeneration;
+package nl.aurorion.blockregen.system;
 
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
@@ -48,5 +48,6 @@ public class AutoSaveTask implements Runnable {
     @Override
     public void run() {
         plugin.getRegenerationManager().save();
+        plugin.getRegionManager().save();
     }
 }
