@@ -52,15 +52,22 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        // Check bypass
-        if (Utils.bypass.contains(player.getName())) {
+        // Check if the block is regenerating already
+        if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
+
+            // Remove the process
+            if (Utils.bypass.contains(player.getName())) {
+                plugin.getRegenerationManager().removeProcess(block.getLocation());
+                return;
+            }
+
+            plugin.getConsoleOutput().debug("Block is regenerating...");
+            event.setCancelled(true);
             return;
         }
 
-        // Check if the block is regenerating already
-        if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
-            plugin.getConsoleOutput().debug("Block is regenerating...");
-            event.setCancelled(true);
+        // Check bypass
+        if (Utils.bypass.contains(player.getName())) {
             return;
         }
 
