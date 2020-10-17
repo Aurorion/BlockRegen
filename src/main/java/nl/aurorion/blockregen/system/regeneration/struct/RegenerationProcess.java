@@ -80,6 +80,9 @@ public class RegenerationProcess implements Runnable {
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
             this.timeLeft = regenDelay * 1000;
+        } else if (this.timeLeft < 0) {
+            regenerate();
+            return;
         }
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
