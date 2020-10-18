@@ -9,6 +9,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +22,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 public class RegenerationManager {
@@ -150,11 +152,21 @@ public class RegenerationManager {
 
     public void save() {
 
-        final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+        List<RegenerationProcess> finalCache = new ArrayList<>(cache);
 
-        for (RegenerationProcess process : finalCache) {
-            if (process != null)
+        // Clear invalid processes
+        Iterator<RegenerationProcess> iterator = finalCache.iterator();
+        while (iterator.hasNext()) {
+            RegenerationProcess process = iterator.next();
+            if (process != null) {
+                if (process.getTimeLeft() < 0) {
+                    process.regenerate();
+                    iterator.remove();
+                    continue;
+                }
+
                 process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
+            }
         }
 
         plugin.getConsoleOutput().debug("Saving " + cache.size() + " regeneration processes..");
