@@ -150,12 +150,10 @@ public class RegenerationManager {
         }
     }
 
-    public void save() {
-
-        List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+    private void purgeExpired() {
 
         // Clear invalid processes
-        Iterator<RegenerationProcess> iterator = finalCache.iterator();
+        Iterator<RegenerationProcess> iterator = cache.iterator();
         while (iterator.hasNext()) {
             RegenerationProcess process = iterator.next();
             if (process != null) {
@@ -168,10 +166,16 @@ public class RegenerationManager {
                 process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
             }
         }
+    }
 
-        plugin.getConsoleOutput().debug("Saving " + cache.size() + " regeneration processes..");
+    public void save() {
 
-        String output = gson.toJson(cache, new TypeToken<List<RegenerationProcess>>() {
+        purgeExpired();
+        final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+
+        plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
+
+        String output = gson.toJson(finalCache, new TypeToken<List<RegenerationProcess>>() {
         }.getType());
 
         plugin.getConsoleOutput().debug("JSON: " + output);
