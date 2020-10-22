@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -88,7 +89,7 @@ public class RegenerationManager {
     public RegenerationProcess getProcess(Location location) {
 
         if (location != null)
-            for (RegenerationProcess process : getCache()) {
+            for (RegenerationProcess process : new HashSet<>(getCache())) {
 
                 // Don't know why I need to do this.
                 if (process == null) continue;
@@ -99,14 +100,16 @@ public class RegenerationManager {
                     continue;
                 }
 
+                if (!process.getBlock().getLocation().equals(location))
+                    continue;
+
                 // Try to start the process again.
                 if (process.getTimeLeft() < 0) {
-                    process.start();
-                    return null;
+                    if (!process.start())
+                        return null;
                 }
 
-                if (process.getBlock().getLocation().equals(location))
-                    return process;
+                return process;
             }
         return null;
     }

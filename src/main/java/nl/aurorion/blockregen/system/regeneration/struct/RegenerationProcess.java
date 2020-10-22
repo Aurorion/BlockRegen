@@ -66,7 +66,7 @@ public class RegenerationProcess implements Runnable {
         this.regenerateInto = preset.getRegenMaterial().get();
     }
 
-    public void start() {
+    public boolean start() {
 
         BlockRegen plugin = BlockRegen.getInstance();
 
@@ -82,7 +82,7 @@ public class RegenerationProcess implements Runnable {
             this.timeLeft = regenDelay * 1000;
         } else if (this.timeLeft < 0) {
             regenerate();
-            return;
+            return false;
         }
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
@@ -90,7 +90,7 @@ public class RegenerationProcess implements Runnable {
         if (this.regenerationTime <= System.currentTimeMillis()) {
             regenerate();
             plugin.getConsoleOutput().debug("Regenerated the process already.");
-            return;
+            return false;
         }
 
         // Replace the block
@@ -110,6 +110,7 @@ public class RegenerationProcess implements Runnable {
         task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
         plugin.getConsoleOutput().debug("Started regeneration...");
         plugin.getConsoleOutput().debug("Regenerate in " + this.timeLeft / 1000 + "s");
+        return true;
     }
 
     @Override
