@@ -9,7 +9,6 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
-import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.Nullable;
@@ -98,6 +97,12 @@ public class RegenerationManager {
                 if (process.getBlock() == null) {
                     plugin.getConsoleOutput().err("Could not remap a process block location.");
                     continue;
+                }
+
+                // Try to start the process again.
+                if (process.getTimeLeft() < 0) {
+                    process.start();
+                    return null;
                 }
 
                 if (process.getBlock().getLocation().equals(location))
@@ -216,8 +221,14 @@ public class RegenerationManager {
 
         for (RegenerationProcess process : loadedProcesses) {
 
-            if (!process.convertSimpleLocation() || !process.convertPreset()) {
-                plugin.getConsoleOutput().debug("Could not load regeneration process " + process.toString());
+            if (!process.convertSimpleLocation()) {
+                plugin.getConsoleOutput().debug("Could not load location for regeneration process " + process.toString());
+                continue;
+            }
+
+            if (!process.convertPreset()) {
+                plugin.getConsoleOutput().debug("Could not load preset for regeneration process " + process.toString());
+                process.revert();
                 continue;
             }
 
