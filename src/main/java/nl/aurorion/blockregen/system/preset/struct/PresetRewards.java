@@ -1,8 +1,10 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
+import com.google.common.base.Strings;
 import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
@@ -28,8 +30,15 @@ public class PresetRewards {
                 BlockRegen.getInstance().getEconomy().depositPlayer(player, money);
         }
 
-        playerCommands.forEach(command -> Bukkit.dispatchCommand(player, Utils.parse(command, player)));
-        consoleCommands.forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player)));
+        playerCommands.forEach(command -> {
+            if (!Strings.isNullOrEmpty(command))
+                Bukkit.dispatchCommand(player, Utils.parse(command, player));
+        });
+
+        consoleCommands.forEach(command -> {
+            if (!Strings.isNullOrEmpty(command))
+                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player));
+        });
     }
 
     public Amount getMoney() {

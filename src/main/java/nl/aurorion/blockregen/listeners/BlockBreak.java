@@ -10,8 +10,8 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
-import nl.aurorion.blockregen.system.preset.struct.ExperienceDrop;
-import nl.aurorion.blockregen.system.preset.struct.ItemDrop;
+import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
+import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
@@ -30,6 +30,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class BlockBreak implements Listener {
 
@@ -124,7 +125,7 @@ public class BlockBreak implements Listener {
 
             if (isInRegion) {
                 if (preset != null) {
-                    process(plugin.getRegenerationManager().createProcess(block, preset, regionName), event);
+                    process(plugin.getRegenerationManager().createProcess(block, preset, regionName), preset, event);
                 } else {
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region"))
                         event.setCancelled(true);
@@ -133,7 +134,7 @@ public class BlockBreak implements Listener {
         } else {
             if (isInWorld) {
                 if (preset != null) {
-                    process(plugin.getRegenerationManager().createProcess(block, preset), event);
+                    process(plugin.getRegenerationManager().createProcess(block, preset), preset, event);
                 } else {
                     if (plugin.getConfig().getBoolean("Disable-Other-Break", false))
                         event.setCancelled(true);
@@ -142,11 +143,10 @@ public class BlockBreak implements Listener {
         }
     }
 
-    private void process(RegenerationProcess process, BlockBreakEvent event) {
+    private void process(RegenerationProcess process, BlockPreset preset, BlockBreakEvent event) {
 
-        int expToDrop = event.getExpToDrop();
+        final AtomicInteger expToDrop = new AtomicInteger(event.getExpToDrop());
 
-        // TODO: Might want to get rid of this part later on, useless
         event.setDropItems(false);
         event.setExpToDrop(0);
 
@@ -157,7 +157,9 @@ public class BlockBreak implements Listener {
         World world = block.getWorld();
 
         String blockName = block.getType().name();
-        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(blockName).orElse(null);
+
+        if (preset == null)
+            return;
 
         // Check permissions and conditions
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
@@ -180,21 +182,23 @@ public class BlockBreak implements Listener {
         if (blockRegenBlockBreakEvent.isCancelled())
             return;
 
-        // Start regeneration
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
-        process.start();
+            // Start regeneration
+            process.start();
 
-        // Rewards...
+            // Rewards...
 
-        List<ItemStack> drops = new ArrayList<>();
+            List<ItemStack> drops = new ArrayList<>();
 
-        // Events ---------------------------------------------------------------------------------------------
+            // Events ---------------------------------------------------------------------------------------------
 
-        boolean doubleDrops = false;
-        boolean doubleExp = false;
+            boolean doubleDrops = false;
+            boolean doubleExp = false;
 
-        if (preset.getEvent() != null && Utils.events.containsKey(preset.getEvent().getName())) {
-            if (Utils.events.get(preset.getEvent().getName())) {
+            if (preset.getEvent() != null &&
+                    Utils.events.containsKey(preset.getEvent().getName()) &&
+                    Utils.events.get(preset.getEvent().getName())) {
 
                 doubleDrops = preset.getEvent().isDoubleDrops();
                 doubleExp = preset.getEvent().isDoubleExperience();
@@ -208,78 +212,79 @@ public class BlockBreak implements Listener {
                     }
                 }
             }
-        }
 
-        // Drop Section-----------------------------------------------------------------------------------------
-        if (preset.isNaturalBreak()) {
+            // Drop Section-----------------------------------------------------------------------------------------
+            if (preset.isNaturalBreak()) {
 
-            for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
-                Material mat = drop.getType();
-                int amount = drop.getAmount();
+                for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                    Material mat = drop.getType();
+                    int amount = drop.getAmount();
 
-                if (doubleDrops)
-                    amount *= 2;
+                    if (doubleDrops)
+                        amount *= 2;
 
-                ItemStack dropItem = new ItemStack(mat, amount);
+                    ItemStack dropItem = new ItemStack(mat, amount);
 
-                plugin.getConsoleOutput().debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
-                drops.add(dropItem);
+                    plugin.getConsoleOutput().debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
+                    drops.add(dropItem);
+                }
+
+                // TODO: Get rid of exp section, add drop-exp-naturally to the main Preset section -- simplifies some stuff
+                if (expToDrop.get() > 0) {
+                    if (doubleExp)
+                        expToDrop.set(expToDrop.get() * 2);
+                    Bukkit.getScheduler().runTask(plugin, () -> world.spawn(location, ExperienceOrb.class).setExperience(expToDrop.get()));
+                }
+            } else {
+                for (ItemDrop drop : preset.getRewards().getDrops()) {
+                    ItemStack itemStack = drop.toItemStack(player);
+
+                    if (itemStack == null) continue;
+
+                    if (preset.isApplyFortune())
+                        itemStack.setAmount(Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemStack.getAmount());
+
+                    if (doubleDrops)
+                        itemStack.setAmount(itemStack.getAmount() * 2);
+
+                    drops.add(itemStack);
+                    plugin.getConsoleOutput().debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
+
+                    if (drop.getExperienceDrop() == null) continue;
+
+                    ExperienceDrop experienceDrop = drop.getExperienceDrop();
+
+                    AtomicInteger expAmount = new AtomicInteger(experienceDrop.getAmount().getInt());
+
+                    if (expAmount.get() <= 0) continue;
+
+                    if (doubleExp)
+                        expAmount.set(expAmount.get() * 2);
+
+                    plugin.getConsoleOutput().debug("Exp: " + expAmount, player);
+
+                    if (experienceDrop.isDropNaturally())
+                        Bukkit.getScheduler().runTask(plugin, () -> world.spawn(location, ExperienceOrb.class).setExperience(expAmount.get()));
+                    else player.giveExp(expAmount.get());
+                }
             }
 
-            // TODO: Get rid of exp section, add drop-exp-naturally to the main Preset section -- simplifies some stuff
-            if (expToDrop > 0) {
-                if (doubleExp) expToDrop *= 2;
-                world.spawn(location, ExperienceOrb.class).setExperience(expToDrop);
+            for (ItemStack drop : drops) {
+                if (preset.isDropNaturally())
+                    Bukkit.getScheduler().runTask(plugin, () -> world.dropItemNaturally(location, drop));
+                else player.getInventory().addItem(drop);
             }
-        } else {
-            for (ItemDrop drop : preset.getRewards().getDrops()) {
-                ItemStack itemStack = drop.toItemStack(player);
 
-                if (itemStack == null) continue;
+            // Trigger Jobs Break if enabled -----------------------------------------------------------------------
+            if (plugin.getConfig().getBoolean("Jobs-Rewards", false) && plugin.getJobsProvider() != null)
+                Bukkit.getScheduler().runTask(plugin, () -> plugin.getJobsProvider().triggerBlockBreakAction(player, block));
 
-                if (preset.isApplyFortune())
-                    itemStack.setAmount(Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemStack.getAmount());
+            // Rewards ---------------------------------------------------------------------------------------------
+            preset.getRewards().give(player);
 
-                if (doubleDrops)
-                    itemStack.setAmount(itemStack.getAmount() * 2);
-
-                drops.add(itemStack);
-                plugin.getConsoleOutput().debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
-
-                if (drop.getExperienceDrop() == null) continue;
-
-                ExperienceDrop experienceDrop = drop.getExperienceDrop();
-
-                int expAmount = experienceDrop.getAmount().getInt();
-
-                if (expAmount <= 0) continue;
-
-                if (doubleExp) expAmount *= 2;
-
-                plugin.getConsoleOutput().debug("Exp: " + expAmount, player);
-
-                if (experienceDrop.isDropNaturally())
-                    world.spawn(location, ExperienceOrb.class).setExperience(expAmount);
-                else player.giveExp(expAmount);
-            }
-        }
-
-        for (ItemStack drop : drops) {
-            if (preset.isDropNaturally())
-                world.dropItemNaturally(location, drop);
-            else player.getInventory().addItem(drop);
-        }
-
-        // Trigger Jobs Break if enabled -----------------------------------------------------------------------
-        if (plugin.getConfig().getBoolean("Jobs-Rewards", false) && plugin.getJobsProvider() != null) {
-            plugin.getJobsProvider().triggerBlockBreakAction(player, block);
-        }
-
-        // Rewards ---------------------------------------------------------------------------------------------
-        preset.getRewards().give(player);
-
-        // Particles -------------------------------------------------------------------------------------------
-        if (preset.getParticle() != null)
-            plugin.getParticleManager().displayParticle(preset.getParticle(), block);
+            // Particles -------------------------------------------------------------------------------------------
+            if (preset.getParticle() != null)
+                Bukkit.getScheduler().runTask(plugin, () -> plugin.getParticleManager().displayParticle(preset.getParticle(), block));
+        });
     }
 }

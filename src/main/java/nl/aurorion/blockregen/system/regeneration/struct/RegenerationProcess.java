@@ -16,7 +16,7 @@ import org.bukkit.scheduler.BukkitTask;
 @Data
 public class RegenerationProcess implements Runnable {
 
-    private SimpleLocation simpleLocation;
+    private SimpleLocation location;
 
     private transient Block block;
 
@@ -61,7 +61,7 @@ public class RegenerationProcess implements Runnable {
 
         this.presetName = preset.getName();
         this.originalMaterial = block.getType();
-        this.simpleLocation = new SimpleLocation(block.getLocation());
+        this.location = new SimpleLocation(block.getLocation());
 
         this.regenerateInto = preset.getRegenMaterial().get();
     }
@@ -118,6 +118,9 @@ public class RegenerationProcess implements Runnable {
         regenerate();
     }
 
+    /**
+     * Regenerate the block.
+     */
     public void regenerate() {
 
         if (task != null) {
@@ -130,6 +133,7 @@ public class RegenerationProcess implements Runnable {
 
         BlockRegen plugin = BlockRegen.getInstance();
 
+        // Call the event
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
         Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
 
@@ -167,14 +171,17 @@ public class RegenerationProcess implements Runnable {
         else run();
     }
 
-    public boolean convertSimpleLocation() {
+    /**
+     * Convert stored Location pointer to the Block at the location.
+     */
+    public boolean convertLocation() {
 
-        if (simpleLocation == null) {
+        if (location == null) {
             BlockRegen.getInstance().getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
             return false;
         }
 
-        Location location = simpleLocation.toLocation();
+        Location location = this.location.toLocation();
         this.block = location.getBlock();
         return true;
     }
@@ -186,6 +193,7 @@ public class RegenerationProcess implements Runnable {
 
         if (preset == null) {
             plugin.getConsoleOutput().err("BlockPreset " + presetName + " no longer exists, removing a left over regeneration process.");
+            revert();
             return false;
         }
 
@@ -199,12 +207,12 @@ public class RegenerationProcess implements Runnable {
 
     public Block getBlock() {
         if (this.block == null)
-            convertSimpleLocation();
+            convertLocation();
         return block;
     }
 
     @Override
     public String toString() {
-        return "id: " + (task != null ? task.getTaskId() : "NaN") + "=" + presetName + " : " + (block != null ? Utils.locationToString(block.getLocation()) : simpleLocation.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
+        return "id: " + (task != null ? task.getTaskId() : "NaN") + "=" + presetName + " : " + (block != null ? Utils.locationToString(block.getLocation()) : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
     }
 }

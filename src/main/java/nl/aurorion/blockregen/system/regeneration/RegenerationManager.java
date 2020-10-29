@@ -11,6 +11,7 @@ import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -22,7 +23,6 @@ import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 public class RegenerationManager {
@@ -67,7 +67,7 @@ public class RegenerationManager {
         try {
             process = new RegenerationProcess(block, preset);
         } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err(e.getMessage());
+            plugin.getConsoleOutput().err("Could not create regeneration process: " + e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
             return null;
@@ -86,35 +86,38 @@ public class RegenerationManager {
     }
 
     @Nullable
-    public RegenerationProcess getProcess(Location location) {
+    public RegenerationProcess getProcess(@NotNull Location location) {
 
-        if (location != null)
-            for (RegenerationProcess process : new HashSet<>(getCache())) {
+        // Convert to block location
+        Location blockLocation = location.getBlock().getLocation();
 
-                // Don't know why I need to do this.
-                if (process == null) continue;
+        for (RegenerationProcess process : new HashSet<>(getCache())) {
 
-                // Try to convert simple location again if the block's not there.
-                if (process.getBlock() == null) {
-                    plugin.getConsoleOutput().err("Could not remap a process block location.");
-                    continue;
-                }
+            // Don't know why I need to do this.
+            if (process == null)
+                continue;
 
-                if (!process.getBlock().getLocation().equals(location))
-                    continue;
-
-                // Try to start the process again.
-                if (process.getTimeLeft() < 0) {
-                    if (!process.start())
-                        return null;
-                }
-
-                return process;
+            // Try to convert simple location again if the block's not there.
+            if (process.getBlock() == null) {
+                plugin.getConsoleOutput().err("Could not remap a process block location.");
+                continue;
             }
+
+            if (!process.getBlock().getLocation().equals(blockLocation))
+                continue;
+
+            // Try to start the process again.
+            if (process.getTimeLeft() < 0) {
+                if (!process.start())
+                    return null;
+            }
+
+            return process;
+        }
         return null;
     }
 
-    public boolean isRegenerating(Location location) {
+    public boolean isRegenerating(@NotNull Location location) {
         return getProcess(location) != null;
     }
 
@@ -123,8 +126,9 @@ public class RegenerationManager {
         plugin.getConsoleOutput().debug("Removed process from cache: " + process.toString());
     }
 
-    public void removeProcess(Location location) {
-        cache.removeIf(p -> p.getBlock().getLocation().equals(location));
+    public void removeProcess(@NotNull Location location) {
+        Location blockLocation = location.getBlock().getLocation();
+        cache.removeIf(p -> p.getBlock().getLocation().equals(blockLocation));
     }
 
     public void startAutoSave() {
@@ -161,25 +165,22 @@ public class RegenerationManager {
     private void purgeExpired() {
 
         // Clear invalid processes
-        Iterator<RegenerationProcess> iterator = cache.iterator();
-        while (iterator.hasNext()) {
-            RegenerationProcess process = iterator.next();
-            if (process != null) {
-                if (process.getTimeLeft() < 0) {
-                    process.regenerate();
-                    iterator.remove();
-                    continue;
-                }
+        for (RegenerationProcess process : new HashSet<>(cache)) {
+            if (process == null)
+                continue;
 
-                process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
-            }
+            if (process.getTimeLeft() < 0)
+                process.regenerate();
         }
     }
 
     public void save() {
 
         purgeExpired();
+
         final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+
+        finalCache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
 
         plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
 
@@ -224,7 +225,7 @@ public class RegenerationManager {
 
         for (RegenerationProcess process : loadedProcesses) {
 
-            if (!process.convertSimpleLocation()) {
+            if (!process.convertLocation()) {
                 plugin.getConsoleOutput().debug("Could not load location for regeneration process " + process.toString());
                 continue;
             }

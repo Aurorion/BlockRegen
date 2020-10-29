@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.Data;
+import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
 
 @Data
 public class BlockPreset {

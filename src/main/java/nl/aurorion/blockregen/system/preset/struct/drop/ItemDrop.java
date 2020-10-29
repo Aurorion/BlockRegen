@@ -1,8 +1,9 @@
-package nl.aurorion.blockregen.system.preset.struct;
+package nl.aurorion.blockregen.system.preset.struct.drop;
 
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.system.preset.struct.Amount;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;

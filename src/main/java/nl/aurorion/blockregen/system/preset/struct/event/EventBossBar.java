@@ -1,4 +1,4 @@
-package nl.aurorion.blockregen.system.preset.struct;
+package nl.aurorion.blockregen.system.preset.struct.event;
 
 import lombok.Data;
 import org.bukkit.boss.BarColor;

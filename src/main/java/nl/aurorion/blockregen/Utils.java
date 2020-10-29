@@ -54,13 +54,14 @@ public class Utils {
 
     @Nullable
     public String parse(String string) {
-        if (Strings.isNullOrEmpty(string)) return string;
+
+        if (Strings.isNullOrEmpty(string))
+            return string;
 
         string = string.replaceAll("(?i)%prefix%", Message.PREFIX.getValue());
         return string;
     }
 
-    @Nullable
     public String parse(String string, Player player) {
         string = Utils.parse(string);
 

@@ -14,7 +14,7 @@ public class DynamicMaterial {
 
     private boolean fixed = false;
 
-    private final List<Material> valuedMaterialsCache = new ArrayList<>();
+    private final List<Material> valuedMaterials = new ArrayList<>();
 
     private Material defaultMaterial;
 
@@ -72,19 +72,19 @@ public class DynamicMaterial {
                     continue;
                 }
 
-                valuedMaterialsCache.add(mat);
+                valuedMaterials.add(mat);
             }
         }
 
         if (defaultMaterial != null) {
-            for (int i = 0; i < (100 - total); i++) valuedMaterialsCache.add(defaultMaterial);
+            for (int i = 0; i < (100 - total); i++) valuedMaterials.add(defaultMaterial);
         }
     }
 
     @NotNull
     public Material get() {
         if (fixed) return defaultMaterial;
-        Material pickedMaterial = valuedMaterialsCache.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterialsCache.size()));
+        Material pickedMaterial = valuedMaterials.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterials.size()));
         return pickedMaterial != null ? pickedMaterial : defaultMaterial;
     }
 }
