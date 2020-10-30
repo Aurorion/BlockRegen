@@ -30,14 +30,15 @@ public class PresetRewards {
                 BlockRegen.getInstance().getEconomy().depositPlayer(player, money);
         }
 
-        playerCommands.forEach(command -> {
-            if (!Strings.isNullOrEmpty(command))
-                Bukkit.dispatchCommand(player, Utils.parse(command, player));
-        });
-
-        consoleCommands.forEach(command -> {
-            if (!Strings.isNullOrEmpty(command))
-                Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player));
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
+            playerCommands.forEach(command -> {
+                if (!Strings.isNullOrEmpty(command))
+                    Bukkit.dispatchCommand(player, Utils.parse(command, player));
+            });
+            consoleCommands.forEach(command -> {
+                if (!Strings.isNullOrEmpty(command))
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player));
+            });
         });
     }
 
