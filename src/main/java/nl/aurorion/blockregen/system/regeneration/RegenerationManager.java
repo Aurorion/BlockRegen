@@ -126,9 +126,12 @@ public class RegenerationManager {
         plugin.getConsoleOutput().debug("Removed process from cache: " + process.toString());
     }
 
+    public void removeProcess(@NotNull Block block) {
+        cache.removeIf(process -> process.getBlock().equals(block));
+    }
+
     public void removeProcess(@NotNull Location location) {
-        Location blockLocation = location.getBlock().getLocation();
-        cache.removeIf(p -> p.getBlock().getLocation().equals(blockLocation));
+        removeProcess(location.getBlock());
     }
 
     public void startAutoSave() {
@@ -240,6 +243,7 @@ public class RegenerationManager {
             process.start();
             plugin.getConsoleOutput().debug("Prepared regeneration process " + process.toString());
         }
+        plugin.getConsoleOutput().info("Loaded " + this.cache.size() + " regeneration process(es)...");
     }
 
     public List<RegenerationProcess> getCache() {

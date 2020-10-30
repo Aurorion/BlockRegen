@@ -13,6 +13,8 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 
+import java.util.Objects;
+
 @Data
 public class RegenerationProcess implements Runnable {
 
@@ -209,6 +211,19 @@ public class RegenerationProcess implements Runnable {
         if (this.block == null)
             convertLocation();
         return block;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegenerationProcess process = (RegenerationProcess) o;
+        return location.equals(process.getLocation());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(location);
     }
 
     @Override

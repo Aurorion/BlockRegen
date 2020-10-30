@@ -157,6 +157,7 @@ public class BlockRegen extends JavaPlugin {
         Message.load();
 
         consoleOutput.setPrefix(Utils.color(Message.PREFIX.getValue()));
+        consoleOutput.setDebug(getConfig().getBoolean("Debug-Enabled", false));
 
         files.getBlockList().load();
         presetManager.loadAll();
