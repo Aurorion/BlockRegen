@@ -1,9 +1,9 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
-import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.Utils;
+import com.google.common.base.Strings;
 import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 

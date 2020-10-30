@@ -1,18 +1,18 @@
 package nl.aurorion.blockregen.listeners;
 
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
-import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
