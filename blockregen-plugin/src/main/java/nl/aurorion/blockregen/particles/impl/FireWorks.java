@@ -12,6 +12,7 @@ import org.bukkit.World;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Firework;
 import org.bukkit.inventory.meta.FireworkMeta;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Random;
 
@@ -23,7 +24,7 @@ public class FireWorks extends AbstractParticle {
     }
 
     @Override
-    public void display(Location location) {
+    public void display(@NotNull Location location) {
         World world = location.getWorld();
 
         if (world == null) return;

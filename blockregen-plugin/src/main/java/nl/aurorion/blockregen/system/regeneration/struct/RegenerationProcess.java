@@ -1,9 +1,9 @@
 package nl.aurorion.blockregen.system.regeneration.struct;
 
-import nl.aurorion.blockregen.BlockRegen;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -146,6 +146,8 @@ public class RegenerationProcess implements Runnable {
 
         Bukkit.getScheduler().runTask(plugin, () -> block.setType(regenerateInto));
         plugin.getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+        if (preset.getRegenerationParticle() != null)
+            plugin.getParticleManager().displayParticle(preset.getRegenerationParticle(), block);
     }
 
     /**

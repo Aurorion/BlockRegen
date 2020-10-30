@@ -159,6 +159,7 @@ Blocks:
       high: 10
     regenerate-into: EMERALD_ORE:10;STONE
     natural-break: false
+    regeneration-particles: block_frame
     drop-item:
       material: emerald
       amount: 1

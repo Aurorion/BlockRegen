@@ -101,6 +101,7 @@ public class RegionManager {
     public RegenerationRegion addRegion(RegenerationRegion region) {
         this.loadedRegions.put(region.getName(), region);
         plugin.getConsoleOutput().debug("Added region " + region.getName());
+        save();
         return region;
     }
 

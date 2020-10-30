@@ -139,6 +139,11 @@ public class PresetManager {
         if (!Strings.isNullOrEmpty(particleName))
             preset.setParticle(particleName);
 
+        String regenParticle = section.getString("regeneration-particles");
+
+        if (!Strings.isNullOrEmpty(regenParticle))
+            preset.setRegenerationParticle(regenParticle);
+
         // Conditions
         PresetConditions conditions = new PresetConditions();
 

@@ -21,6 +21,8 @@ public class BlockPreset {
 
     private String particle;
 
+    private String regenerationParticle;
+
     private boolean naturalBreak;
 
     private boolean applyFortune;

@@ -71,7 +71,6 @@ public class GsonHelper {
         ByteBuffer buffer = ByteBuffer.allocate(output.getBytes().length);
 
         buffer.put(output.getBytes(StandardCharsets.UTF_8));
-        buffer.flip();
 
         CompletableFuture<Integer> future = new CompletableFuture<>();
         channel.write(buffer, 0, null, new CompletionHandler<Integer, Object>() {
