@@ -1,25 +1,24 @@
 package nl.aurorion.blockregen.system.regeneration;
 
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -187,18 +186,10 @@ public class RegenerationManager {
 
         plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
 
-        String output = gson.toJson(finalCache, new TypeToken<List<RegenerationProcess>>() {
-        }.getType());
-
-        plugin.getConsoleOutput().debug("JSON: " + output);
-
-        Path path = Paths.get(plugin.getDataFolder().getPath() + "/Data.json");
-
-        try {
-            Files.write(path, output.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
+            ConsoleOutput.getInstance().err("Could not save: " + e.getMessage());
+            return null;
+        });
     }
 
     public void load() {

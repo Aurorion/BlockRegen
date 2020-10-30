@@ -15,6 +15,7 @@ import nl.aurorion.blockregen.particles.breaking.FireWorks;
 import nl.aurorion.blockregen.particles.breaking.FlameCrown;
 import nl.aurorion.blockregen.particles.breaking.WitchSpell;
 import nl.aurorion.blockregen.providers.JobsProvider;
+import nl.aurorion.blockregen.system.GsonHelper;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import nl.aurorion.blockregen.system.region.RegionManager;
@@ -75,12 +76,19 @@ public class BlockRegen extends JavaPlugin {
     @Getter
     private RegionManager regionManager;
 
+    @Getter
+    private GsonHelper gsonHelper;
+
     @Override
     public void onEnable() {
         random = new Random();
 
-        this.versionManager = new VersionManager(this);
+        consoleOutput = ConsoleOutput.getInstance(this);
+
+        versionManager = new VersionManager(this);
         consoleOutput.info("Running on version " + versionManager.getVersion());
+
+        gsonHelper = new GsonHelper();
 
         particleManager = new ParticleManager(this);
 
@@ -94,9 +102,6 @@ public class BlockRegen extends JavaPlugin {
         presetManager = new PresetManager(this);
         regenerationManager = new RegenerationManager(this);
         regionManager = new RegionManager(this);
-
-        consoleOutput = ConsoleOutput.getInstance(this);
-        consoleOutput.setColors(true);
 
         Message.load();
 
