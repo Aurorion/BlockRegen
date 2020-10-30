@@ -1,14 +1,15 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Message;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.JobsPlayer;
 import com.google.common.base.Strings;
 import lombok.NoArgsConstructor;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.ParseUtil;
 import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -112,17 +113,17 @@ public class PresetConditions {
 
     public void setToolsRequired(@Nullable String input) {
 
-        if (Strings.isNullOrEmpty(input)) return;
+        if (Strings.isNullOrEmpty(input))
+            return;
 
         String[] arr = input.split(", ");
 
         toolsRequired.clear();
         for (String loop : arr) {
-            Material material;
-            try {
-                material = Material.valueOf(loop.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                return;
+            Material material = ParseUtil.parseMaterial(loop);
+            if (material == null) {
+                ConsoleOutput.getInstance().warn("Could not parse tool material " + loop);
+                continue;
             }
             toolsRequired.add(material);
         }
@@ -136,18 +137,23 @@ public class PresetConditions {
 
         enchantsRequired.clear();
         for (String loop : arr) {
-            Enchantment enchantment;
-            int level = 1;
 
-            // TODO: Exc handle for enchants
-            if (loop.contains(";")) {
-                enchantment = Enchantment.getByKey(NamespacedKey.minecraft(loop.split(";")[0].toLowerCase()));
-                level = Integer.parseInt(loop.split(";")[1]);
-            } else {
-                enchantment = Enchantment.getByKey(NamespacedKey.minecraft(loop.toLowerCase()));
+            String enchantmentName = loop.split(";")[0];
+            Enchantment enchantment = ParseUtil.parseEnchantment(enchantmentName);
+            if (enchantment == null) {
+                ConsoleOutput.getInstance().warn("Could not parse enchantment " + enchantmentName + " in " + input);
+                continue;
             }
 
-            if (enchantment == null) continue;
+            int level = 1;
+            if (loop.contains(";")) {
+                level = Integer.parseInt(loop.split(";")[1]);
+
+                if (level < 0) {
+                    ConsoleOutput.getInstance().warn("Could not parse an enchantment level in " + input);
+                    continue;
+                }
+            }
 
             enchantsRequired.put(enchantment, level);
         }

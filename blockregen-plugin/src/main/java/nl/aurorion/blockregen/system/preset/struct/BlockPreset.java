@@ -1,7 +1,8 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
-import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
 import lombok.Data;
+import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
+import org.bukkit.Material;
 
 @Data
 public class BlockPreset {
@@ -9,7 +10,7 @@ public class BlockPreset {
     private final String name;
 
     // Type to look for
-    private String material;
+    private Material material;
 
     private DynamicMaterial replaceMaterial;
 

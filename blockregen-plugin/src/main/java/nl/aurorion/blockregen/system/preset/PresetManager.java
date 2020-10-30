@@ -1,6 +1,10 @@
 package nl.aurorion.blockregen.system.preset;
 
+import com.cryptomorin.xseries.XMaterial;
+import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -11,13 +15,17 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.preset.struct.event.EventBossBar;
 import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
-import com.google.common.base.Strings;
 import org.bukkit.Material;
 import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public class PresetManager {
 
@@ -33,8 +41,8 @@ public class PresetManager {
         return Optional.ofNullable(presets.getOrDefault(name, null));
     }
 
-    public Optional<BlockPreset> getPresetByTarget(String target) {
-        return presets.values().stream().filter(o -> o.getMaterial().equalsIgnoreCase(target)).findAny();
+    public Optional<BlockPreset> getPresetByTarget(Material target) {
+        return presets.values().stream().filter(o -> o.getMaterial() == target).findAny();
     }
 
     public Map<String, BlockPreset> getPresets() {
@@ -69,24 +77,32 @@ public class PresetManager {
         // Target material
         String targetMaterial = section.getString("target-material");
 
-        if (targetMaterial == null)
+        if (Strings.isNullOrEmpty(targetMaterial))
             targetMaterial = name;
 
-        plugin.getConsoleOutput().debug("Target material: " + targetMaterial.toUpperCase());
+        Optional<XMaterial> xMaterial = XMaterial.matchXMaterial(targetMaterial.toUpperCase());
 
-        preset.setMaterial(targetMaterial.toUpperCase());
+        if (!xMaterial.isPresent()) {
+            ConsoleOutput.getInstance().warn("Could not load preset " + name + ", invalid target material.");
+            return;
+        }
+
+        plugin.getConsoleOutput().debug("Target material: " + xMaterial.get().name());
+
+        preset.setMaterial(xMaterial.get().parseMaterial());
 
         // Replace material
         String replaceMaterial = section.getString("replace-block");
 
-        if (Strings.isNullOrEmpty(replaceMaterial)) return;
+        if (Strings.isNullOrEmpty(replaceMaterial))
+            return;
 
         try {
             preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
         } catch (IllegalArgumentException e) {
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid, skipping it.");
+            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid: " + e.getMessage());
             return;
         }
 
@@ -101,7 +117,7 @@ public class PresetManager {
         } catch (IllegalArgumentException e) {
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid, skipping it.");
+            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid: " + e.getMessage());
             return;
         }
 
@@ -120,9 +136,8 @@ public class PresetManager {
         // Particle
         String particleName = section.getString("particles");
 
-        if (!Strings.isNullOrEmpty(particleName)) {
+        if (!Strings.isNullOrEmpty(particleName))
             preset.setParticle(particleName);
-        }
 
         // Conditions
         PresetConditions conditions = new PresetConditions();
@@ -263,32 +278,27 @@ public class PresetManager {
         if (section == null)
             return null;
 
-        Material material = null;
-        try {
-            material = Material.valueOf(section.getString("material").trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err(e.getMessage());
-        }
+        Material material = ParseUtil.parseMaterial(section.getString("material"));
 
-        if (material != null) {
-            ItemDrop drop = new ItemDrop(material);
+        if (material == null)
+            return null;
 
-            drop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".amount", 1));
+        ItemDrop drop = new ItemDrop(material);
 
-            drop.setDisplayName(section.getString("name"));
+        drop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".amount", 1));
 
-            drop.setLore(section.getStringList("lores"));
+        drop.setDisplayName(section.getString("name"));
 
-            ExperienceDrop experienceDrop = new ExperienceDrop();
+        drop.setLore(section.getStringList("lores"));
 
-            experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".exp.amount", 0));
+        ExperienceDrop experienceDrop = new ExperienceDrop();
 
-            experienceDrop.setDropNaturally(plugin.getFiles().getBlockList().getFileConfiguration().getBoolean(path + ".exp.drop-naturally", false));
+        experienceDrop.setAmount(Amount.loadAmount(plugin.getFiles().getBlockList().getFileConfiguration(), path + ".exp.amount", 0));
 
-            drop.setExperienceDrop(experienceDrop);
-            return drop;
-        }
-        return null;
+        experienceDrop.setDropNaturally(plugin.getFiles().getBlockList().getFileConfiguration().getBoolean(path + ".exp.drop-naturally", false));
+
+        drop.setExperienceDrop(experienceDrop);
+        return drop;
     }
 
     private void cacheEvents() {

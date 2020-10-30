@@ -1,5 +1,7 @@
 package nl.aurorion.blockregen;
 
+import com.cryptomorin.xseries.XEnchantment;
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -18,6 +20,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @UtilityClass
 public class Utils {
@@ -74,26 +77,6 @@ public class Utils {
             string = PlaceholderAPI.setPlaceholders(player, string);
 
         return string;
-    }
-
-    @Nullable
-    public Material parseMaterial(@Nullable String input, boolean... blocksOnly) {
-        if (Strings.isNullOrEmpty(input)) return null;
-
-        Material material;
-        try {
-            material = Material.valueOf(input.trim().toUpperCase());
-        } catch (IllegalArgumentException e) {
-            BlockRegen.getInstance().getConsoleOutput().debug("Could not parse material " + input);
-            return null;
-        }
-
-        if (blocksOnly.length > 0 && blocksOnly[0] && !material.isBlock()) {
-            BlockRegen.getInstance().getConsoleOutput().debug("Material " + input + " is not a block.");
-            return null;
-        }
-
-        return material;
     }
 
     /**
