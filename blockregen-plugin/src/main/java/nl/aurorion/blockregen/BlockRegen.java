@@ -11,9 +11,10 @@ import nl.aurorion.blockregen.listeners.BlockBreak;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
 import nl.aurorion.blockregen.particles.ParticleManager;
-import nl.aurorion.blockregen.particles.breaking.FireWorks;
-import nl.aurorion.blockregen.particles.breaking.FlameCrown;
-import nl.aurorion.blockregen.particles.breaking.WitchSpell;
+import nl.aurorion.blockregen.particles.impl.BlockFrame;
+import nl.aurorion.blockregen.particles.impl.FireWorks;
+import nl.aurorion.blockregen.particles.impl.FlameCrown;
+import nl.aurorion.blockregen.particles.impl.WitchSpell;
 import nl.aurorion.blockregen.providers.JobsProvider;
 import nl.aurorion.blockregen.system.GsonHelper;
 import nl.aurorion.blockregen.system.preset.PresetManager;
@@ -90,12 +91,13 @@ public class BlockRegen extends JavaPlugin {
 
         gsonHelper = new GsonHelper();
 
-        particleManager = new ParticleManager(this);
+        particleManager = new ParticleManager();
 
         // Add default particles
         new FireWorks().register();
         new FlameCrown().register();
         new WitchSpell().register();
+        new BlockFrame().register();
 
         files = new Files(this);
 
