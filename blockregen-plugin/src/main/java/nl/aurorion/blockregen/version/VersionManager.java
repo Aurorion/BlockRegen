@@ -104,6 +104,6 @@ public class VersionManager {
         if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
 
         this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
-        plugin.getConsoleOutput().info("WorldGuard found! &aSupporting it's regenerationRegion protection.");
+        plugin.getConsoleOutput().info("WorldGuard found! &aSupporting it's Region protection.");
     }
 }

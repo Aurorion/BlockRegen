@@ -1,12 +1,12 @@
 name: BlockRegen
 main: nl.aurorion.blockregen.BlockRegen
 version: ${project.version}
-authors: [Aurorion, Wertik1206]
-softdepend: [Residence, Vault, WorldEdit, Towny, Jobs, GriefPrevention, PlaceholderAPI, WorldGuard]
-api-version: "1.16"
+authors: [ Aurorion, Wertik1206 ]
+softdepend: [ Residence, Vault, WorldEdit, Towny, Jobs, GriefPrevention, PlaceholderAPI, WorldGuard ]
+api-version: "1.13"
 commands:
   blockregen:
-    aliases: [br]
+    aliases: [ br ]
     description: Main plugin command
 permissions:
   blockregen.admin:
