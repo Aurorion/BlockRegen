@@ -5,7 +5,6 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
-import com.sk89q.worldedit.regions.Region;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -142,6 +141,7 @@ public class Commands implements CommandExecutor {
                             return false;
                         }
 
+                        plugin.getRegionManager().addRegion(region);
                         Message.SET_REGION.send(player);
                         return false;
                     }
