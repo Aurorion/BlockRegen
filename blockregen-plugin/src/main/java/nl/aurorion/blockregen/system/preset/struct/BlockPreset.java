@@ -1,7 +1,7 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
 import lombok.Data;
-import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
+import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
 import org.bukkit.Material;
 
@@ -31,8 +31,6 @@ public class BlockPreset {
     private PresetConditions conditions;
 
     private PresetRewards rewards;
-
-    private PresetEvent event;
 
     public BlockPreset(String name) {
         this.name = name;

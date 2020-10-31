@@ -1,18 +1,19 @@
 package nl.aurorion.blockregen.listeners;
 
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
+import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -195,20 +196,17 @@ public class BlockBreak implements Listener {
             boolean doubleDrops = false;
             boolean doubleExp = false;
 
-            if (preset.getEvent() != null &&
-                    Utils.events.containsKey(preset.getEvent().getName()) &&
-                    Utils.events.get(preset.getEvent().getName())) {
+            PresetEvent presetEvent = plugin.getEventManager().getEvent(preset.getName());
 
-                doubleDrops = preset.getEvent().isDoubleDrops();
-                doubleExp = preset.getEvent().isDoubleExperience();
+            if (presetEvent != null && presetEvent.isEnabled()) {
+                doubleDrops = presetEvent.isDoubleDrops();
+                doubleExp = presetEvent.isDoubleExperience();
 
-                if (preset.getEvent().getItem() != null) {
-                    ItemStack eventDrop = preset.getEvent().getItem().toItemStack(player);
+                if (presetEvent.getItem() != null) {
+                    ItemStack eventDrop = presetEvent.getItem().toItemStack(player);
 
-                    // Event item
-                    if (eventDrop != null && (plugin.getRandom().nextInt((preset.getEvent().getItemRarity().getInt() - 1) + 1) + 1) == 1) {
+                    if (eventDrop != null && (plugin.getRandom().nextInt((presetEvent.getItemRarity().getInt() - 1) + 1) + 1) == 1)
                         drops.add(eventDrop);
-                    }
                 }
             }
 

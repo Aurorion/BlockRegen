@@ -2,13 +2,17 @@ package nl.aurorion.blockregen.system.preset.struct.drop;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import org.bukkit.Material;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -65,5 +69,27 @@ public class ItemDrop {
         itemStack.setItemMeta(itemMeta);
 
         return itemStack;
+    }
+
+    @Nullable
+    public static ItemDrop load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section) {
+
+        if (section == null)
+            return null;
+
+        Material material = ParseUtil.parseMaterial(section.getString("material"));
+
+        if (material == null)
+            return null;
+
+        ItemDrop drop = new ItemDrop(material);
+
+        drop.setAmount(Amount.loadAmount(configuration, section.getCurrentPath() + ".amount", 1));
+        drop.setDisplayName(section.getString("name"));
+        drop.setLore(section.getStringList("lores"));
+
+        drop.setExperienceDrop(ExperienceDrop.load(configuration, section.getConfigurationSection("exp")));
+
+        return drop;
     }
 }

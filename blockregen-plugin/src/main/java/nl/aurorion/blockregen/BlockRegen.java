@@ -16,6 +16,7 @@ import nl.aurorion.blockregen.particles.impl.FlameCrown;
 import nl.aurorion.blockregen.particles.impl.WitchSpell;
 import nl.aurorion.blockregen.providers.JobsProvider;
 import nl.aurorion.blockregen.system.GsonHelper;
+import nl.aurorion.blockregen.system.event.EventManager;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import nl.aurorion.blockregen.system.region.RegionManager;
@@ -77,6 +78,9 @@ public class BlockRegen extends JavaPlugin {
     private RegionManager regionManager;
 
     @Getter
+    private EventManager eventManager;
+
+    @Getter
     private GsonHelper gsonHelper;
 
     @Override
@@ -102,6 +106,7 @@ public class BlockRegen extends JavaPlugin {
         presetManager = new PresetManager(this);
         regenerationManager = new RegenerationManager(this);
         regionManager = new RegionManager(this);
+        eventManager = new EventManager(this);
 
         Message.load();
 
@@ -150,8 +155,8 @@ public class BlockRegen extends JavaPlugin {
         if (!(sender instanceof ConsoleCommandSender))
             consoleOutput.addListener(sender);
 
-        Utils.events.clear();
-        Utils.bars.clear();
+        eventManager.disableAll();
+        eventManager.clearBars();
 
         // Load again in case something got installed.
         versionManager.load();

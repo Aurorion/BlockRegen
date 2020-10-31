@@ -4,14 +4,8 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.Utils;
-import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
-import com.sk89q.worldedit.regions.Region;
+import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.boss.BarColor;
-import org.bukkit.boss.BarStyle;
-import org.bukkit.boss.BossBar;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -195,98 +189,64 @@ public class Commands implements CommandExecutor {
                 }
 
                 if (args.length < 3) {
-                    if (Utils.events.isEmpty()) {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m     &r &3BlockRegen &8&m     "
+
+                    if (plugin.getEventManager().getLoadedEvents().isEmpty()) {
+                        sender.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen &8&m     "
                                 + "\n&cYou haven't made any events yet."
                                 + "\n&8&m                       "));
-                    } else {
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m     &r &3BlockRegen &8&m     "));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7You have the following events ready to be activated."));
-                        sender.sendMessage(" ");
-                        for (String events : Utils.events.keySet()) {
-                            String state;
-                            if (!Utils.events.get(events)) {
-                                state = ChatColor.RED + "(inactive)";
-                            } else {
-                                state = ChatColor.GREEN + "(active)";
-                            }
-                            sender.sendMessage(ChatColor.AQUA + "- " + events + " " + state);
-                        }
-                        sender.sendMessage(" ");
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7Use &3/" + label + " events activate <event name> &7to activate it."));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&7Use &3/" + label + " events deactivate <event name> &7to de-activate it."));
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&8&m                       "));
+                        return false;
                     }
+
+                    StringBuilder list = new StringBuilder("&8&m     &r &3BlockRegen &8&m     \n" +
+                            "&7You have the following events ready to be activated.\n");
+
+                    for (PresetEvent event : plugin.getEventManager().getEvents(e -> true)) {
+                        list.append("\n&8 - &r").append(event.getDisplayName()).append(" (").append(event.getName()).append(") ")
+                                .append(event.isEnabled() ? " &a(active)&r" : " &c(inactive)&r");
+                    }
+
+                    list.append("&7Use &3/").append(label).append(" events activate <block name> &7to activate it.\n")
+                            .append("&7Use &3/").append(label).append(" events deactivate <block name> &7to de-activate it.\n")
+                            .append("&8&m                       ");
+                    sender.sendMessage(StringUtil.color(list.toString()));
                 } else {
                     if (args[1].equalsIgnoreCase("activate")) {
-                        String allArgs = args[2];
-                        if (args.length > 3) {
-                            StringBuilder sb = new StringBuilder();
-                            for (int i = 2; i < args.length; i++) {
-                                sb.append(args[i]).append(" ");
-                            }
-                            allArgs = sb.toString().trim();
-                        }
+                        String name = args[2];
 
-                        if (Utils.events.containsKey(allArgs)) {
-                            if (!Utils.events.get(allArgs)) {
-                                Utils.events.put(allArgs, true);
-                                sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", allArgs));
+                        PresetEvent event = plugin.getEventManager().getEvent(name);
 
-                                String barName = null;
-                                BarColor barColor = BarColor.BLUE;
-
-                                for (BlockPreset preset : plugin.getPresetManager().getPresets().values()) {
-                                    if (preset.getEvent() == null || !preset.getEvent().getName().equalsIgnoreCase(allArgs))
-                                        continue;
-
-                                    if (preset.getEvent().getBossBar() == null)
-                                        return false;
-
-                                    barName = preset.getEvent().getBossBar().getText();
-                                    barColor = preset.getEvent().getBossBar().getColor();
-                                }
-
-                                BossBar bossbar = Bukkit.createBossBar(StringUtil.color(Utils.parse(barName)), barColor, BarStyle.SOLID);
-
-                                Utils.bars.put(allArgs, bossbar);
-
-                                for (Player online : Bukkit.getOnlinePlayers()) {
-                                    bossbar.addPlayer(online);
-                                }
-                            } else {
-                                sender.sendMessage(Message.EVENT_ALREADY_ACTIVE.get());
-                            }
-                        } else {
+                        if (event == null) {
                             sender.sendMessage(Message.EVENT_NOT_FOUND.get());
+                            return false;
                         }
+
+                        if (event.isEnabled()) {
+                            sender.sendMessage(Message.EVENT_ALREADY_ACTIVE.get());
+                            return false;
+                        }
+
+                        plugin.getEventManager().enableEvent(event);
+                        sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", event.getDisplayName()));
                         return false;
                     }
 
                     if (args[1].equalsIgnoreCase("deactivate")) {
-                        String allArgs = args[2];
-                        if (args.length > 3) {
-                            StringBuilder sb = new StringBuilder();
-                            for (int i = 2; i < args.length; i++) {
-                                sb.append(args[i]).append(" ");
-                            }
-                            allArgs = sb.toString().trim();
-                        }
+                        String name = args[2];
 
-                        if (Utils.events.containsKey(allArgs)) {
-                            if (Utils.events.get(allArgs)) {
-                                Utils.events.put(allArgs, false);
-                                sender.sendMessage(Message.DEACTIVATE_EVENT.get().replace("%event%", allArgs));
-                                BossBar bossbar = Utils.bars.get(allArgs);
-                                bossbar.removeAll();
-                                Utils.bars.remove(allArgs);
-                            } else {
-                                sender.sendMessage(Message.EVENT_NOT_ACTIVE.get());
-                            }
-                        } else {
+                        PresetEvent event = plugin.getEventManager().getEvent(name);
+
+                        if (event == null) {
                             sender.sendMessage(Message.EVENT_NOT_FOUND.get());
+                            return false;
                         }
 
+                        if (!event.isEnabled()) {
+                            sender.sendMessage(Message.EVENT_NOT_ACTIVE.get());
+                            return false;
+                        }
+
+                        plugin.getEventManager().disableEvent(event);
+                        sender.sendMessage(Message.DEACTIVATE_EVENT.get().replace("%event%", event.getDisplayName()));
                         return false;
                     }
                 }

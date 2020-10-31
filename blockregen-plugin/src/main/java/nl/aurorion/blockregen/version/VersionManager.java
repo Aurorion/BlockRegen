@@ -7,6 +7,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.version.api.Methods;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;
+import nl.aurorion.blockregen.version.current.LatestMethods;
 import nl.aurorion.blockregen.version.current.LatestWorldEditProvider;
 import nl.aurorion.blockregen.version.current.LatestWorldGuardProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldEditProvider;
@@ -54,6 +55,7 @@ public class VersionManager {
                     setWorldEditProvider(new LegacyWorldEditProvider(worldEdit));
                 if (worldGuardProvider == null && worldEditProvider != null && worldGuard != null)
                     setWorldGuardProvider(new LegacyWorldGuardProvider(worldGuard));
+                this.methods = new LatestMethods();
                 break;
             case "v1_13":
             case "v1_14":
@@ -64,6 +66,7 @@ public class VersionManager {
                     setWorldEditProvider(new LatestWorldEditProvider(worldEdit));
                 if (worldGuardProvider == null && worldEditProvider != null && worldGuard != null)
                     setWorldGuardProvider(new LatestWorldGuardProvider(worldGuard));
+                this.methods = new LatestMethods();
         }
     }
 

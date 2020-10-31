@@ -21,9 +21,7 @@ public class PlayerInteract implements Listener {
 
         Player player = event.getPlayer();
 
-        if (event.getAction().toString().toUpperCase().contains("BLOCK") && Utils.dataCheck.contains(player.getName())) {
-            if (event.getClickedBlock() == null) return;
-
+        if (event.getClickedBlock() != null && Utils.dataCheck.contains(player.getName())) {
             event.setCancelled(true);
             player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));
         }

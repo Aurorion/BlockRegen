@@ -1,7 +1,5 @@
 package nl.aurorion.blockregen;
 
-import com.cryptomorin.xseries.XEnchantment;
-import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
@@ -10,17 +8,13 @@ import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
-import org.bukkit.boss.BossBar;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
 
 @UtilityClass
 public class Utils {
@@ -28,9 +22,6 @@ public class Utils {
     //TODO Move all of these somewhere else
     public final List<String> bypass = new ArrayList<>();
     public final List<String> dataCheck = new ArrayList<>();
-
-    public final Map<String, Boolean> events = new HashMap<>();
-    public final Map<String, BossBar> bars = new HashMap<>();
 
     public final List<Color> FIREWORK_COLORS = new ArrayList<Color>() {{
         add(Color.AQUA);
