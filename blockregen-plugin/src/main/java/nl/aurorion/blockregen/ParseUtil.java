@@ -25,7 +25,7 @@ public class ParseUtil {
     }
 
     @Nullable
-    public Enchantment parseEnchantment(String input) {
+    public XEnchantment parseEnchantment(String input) {
         if (Strings.isNullOrEmpty(input))
             return null;
 
@@ -41,7 +41,7 @@ public class ParseUtil {
             return null;
         }
 
-        return enchantment;
+        return xEnchantment.get();
     }
 
     @Nullable

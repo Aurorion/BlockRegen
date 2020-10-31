@@ -1,5 +1,7 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
+import com.cryptomorin.xseries.XEnchantment;
+import com.cryptomorin.xseries.XMaterial;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;
 import com.gamingmesh.jobs.container.JobsPlayer;
@@ -27,7 +29,7 @@ public class PresetConditions {
 
     private final List<Material> toolsRequired = new ArrayList<>();
 
-    private final Map<Enchantment, Integer> enchantsRequired = new HashMap<>();
+    private final Map<XEnchantment, Integer> enchantsRequired = new HashMap<>();
 
     private final Map<Job, Integer> jobsRequired = new HashMap<>();
 
@@ -40,9 +42,8 @@ public class PresetConditions {
         if (toolsRequired.isEmpty()) return true;
 
         for (Material material : toolsRequired) {
-            if (player.getInventory().getItemInMainHand().getType() == material) {
+            if (XMaterial.matchXMaterial(player.getInventory().getItemInMainHand()) == XMaterial.matchXMaterial(material))
                 return true;
-            }
         }
 
         player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player).replace("%tool%", toolsRequired.stream()
@@ -62,11 +63,15 @@ public class PresetConditions {
         ItemMeta meta = tool.getItemMeta();
 
         if (meta != null && player.getInventory().getItemInMainHand().getType() != Material.AIR) {
-            for (Map.Entry<Enchantment, Integer> entry : enchantsRequired.entrySet()) {
+            for (Map.Entry<XEnchantment, Integer> entry : enchantsRequired.entrySet()) {
 
-                if (meta.hasEnchant(entry.getKey()) && meta.getEnchantLevel(entry.getKey()) >= entry.getValue()) {
+                Enchantment enchantment = entry.getKey().parseEnchantment();
+
+                if (enchantment == null)
+                    continue;
+
+                if (meta.hasEnchant(enchantment) && meta.getEnchantLevel(enchantment) >= entry.getValue())
                     return true;
-                }
             }
         }
 
@@ -91,11 +96,11 @@ public class PresetConditions {
         return false;
     }
 
-    private String compressEnchantRequirements(Map<Enchantment, Integer> input) {
+    private String compressEnchantRequirements(Map<XEnchantment, Integer> input) {
         List<String> out = new ArrayList<>();
 
-        for (Map.Entry<Enchantment, Integer> enchant : input.entrySet()) {
-            out.add(enchant.getKey().getKey().getKey() + " (" + enchant.getValue().toString() + ")");
+        for (Map.Entry<XEnchantment, Integer> enchant : input.entrySet()) {
+            out.add(enchant.getKey().name() + " (" + enchant.getValue().toString() + ")");
         }
 
         return String.join(", ", out);
@@ -139,7 +144,7 @@ public class PresetConditions {
         for (String loop : arr) {
 
             String enchantmentName = loop.split(";")[0];
-            Enchantment enchantment = ParseUtil.parseEnchantment(enchantmentName);
+            XEnchantment enchantment = ParseUtil.parseEnchantment(enchantmentName);
             if (enchantment == null) {
                 ConsoleOutput.getInstance().warn("Could not parse enchantment " + enchantmentName + " in " + input);
                 continue;

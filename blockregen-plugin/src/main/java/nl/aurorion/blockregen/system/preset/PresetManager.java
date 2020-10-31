@@ -45,12 +45,8 @@ public class PresetManager {
 
     public Optional<BlockPreset> getPresetByBlock(Block block) {
         return presets.values().stream()
-                .filter(p -> XBlock.isType(block, XMaterial.matchXMaterial(p.getMaterial())))
+                .filter(p -> XBlock.isSimilar(block, XMaterial.matchXMaterial(p.getMaterial())))
                 .findAny();
-    }
-
-    public Optional<BlockPreset> getPresetByTarget(Material target) {
-        return presets.values().stream().filter(o -> o.getMaterial() == target).findAny();
     }
 
     public Map<String, BlockPreset> getPresets() {
