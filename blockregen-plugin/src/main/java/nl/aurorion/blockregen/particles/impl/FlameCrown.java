@@ -21,6 +21,6 @@ public class FlameCrown extends AbstractParticle {
     public void display(@NotNull Location location) {
         Location start = location.clone().add(.5, 1.2, .5);
         ParticleDisplay display = new ParticleDisplay(Particle.FLAME, start, 1);
-        Bukkit.getScheduler().runTaskAsynchronously(BlockRegen.getInstance(), () -> XParticle.circle(.5D, 10.0D, display));
+        Bukkit.getScheduler().runTaskAsynchronously(BlockRegen.getInstance(), () -> XParticle.circle(.5, .1, display));
     }
 }
