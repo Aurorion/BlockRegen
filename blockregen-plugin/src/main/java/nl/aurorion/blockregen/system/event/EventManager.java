@@ -36,6 +36,9 @@ public class EventManager {
      * Remove Player from all active bars.
      */
     public void removeBars(Player player) {
+        if (plugin.getVersionManager().isBelow("v1_8", true))
+            return;
+
         for (PresetEvent event : getEvents(e -> e.isEnabled() && e.getActiveBossBar() != null)) {
             event.getActiveBossBar().addPlayer(player);
         }
@@ -45,6 +48,9 @@ public class EventManager {
      * Add player to all active bars.
      */
     public void addBars(Player player) {
+        if (plugin.getVersionManager().isBelow("v1_8", true))
+            return;
+
         for (PresetEvent event : getEvents(e -> e.isEnabled() && e.getActiveBossBar() != null)) {
             event.getActiveBossBar().addPlayer(player);
         }
@@ -56,6 +62,9 @@ public class EventManager {
 
         event.setEnabled(false);
         ConsoleOutput.getInstance().debug("Disabled event " + event.getName());
+
+        if (plugin.getVersionManager().isBelow("v1_8", true))
+            return;
 
         // Boss bar
         BossBar bossBar = event.getActiveBossBar();
@@ -84,6 +93,9 @@ public class EventManager {
 
         event.setEnabled(true);
         ConsoleOutput.getInstance().debug("Enabled event " + event.getName());
+
+        if (plugin.getVersionManager().isBelow("v1_8", true))
+            return;
 
         // Boss bar
         BossBar bossBar = plugin.getVersionManager().getMethods().createBossBar(event.getBossBar().getText(), event.getBossBar().getColor());

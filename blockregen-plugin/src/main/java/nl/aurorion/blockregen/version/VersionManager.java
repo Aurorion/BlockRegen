@@ -4,6 +4,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;
@@ -44,17 +45,20 @@ public class VersionManager {
         setupWorldEdit();
         setupWorldGuard();
 
+        /*
+         * Latest - 1.13+
+         * Legacy - 1.12 - 1.8
+         * */
         switch (version) {
+            // Try to catch 1.7 into legacy. Might work on some occasions.
             case "v1_7":
             case "v1_8":
             case "v1_9":
             case "v1_10":
             case "v1_11":
             case "v1_12":
-                if (worldEditProvider == null && worldEdit != null)
-                    setWorldEditProvider(new LegacyWorldEditProvider(worldEdit));
-                if (worldGuardProvider == null && worldEditProvider != null && worldGuard != null)
-                    setWorldGuardProvider(new LegacyWorldGuardProvider(worldGuard));
+                useWorldEdit(LegacyWorldEditProvider::new);
+                useWorldGuard(LegacyWorldGuardProvider::new);
                 this.methods = new LatestMethods();
                 break;
             case "v1_13":
@@ -62,11 +66,25 @@ public class VersionManager {
             case "v1_15":
             case "v1_16":
             default:
-                if (worldEditProvider == null && worldEdit != null)
-                    setWorldEditProvider(new LatestWorldEditProvider(worldEdit));
-                if (worldGuardProvider == null && worldEditProvider != null && worldGuard != null)
-                    setWorldGuardProvider(new LatestWorldGuardProvider(worldGuard));
+                useWorldEdit(LatestWorldEditProvider::new);
+                useWorldGuard(LatestWorldGuardProvider::new);
                 this.methods = new LatestMethods();
+        }
+    }
+
+    public interface InstanceProvider<X, Y> {
+        X provide(Y plugin);
+    }
+
+    public void useWorldGuard(InstanceProvider<WorldGuardProvider, WorldGuardPlugin> instanceProvider) {
+        if (worldGuardProvider == null && worldGuard != null) {
+            this.worldGuardProvider = instanceProvider.provide(worldGuard);
+        }
+    }
+
+    public void useWorldEdit(InstanceProvider<WorldEditProvider, WorldEditPlugin> instanceProvider) {
+        if (worldEditProvider == null && worldEdit != null) {
+            this.worldEditProvider = instanceProvider.provide(worldEdit);
         }
     }
 
@@ -75,6 +93,23 @@ public class VersionManager {
 
         Matcher matcher = pattern.matcher(Bukkit.getServer().getClass().getPackage().getName());
         return matcher.find() ? matcher.group() : null;
+    }
+
+    private int composeVersionNumber(String versionString) {
+        String num = versionString.replace("v", "").replace("_", "");
+        return ParseUtil.parseInteger(num);
+    }
+
+    public boolean isAbove(String versionString, boolean include) {
+        int version = composeVersionNumber(versionString);
+        int current = composeVersionNumber(this.version);
+        return include ? current >= version : current > version;
+    }
+
+    public boolean isBelow(String versionString, boolean include) {
+        int version = composeVersionNumber(versionString);
+        int current = composeVersionNumber(this.version);
+        return include ? current <= version : current < version;
     }
 
     private void setWorldEditProvider(WorldEditProvider worldEditProvider) {

@@ -2,6 +2,7 @@ package nl.aurorion.blockregen.system.event.struct;
 
 import lombok.Getter;
 import lombok.Setter;
+import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
@@ -72,7 +73,8 @@ public class PresetEvent {
         event.setDoubleDrops(section.getBoolean("double-drops", false));
         event.setDoubleExperience(section.getBoolean("double-exp", false));
 
-        event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), event.getName()));
+        if (BlockRegen.getInstance().getVersionManager().isAbove("v1_8", false))
+            event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), event.getName()));
 
         event.setItem(ItemDrop.load(configuration, section.getConfigurationSection(".custom-item")));
 
