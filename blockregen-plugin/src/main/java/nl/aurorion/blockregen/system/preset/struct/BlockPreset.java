@@ -10,12 +10,10 @@ public class BlockPreset {
 
     private final String name;
 
-    // Type to look for
     private Material material;
 
     private DynamicMaterial replaceMaterial;
 
-    // Regen-to
     private DynamicMaterial regenMaterial;
 
     private Amount delay;

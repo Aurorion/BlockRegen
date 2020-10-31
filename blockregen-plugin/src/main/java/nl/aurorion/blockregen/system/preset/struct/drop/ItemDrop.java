@@ -31,7 +31,6 @@ public class ItemDrop {
     @Setter
     private List<String> lore = new ArrayList<>();
 
-    // Nullable
     @Getter
     @Setter
     private ExperienceDrop experienceDrop;
