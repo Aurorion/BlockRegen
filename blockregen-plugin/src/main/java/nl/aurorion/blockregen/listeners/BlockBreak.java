@@ -46,7 +46,7 @@ public class BlockBreak implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        BlockPreset preset = plugin.getPresetManager().getPresetByTarget(block.getType()).orElse(null);
+        BlockPreset preset = plugin.getPresetManager().getPresetByBlock(block).orElse(null);
 
         if (event.isCancelled()) {
             return;

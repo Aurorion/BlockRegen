@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.preset;
 
+import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
@@ -8,14 +9,15 @@ import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
-import nl.aurorion.blockregen.system.preset.struct.DynamicMaterial;
 import nl.aurorion.blockregen.system.preset.struct.PresetConditions;
 import nl.aurorion.blockregen.system.preset.struct.PresetRewards;
 import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.preset.struct.event.EventBossBar;
 import nl.aurorion.blockregen.system.preset.struct.event.PresetEvent;
+import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
 import org.bukkit.Material;
+import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,6 +41,12 @@ public class PresetManager {
 
     public Optional<BlockPreset> getPreset(String name) {
         return Optional.ofNullable(presets.getOrDefault(name, null));
+    }
+
+    public Optional<BlockPreset> getPresetByBlock(Block block) {
+        return presets.values().stream()
+                .filter(p -> XBlock.isType(block, XMaterial.matchXMaterial(p.getMaterial())))
+                .findAny();
     }
 
     public Optional<BlockPreset> getPresetByTarget(Material target) {
@@ -188,20 +196,14 @@ public class PresetManager {
 
             // Single drop
             if (section.contains("drop-item.material")) {
-                Material material = null;
-                try {
-                    material = Material.valueOf(section.getString("drop-item.material").trim().toUpperCase());
-                } catch (IllegalArgumentException e) {
-                    plugin.getConsoleOutput().err(e.getMessage());
-                    if (plugin.getConsoleOutput().isDebug())
-                        e.printStackTrace();
-                }
+                Material material = ParseUtil.parseMaterial(section.getString("drop-item.material"));
 
                 if (material != null) {
                     ItemDrop drop = loadItemDrop("Blocks." + name + ".drop-item");
 
                     if (drop != null) drops.add(drop);
-                }
+                } else
+                    ConsoleOutput.getInstance().warn("Could not load material for " + name);
             } else {
                 // Multiple drops
                 for (String dropName : section.getConfigurationSection("drop-item").getKeys(false)) {
