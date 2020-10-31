@@ -15,7 +15,7 @@ If you're looking for something more basic and use WorldGuard, explore [BlockReg
 ### Notes
 
 * Versions 1.8 (and any below) don't support boss bars.
-* Versions below 1.12 have not been fully tested, report any issues
+* Versions below 1.12 have not been fully tested, report any issues.
 
 ## Development trello
 
