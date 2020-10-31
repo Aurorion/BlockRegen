@@ -16,11 +16,10 @@ public class FlameCrown extends AbstractParticle {
         return "flame_crown";
     }
 
-    //TODO Displays just one particle. Fix that.
     @Override
     public void display(@NotNull Location location) {
         Location start = location.clone().add(.5, 1.2, .5);
         ParticleDisplay display = new ParticleDisplay(Particle.FLAME, start, 1);
-        Bukkit.getScheduler().runTaskAsynchronously(BlockRegen.getInstance(), () -> XParticle.circle(.5, .1, display));
+        Bukkit.getScheduler().runTaskAsynchronously(BlockRegen.getInstance(), () -> XParticle.circle(.5, 10, display));
     }
 }

@@ -11,7 +11,6 @@ import nl.aurorion.blockregen.listeners.BlockBreak;
 import nl.aurorion.blockregen.listeners.PlayerInteract;
 import nl.aurorion.blockregen.listeners.PlayerJoin;
 import nl.aurorion.blockregen.particles.ParticleManager;
-import nl.aurorion.blockregen.particles.impl.BlockFrame;
 import nl.aurorion.blockregen.particles.impl.FireWorks;
 import nl.aurorion.blockregen.particles.impl.FlameCrown;
 import nl.aurorion.blockregen.particles.impl.WitchSpell;
@@ -97,7 +96,6 @@ public class BlockRegen extends JavaPlugin {
         new FireWorks().register();
         new FlameCrown().register();
         new WitchSpell().register();
-        new BlockFrame().register();
 
         files = new Files(this);
 

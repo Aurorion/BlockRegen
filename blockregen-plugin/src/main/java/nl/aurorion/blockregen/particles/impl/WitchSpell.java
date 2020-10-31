@@ -14,10 +14,9 @@ public class WitchSpell extends AbstractParticle {
         return "witch_spell";
     }
 
-    //TODO Displays just one particle. Fix that.
     @Override
     public void display(@NotNull Location location) {
         ParticleDisplay display = new ParticleDisplay(Particle.SPELL_WITCH, location.clone().add(.5, .5, .5), 1);
-        XParticle.circle(.5, .1, display);
+        XParticle.circle(.5, 10, display);
     }
 }
