@@ -1,9 +1,7 @@
 package nl.aurorion.blockregen.system.regeneration;
 
-import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
@@ -15,14 +13,11 @@ import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 public class RegenerationManager {
 
@@ -168,64 +163,45 @@ public class RegenerationManager {
     }
 
     public void save() {
+        CompletableFuture.runAsync(() -> {
+            purgeExpired();
 
-        purgeExpired();
+            final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
 
-        final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+            finalCache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
 
-        finalCache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
+            plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
 
-        plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
-
-        plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
-            ConsoleOutput.getInstance().err("Could not save: " + e.getMessage());
-            return null;
+            plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
+                ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
+                return null;
+            });
         });
     }
 
     public void load() {
+        plugin.getGsonHelper().loadListAsync(plugin.getDataFolder().getPath() + "/Data.json", RegenerationProcess.class).thenAcceptAsync(loadedProcesses -> {
+            cache.clear();
 
-        // From json
+            for (RegenerationProcess process : loadedProcesses) {
 
-        Path path = Paths.get(plugin.getDataFolder().getPath() + "/Data.json");
+                if (!process.convertLocation()) {
+                    plugin.getConsoleOutput().debug("Could not load location for regeneration process " + process.toString());
+                    continue;
+                }
 
-        if (!Files.exists(path)) return;
+                if (!process.convertPreset()) {
+                    plugin.getConsoleOutput().debug("Could not load preset for regeneration process " + process.toString());
+                    process.revert();
+                    continue;
+                }
 
-        String input;
-        try {
-            input = String.join("", Files.readAllLines(path));
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        if (Strings.isNullOrEmpty(input)) return;
-
-        List<RegenerationProcess> loadedProcesses = gson.fromJson(input, new TypeToken<List<RegenerationProcess>>() {
-        }.getType());
-
-        // Load into cache
-
-        cache.clear();
-
-        for (RegenerationProcess process : loadedProcesses) {
-
-            if (!process.convertLocation()) {
-                plugin.getConsoleOutput().debug("Could not load location for regeneration process " + process.toString());
-                continue;
+                // Start it
+                process.start();
+                plugin.getConsoleOutput().debug("Prepared regeneration process " + process.toString());
             }
-
-            if (!process.convertPreset()) {
-                plugin.getConsoleOutput().debug("Could not load preset for regeneration process " + process.toString());
-                process.revert();
-                continue;
-            }
-
-            // Start it
-            process.start();
-            plugin.getConsoleOutput().debug("Prepared regeneration process " + process.toString());
-        }
-        plugin.getConsoleOutput().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+            plugin.getConsoleOutput().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+        });
     }
 
     public List<RegenerationProcess> getCache() {
