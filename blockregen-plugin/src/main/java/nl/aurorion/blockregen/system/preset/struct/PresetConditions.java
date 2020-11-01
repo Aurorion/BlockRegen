@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 public class PresetConditions {
 
-    private final List<Material> toolsRequired = new ArrayList<>();
+    private final List<XMaterial> toolsRequired = new ArrayList<>();
 
     private final Map<XEnchantment, Integer> enchantsRequired = new HashMap<>();
 
@@ -41,8 +41,8 @@ public class PresetConditions {
 
         if (toolsRequired.isEmpty()) return true;
 
-        for (Material material : toolsRequired) {
-            if (XMaterial.matchXMaterial(player.getInventory().getItemInMainHand()) == XMaterial.matchXMaterial(material))
+        for (XMaterial material : toolsRequired) {
+            if (XMaterial.matchXMaterial(player.getInventory().getItemInMainHand()) == material)
                 return true;
         }
 
@@ -125,7 +125,7 @@ public class PresetConditions {
 
         toolsRequired.clear();
         for (String loop : arr) {
-            Material material = ParseUtil.parseMaterial(loop);
+            XMaterial material = ParseUtil.parseMaterial(loop);
             if (material == null) {
                 ConsoleOutput.getInstance().warn("Could not parse tool material " + loop);
                 continue;

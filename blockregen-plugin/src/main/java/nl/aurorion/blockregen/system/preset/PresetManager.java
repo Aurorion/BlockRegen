@@ -89,22 +89,20 @@ public class PresetManager {
             return;
         }
 
-        plugin.getConsoleOutput().debug("Target material: " + xMaterial.get().name());
-
         preset.setMaterial(xMaterial.get().parseMaterial());
 
         // Replace material
         String replaceMaterial = section.getString("replace-block");
 
         if (Strings.isNullOrEmpty(replaceMaterial))
-            return;
+            replaceMaterial = "AIR";
 
         try {
             preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
         } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid: " + e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid: " + e.getMessage());
             return;
         }
 
@@ -117,9 +115,9 @@ public class PresetManager {
         try {
             preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
         } catch (IllegalArgumentException e) {
+            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid: " + e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
                 e.printStackTrace();
-            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid: " + e.getMessage());
             return;
         }
 
@@ -170,7 +168,6 @@ public class PresetManager {
         }
 
         preset.setConditions(conditions);
-        plugin.getConsoleOutput().debug("Conditions loaded");
 
         // Rewards
         PresetRewards rewards = new PresetRewards();
@@ -190,14 +187,14 @@ public class PresetManager {
 
             // Single drop
             if (section.contains("drop-item.material")) {
-                Material material = ParseUtil.parseMaterial(section.getString("drop-item.material"));
+                XMaterial material = ParseUtil.parseMaterial(section.getString("drop-item.material"));
 
                 if (material != null) {
                     ItemDrop drop = ItemDrop.load(file, section.getConfigurationSection("drop-item"));
                     if (drop != null)
                         drops.add(drop);
                 } else
-                    ConsoleOutput.getInstance().warn("Could not load material for " + name);
+                    ConsoleOutput.getInstance().warn("Could not load item drop for preset " + name + ", material is invalid.");
             } else {
                 // Multiple drops
                 for (String dropName : section.getConfigurationSection("drop-item").getKeys(false)) {
@@ -206,7 +203,6 @@ public class PresetManager {
             }
 
             rewards.setDrops(drops);
-            plugin.getConsoleOutput().debug("Added " + rewards.getDrops().size() + " drop(s)");
         }
 
         preset.setRewards(rewards);

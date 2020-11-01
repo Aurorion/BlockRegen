@@ -152,16 +152,7 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revertAll() {
-        for (RegenerationProcess process : cache) {
-            Block block = process.getBlock();
-
-            if (block == null) {
-                plugin.getConsoleOutput().err("Could not revert process " + process.toString() + ", block is null.");
-                continue;
-            }
-
-            block.setType(process.getOriginalMaterial());
-        }
+        new HashSet<>(cache).forEach(RegenerationProcess::revert);
     }
 
     private void purgeExpired() {

@@ -45,7 +45,7 @@ public class ParseUtil {
     }
 
     @Nullable
-    public Material parseMaterial(String input, boolean... blocksOnly) {
+    public XMaterial parseMaterial(String input, boolean... blocksOnly) {
 
         if (Strings.isNullOrEmpty(input))
             return null;
@@ -64,6 +64,6 @@ public class ParseUtil {
             return null;
         }
 
-        return material;
+        return xMaterial.get();
     }
 }

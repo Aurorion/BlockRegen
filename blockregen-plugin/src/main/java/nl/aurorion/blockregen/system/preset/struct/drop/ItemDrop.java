@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.preset.struct.drop;
 
+import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.ParseUtil;
@@ -21,7 +22,7 @@ import java.util.List;
 public class ItemDrop {
 
     @Getter
-    private final Material material;
+    private final XMaterial material;
 
     @Getter
     @Setter
@@ -39,7 +40,7 @@ public class ItemDrop {
     @Setter
     private ExperienceDrop experienceDrop;
 
-    public ItemDrop(Material material) {
+    public ItemDrop(XMaterial material) {
         this.material = material;
     }
 
@@ -49,7 +50,12 @@ public class ItemDrop {
 
         if (amount <= 0) return null;
 
-        ItemStack itemStack = new ItemStack(material, amount);
+        ItemStack itemStack = material.parseItem();
+
+        if (itemStack == null)
+            return null;
+
+        itemStack.setAmount(amount);
 
         ItemMeta itemMeta = itemStack.getItemMeta();
 
@@ -77,7 +83,7 @@ public class ItemDrop {
         if (section == null)
             return null;
 
-        Material material = ParseUtil.parseMaterial(section.getString("material"));
+        XMaterial material = ParseUtil.parseMaterial(section.getString("material"));
 
         if (material == null)
             return null;

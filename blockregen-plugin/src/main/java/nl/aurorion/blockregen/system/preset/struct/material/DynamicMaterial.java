@@ -1,10 +1,9 @@
 package nl.aurorion.blockregen.system.preset.struct.material;
 
+import com.cryptomorin.xseries.XMaterial;
+import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ParseUtil;
-import nl.aurorion.blockregen.Utils;
-import com.google.common.base.Strings;
-import org.bukkit.Material;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -15,9 +14,9 @@ public class DynamicMaterial {
 
     private boolean fixed = false;
 
-    private final List<Material> valuedMaterials = new ArrayList<>();
+    private final List<XMaterial> valuedMaterials = new ArrayList<>();
 
-    private Material defaultMaterial;
+    private XMaterial defaultMaterial;
 
     public DynamicMaterial(String input) {
 
@@ -70,7 +69,7 @@ public class DynamicMaterial {
             total += chance;
 
             for (int i = 0; i < chance; i++) {
-                Material mat = ParseUtil.parseMaterial(material.split(":")[0], true);
+                XMaterial mat = ParseUtil.parseMaterial(material.split(":")[0], true);
 
                 if (mat == null) {
                     BlockRegen.getInstance().getConsoleOutput().debug("Invalid material " + material.split(":")[0] + " skipped");
@@ -87,9 +86,10 @@ public class DynamicMaterial {
     }
 
     @NotNull
-    public Material get() {
-        if (fixed) return defaultMaterial;
-        Material pickedMaterial = valuedMaterials.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterials.size()));
+    public XMaterial get() {
+        if (fixed)
+            return defaultMaterial;
+        XMaterial pickedMaterial = valuedMaterials.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterials.size()));
         return pickedMaterial != null ? pickedMaterial : defaultMaterial;
     }
 }

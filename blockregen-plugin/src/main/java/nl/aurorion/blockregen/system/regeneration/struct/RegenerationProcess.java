@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.regeneration.struct;
 
+import com.cryptomorin.xseries.XMaterial;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
@@ -23,7 +24,7 @@ public class RegenerationProcess implements Runnable {
     private transient Block block;
 
     @Getter
-    private Material originalMaterial;
+    private XMaterial originalMaterial;
 
     @Getter
     private String regionName;
@@ -47,7 +48,7 @@ public class RegenerationProcess implements Runnable {
 
     @Getter
     @Setter
-    private transient Material regenerateInto;
+    private transient XMaterial regenerateInto;
 
     private transient BukkitTask task;
 
@@ -62,7 +63,7 @@ public class RegenerationProcess implements Runnable {
         this.preset = preset;
 
         this.presetName = preset.getName();
-        this.originalMaterial = block.getType();
+        this.originalMaterial = XMaterial.matchXMaterial(block.getType());
         this.location = new SimpleLocation(block.getLocation());
 
         this.regenerateInto = preset.getRegenMaterial().get();
@@ -97,10 +98,13 @@ public class RegenerationProcess implements Runnable {
 
         // Replace the block
 
-        Material replaceMaterial = preset.getReplaceMaterial().get();
+        Material replaceMaterial = preset.getReplaceMaterial().get().parseMaterial();
 
-        Bukkit.getScheduler().runTask(plugin, () -> block.setType(replaceMaterial));
-        plugin.consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
+        if (replaceMaterial != null)
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                block.setType(replaceMaterial);
+                plugin.consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
+            });
 
         if (this.regenerateInto == null)
             this.regenerateInto = preset.getRegenMaterial().get();
@@ -144,8 +148,16 @@ public class RegenerationProcess implements Runnable {
         if (blockRegenBlockRegenEvent.isCancelled())
             return;
 
-        Bukkit.getScheduler().runTask(plugin, () -> block.setType(regenerateInto));
-        plugin.getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+        // Set type
+        Material material = regenerateInto.parseMaterial();
+        if (material != null) {
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                block.setType(material);
+                plugin.getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+            });
+        }
+
+        // Particle
         if (preset.getRegenerationParticle() != null)
             plugin.getParticleManager().displayParticle(preset.getRegenerationParticle(), block);
     }
@@ -164,8 +176,13 @@ public class RegenerationProcess implements Runnable {
 
         plugin.getRegenerationManager().removeProcess(this);
 
-        Bukkit.getScheduler().runTask(plugin, () -> block.setType(originalMaterial));
-        plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
+        // Set the block
+        Material material = originalMaterial.parseMaterial();
+        if (material != null)
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                block.setType(material);
+                plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
+            });
     }
 
     public void updateTimeLeft(long timeLeft) {
