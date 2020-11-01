@@ -54,18 +54,13 @@ public class RegenerationManager {
     /**
      * Helper for creating regeneration processes.
      */
+    @Nullable
     public RegenerationProcess createProcess(Block block, BlockPreset preset) {
 
-        RegenerationProcess process;
-        try {
-            process = new RegenerationProcess(block, preset);
-        } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Could not create regeneration process: " + e.getMessage());
-            if (plugin.getConsoleOutput().isDebug())
-                e.printStackTrace();
+        if (block == null || preset == null)
             return null;
-        }
-        return process;
+
+        return new RegenerationProcess(block, preset);
     }
 
     /**

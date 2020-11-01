@@ -44,22 +44,17 @@ public class RegenerationProcess implements Runnable {
     @Getter
     private transient long regenerationTime;
 
+    private transient Material replaceMaterial;
+
     @Getter
     private long timeLeft = -1;
 
-    @Getter
     @Setter
-    private transient XMaterial regenerateInto;
+    private transient Material regenerateInto;
 
     private transient BukkitTask task;
 
     public RegenerationProcess(Block block, BlockPreset preset) {
-
-        if (block == null)
-            throw new IllegalArgumentException("Block cannot be null");
-        if (preset == null)
-            throw new IllegalArgumentException("Preset cannot be null");
-
         this.block = block;
         this.preset = preset;
 
@@ -67,7 +62,20 @@ public class RegenerationProcess implements Runnable {
         this.originalMaterial = XMaterial.matchXMaterial(block.getType());
         this.location = new SimpleLocation(block.getLocation());
 
-        this.regenerateInto = preset.getRegenMaterial().get();
+        getRegenerateInto();
+        getReplaceMaterial();
+    }
+
+    public Material getRegenerateInto() {
+        if (this.regenerateInto == null)
+            this.regenerateInto = preset.getRegenMaterial().get().parseMaterial();
+        return this.regenerateInto;
+    }
+
+    public Material getReplaceMaterial() {
+        if (this.replaceMaterial == null)
+            this.replaceMaterial = preset.getReplaceMaterial().get().parseMaterial();
+        return this.replaceMaterial;
     }
 
     public boolean start() {
@@ -84,9 +92,6 @@ public class RegenerationProcess implements Runnable {
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
             this.timeLeft = regenDelay * 1000;
-        } else if (this.timeLeft < 0) {
-            regenerate();
-            return false;
         }
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
@@ -99,20 +104,17 @@ public class RegenerationProcess implements Runnable {
 
         // Replace the block
 
-        Material replaceMaterial = preset.getReplaceMaterial().get().parseMaterial();
-
-        if (replaceMaterial != null)
+        if (getReplaceMaterial() != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                block.setType(replaceMaterial);
+                block.setType(getReplaceMaterial());
                 ConsoleOutput.getInstance().debug("Replaced block with " + replaceMaterial.toString());
             });
-
-        if (this.regenerateInto == null)
-            this.regenerateInto = preset.getRegenMaterial().get();
+        }
 
         // Start the regeneration task
 
-        if (task != null) task.cancel();
+        if (task != null)
+            task.cancel();
 
         task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
         ConsoleOutput.getInstance().debug("Started regeneration...");
@@ -135,9 +137,6 @@ public class RegenerationProcess implements Runnable {
             task = null;
         }
 
-        if (this.regenerateInto == null)
-            this.regenerateInto = preset.getRegenMaterial().get();
-
         BlockRegen plugin = BlockRegen.getInstance();
 
         // Call the event
@@ -150,11 +149,10 @@ public class RegenerationProcess implements Runnable {
             return;
 
         // Set type
-        Material material = regenerateInto.parseMaterial();
-        if (material != null) {
+        if (getRegenerateInto() != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                block.setType(material);
-                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+                block.setType(getRegenerateInto());
+                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + getRegenerateInto());
             });
         }
 

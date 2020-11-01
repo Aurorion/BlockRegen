@@ -34,10 +34,10 @@ public class BlockRegenBlockRegenerationEvent extends BlockRegenBlockEvent imple
      * */
 
     public Material getRegenerateInto() {
-        return regenerationProcess.getRegenerateInto().parseMaterial();
+        return regenerationProcess.getRegenerateInto();
     }
 
     public void setRegenerateInto(Material material) {
-        regenerationProcess.setRegenerateInto(XMaterial.matchXMaterial(material));
+        regenerationProcess.setRegenerateInto(material);
     }
 }

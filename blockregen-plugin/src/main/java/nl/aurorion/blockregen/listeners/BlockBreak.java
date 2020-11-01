@@ -20,7 +20,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -41,7 +40,7 @@ public class BlockBreak implements Listener {
         this.plugin = plugin;
     }
 
-    @EventHandler(priority = EventPriority.LOWEST)
+    @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
 
         Player player = event.getPlayer();
@@ -78,13 +77,10 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        FileConfiguration settings = plugin.getFiles().getSettings().getFileConfiguration();
-
         // Towny
         if (plugin.getConfig().getBoolean("Towny-Support", true) && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
-            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null)
-                if (TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
-                    return;
+            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null && TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown())
+                return;
         }
 
         // Grief Prevention
@@ -110,22 +106,22 @@ public class BlockBreak implements Listener {
 
         World world = block.getWorld();
 
-        boolean isInWorld = settings.getStringList("Worlds-Enabled").contains(world.getName());
+        boolean isInWorld = plugin.getConfig().getStringList("Worlds-Enabled").contains(world.getName());
 
         boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
 
         if (useRegions) {
+
             if (plugin.getVersionManager().getWorldEditProvider() == null)
                 return;
 
             RegenerationRegion region = plugin.getRegionManager().getRegion(block.getLocation());
 
             boolean isInRegion = region != null;
-            String regionName = region == null ? null : region.getName();
 
             if (isInRegion) {
                 if (preset != null) {
-                    process(plugin.getRegenerationManager().createProcess(block, preset, regionName), preset, event);
+                    process(plugin.getRegenerationManager().createProcess(block, preset, region.getName()), preset, event);
                 } else {
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region"))
                         event.setCancelled(true);
@@ -165,13 +161,11 @@ public class BlockBreak implements Listener {
         if (!player.hasPermission("blockregen.block." + blockName) && !player.hasPermission("blockregen.block.*") && !player.isOp()) {
             Message.PERMISSION_BLOCK_ERROR.send(event.getPlayer());
             event.setCancelled(true);
-            plugin.getRegenerationManager().removeProcess(process);
             return;
         }
 
         if (!preset.getConditions().check(player)) {
             event.setCancelled(true);
-            plugin.getRegenerationManager().removeProcess(process);
             return;
         }
 
@@ -182,12 +176,11 @@ public class BlockBreak implements Listener {
         if (blockRegenBlockBreakEvent.isCancelled())
             return;
 
+        // Start regeneration
+        process.start();
+
+        // Run rewards async
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
-
-            // Start regeneration
-            process.start();
-
-            // Rewards...
 
             List<ItemStack> drops = new ArrayList<>();
 
@@ -210,7 +203,7 @@ public class BlockBreak implements Listener {
                 }
             }
 
-            // Drop Section-----------------------------------------------------------------------------------------
+            // Drop Section -----------------------------------------------------------------------------------------
             if (preset.isNaturalBreak()) {
 
                 for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
