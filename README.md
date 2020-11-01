@@ -12,7 +12,7 @@ I don't have access to the spigot page and it most likely won't be updated, use 
 
 * Versions 1.8 (and any below) don't support boss bars for events.
 * Versions below 1.12 have not been fully tested, report any issues.
-* Even if you want to use a material from before 1.13 on 1.12 (and below), use it's 1.13+ name.
+* For materials on version 1.12 (and below) use their 1.13+ names.
   * ex.: Cyan dye -> ~~INK_SACK;4~~ CYAN_DYE
   * You can find a list of materials [here](https://github.com/CryptoMorin/XSeries/blob/master/src/main/java/com/cryptomorin/xseries/XMaterial.java).
 
