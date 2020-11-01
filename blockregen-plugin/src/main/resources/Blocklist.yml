@@ -97,12 +97,23 @@ Blocks:
     # Not wish to use this? You can completely remove it without getting null errors
     # Below is an example. Read more info on the spigot updates page.
     event:
-      event-name: Double Diamonds
 
-      # Display a bossbar for all players when the event is active.
+      # Event display name, the preset (block) name is used in commands.
+      event-name: '&3Double Diamonds'
+
+      # Display a boss bar for all players when the event is active.
       bossbar:
+
+        # Text to be displayed
         name: "&bDiamonds, diamonds everywhere!"
+
+        # Color of the boss bar
+        # Options: BLUE, GREEN, PINK, WHITE, YELLOW, RED, PURPLE
         color: BLUE
+
+        # Style of the boss bar
+        # Options: SOLID, SEGMENTED_6, SEGMENTED_10, SEGMENTED_12, SEGMENTED_20
+        style: SOLID
 
       # Should we double the drops or exp?
       double-drops: true
