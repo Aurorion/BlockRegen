@@ -98,7 +98,7 @@ public class EventManager {
             return;
 
         // Boss bar
-        BossBar bossBar = plugin.getVersionManager().getMethods().createBossBar(event.getBossBar().getText(), event.getBossBar().getColor());
+        BossBar bossBar = plugin.getVersionManager().getMethods().createBossBar(event.getBossBar().getText(), event.getBossBar().getColor(), event.getBossBar().getStyle());
         if (bossBar == null)
             return;
 
