@@ -83,7 +83,7 @@ public class PresetEvent {
             event.setItemRarity(rarity);
         } else event.setItemRarity(new Amount(1));
 
-        ConsoleOutput.getInstance().debug("Loaded event " + displayName);
+        ConsoleOutput.getInstance().debug("Loaded event " + event.getName());
         return event;
     }
 }

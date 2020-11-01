@@ -24,19 +24,19 @@ public class EventBossBar {
 
         bossBar.setText(section.getString("name", "&eBlock event &r" + displayName + " &eis active!"));
 
-        String barStyle = section.getString("style");
+        String barStyle = section.getString("style", "SOLID");
 
         if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarStyleValid(barStyle)) {
             ConsoleOutput.getInstance().warn("Boss bar style " + barStyle + " is invalid.");
             bossBar.setStyle("SOLID");
-        }
+        } else bossBar.setStyle(barStyle);
 
-        String barColor = section.getString("color");
+        String barColor = section.getString("color", "BLUE");
 
         if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarColorValid(barColor)) {
             ConsoleOutput.getInstance().warn("Boss bar color " + barColor + " is invalid.");
             bossBar.setColor("BLUE");
-        }
+        } else bossBar.setColor(barColor);
 
         return bossBar;
     }
