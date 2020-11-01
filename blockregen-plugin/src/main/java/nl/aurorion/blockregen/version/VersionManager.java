@@ -57,8 +57,10 @@ public class VersionManager {
             case "v1_10":
             case "v1_11":
             case "v1_12":
-                useWorldEdit(LegacyWorldEditProvider::new);
-                useWorldGuard(LegacyWorldGuardProvider::new);
+                if (worldEdit != null)
+                    useWorldEdit(LegacyWorldEditProvider::new);
+                if (worldGuard != null)
+                    useWorldGuard(LegacyWorldGuardProvider::new);
                 this.methods = new LatestMethods();
                 break;
             case "v1_13":
@@ -66,8 +68,10 @@ public class VersionManager {
             case "v1_15":
             case "v1_16":
             default:
-                useWorldEdit(LatestWorldEditProvider::new);
-                useWorldGuard(LatestWorldGuardProvider::new);
+                if (worldEdit != null)
+                    useWorldEdit(LatestWorldEditProvider::new);
+                if (worldGuard != null)
+                    useWorldGuard(LatestWorldGuardProvider::new);
                 this.methods = new LatestMethods();
         }
     }
@@ -77,13 +81,13 @@ public class VersionManager {
     }
 
     public void useWorldGuard(InstanceProvider<WorldGuardProvider, WorldGuardPlugin> instanceProvider) {
-        if (worldGuardProvider == null && worldGuard != null) {
+        if (worldGuardProvider == null) {
             this.worldGuardProvider = instanceProvider.provide(worldGuard);
         }
     }
 
     public void useWorldEdit(InstanceProvider<WorldEditProvider, WorldEditPlugin> instanceProvider) {
-        if (worldEditProvider == null && worldEdit != null) {
+        if (worldEditProvider == null) {
             this.worldEditProvider = instanceProvider.provide(worldEdit);
         }
     }
