@@ -96,7 +96,7 @@ public class Commands implements CommandExecutor {
                 }
 
                 if (args.length == 1 || args.length > 3) {
-                    player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen &8&m     "
+                    player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Regions &8&m     "
                             + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
                             + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
                             + "\n&3/" + label + " region list &8- &7List your regions."));
@@ -191,23 +191,22 @@ public class Commands implements CommandExecutor {
                 if (args.length < 3) {
 
                     if (plugin.getEventManager().getLoadedEvents().isEmpty()) {
-                        sender.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen &8&m     "
+                        sender.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Events &8&m     "
                                 + "\n&cYou haven't made any events yet."
                                 + "\n&8&m                       "));
                         return false;
                     }
 
-                    StringBuilder list = new StringBuilder("&8&m     &r &3BlockRegen &8&m     \n" +
-                            "&7You have the following events ready to be activated.\n");
+                    StringBuilder list = new StringBuilder("&8&m     &r &3BlockRegen Events &8&m     \n" +
+                            "&7You have the following events loaded:").append("\n&r ");
 
                     for (PresetEvent event : plugin.getEventManager().getEvents(e -> true)) {
-                        list.append("\n&8 - &r").append(event.getDisplayName()).append(" (").append(event.getName()).append(") ")
+                        list.append("\n&8 - &r").append(event.getDisplayName()).append(" &7(Name: &f").append(event.getName()).append("&7) ")
                                 .append(event.isEnabled() ? " &a(active)&r" : " &c(inactive)&r");
                     }
 
-                    list.append("&7Use &3/").append(label).append(" events activate <block name> &7to activate it.\n")
-                            .append("&7Use &3/").append(label).append(" events deactivate <block name> &7to de-activate it.\n")
-                            .append("&8&m                       ");
+                    list.append("\n&r \n&7Use &3/").append(label).append(" events activate <name> &7to activate it.\n")
+                            .append("&7Use &3/").append(label).append(" events deactivate <name> &7to de-activate it.");
                     sender.sendMessage(StringUtil.color(list.toString()));
                 } else {
                     if (args[1].equalsIgnoreCase("activate")) {

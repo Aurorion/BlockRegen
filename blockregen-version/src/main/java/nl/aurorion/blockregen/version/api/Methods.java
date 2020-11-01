@@ -7,5 +7,7 @@ public interface Methods {
 
     boolean isBarColorValid(@Nullable String string);
 
-    @Nullable BossBar createBossBar(@Nullable String text, @Nullable String color);
+    boolean isBarStyleValid(@Nullable String string);
+
+    @Nullable BossBar createBossBar(@Nullable String text, @Nullable String color, @Nullable String style);
 }

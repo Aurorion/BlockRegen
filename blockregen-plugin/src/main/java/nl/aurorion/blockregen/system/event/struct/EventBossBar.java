@@ -11,28 +11,31 @@ import org.jetbrains.annotations.Nullable;
 public class EventBossBar {
 
     private String text;
-    private String color = "BLUE";
+    private String color;
+    private String style;
 
     @Nullable
-    public static EventBossBar load(@Nullable ConfigurationSection section, @NotNull String eventName) {
+    public static EventBossBar load(@Nullable ConfigurationSection section, @NotNull String displayName) {
 
         if (section == null)
             return null;
 
         EventBossBar bossBar = new EventBossBar();
 
-        if (!section.contains("bossbar.name"))
-            bossBar.setText("&fEvent " + eventName + " &fis active!");
-        else
-            bossBar.setText(section.getString("bossbar.name"));
+        bossBar.setText(section.getString("name", "&eBlock event &r" + displayName + " &eis active!"));
 
-        String barColor = section.getString("bossbar.color");
+        String barStyle = section.getString("style");
 
-        if (barColor != null) {
-            if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarColorValid(barColor)) {
-                ConsoleOutput.getInstance().warn("Boss bar color " + barColor + " is invalid.");
-            } else
-                bossBar.setColor(barColor);
+        if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarStyleValid(barStyle)) {
+            ConsoleOutput.getInstance().warn("Boss bar style " + barStyle + " is invalid.");
+            bossBar.setStyle("SOLID");
+        }
+
+        String barColor = section.getString("color");
+
+        if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarColorValid(barColor)) {
+            ConsoleOutput.getInstance().warn("Boss bar color " + barColor + " is invalid.");
+            bossBar.setColor("BLUE");
         }
 
         return bossBar;

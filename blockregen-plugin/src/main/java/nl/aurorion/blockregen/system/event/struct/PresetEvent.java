@@ -54,12 +54,12 @@ public class PresetEvent {
     }
 
     @Nullable
-    public static PresetEvent load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section) {
+    public static PresetEvent load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section, String presetName) {
 
         if (section == null)
             return null;
 
-        PresetEvent event = new PresetEvent(section.getName());
+        PresetEvent event = new PresetEvent(presetName);
 
         String displayName = section.getString("event-name");
 

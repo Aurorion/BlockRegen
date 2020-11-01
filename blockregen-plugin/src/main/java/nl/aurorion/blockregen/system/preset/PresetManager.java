@@ -13,7 +13,6 @@ import nl.aurorion.blockregen.system.preset.struct.PresetConditions;
 import nl.aurorion.blockregen.system.preset.struct.PresetRewards;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -207,7 +206,7 @@ public class PresetManager {
 
         preset.setRewards(rewards);
 
-        PresetEvent event = PresetEvent.load(file, section.getConfigurationSection("event"));
+        PresetEvent event = PresetEvent.load(file, section.getConfigurationSection("event"), name);
 
         if (event != null)
             plugin.getEventManager().addEvent(event);
