@@ -92,6 +92,8 @@ public class BlockRegen extends JavaPlugin {
         versionManager = new VersionManager(this);
         consoleOutput.info("Running on version " + versionManager.getVersion());
 
+        versionManager.load();
+
         gsonHelper = new GsonHelper();
 
         particleManager = new ParticleManager();
@@ -117,7 +119,6 @@ public class BlockRegen extends JavaPlugin {
         regionManager.load();
         regenerationManager.load();
 
-        versionManager.load();
         checkDependencies();
 
         registerListeners();
