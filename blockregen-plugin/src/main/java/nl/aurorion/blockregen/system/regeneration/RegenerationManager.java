@@ -146,7 +146,7 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revertAll() {
-        new HashSet<>(cache).forEach(RegenerationProcess::placeBack);
+        cache.forEach(RegenerationProcess::placeBack);
     }
 
     private void purgeExpired() {
