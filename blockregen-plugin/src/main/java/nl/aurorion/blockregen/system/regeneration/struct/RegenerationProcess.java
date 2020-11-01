@@ -186,15 +186,13 @@ public class RegenerationProcess implements Runnable {
         }
     }
 
-    public void revertSync() {
+    public void placeBack() {
         if (task != null) {
             task.cancel();
             task = null;
         }
 
         BlockRegen plugin = BlockRegen.getInstance();
-
-        plugin.getRegenerationManager().removeProcess(this);
 
         // Set the block
         Material material = originalMaterial.parseMaterial();

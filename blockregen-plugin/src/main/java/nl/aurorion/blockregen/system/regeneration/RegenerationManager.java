@@ -17,7 +17,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
 
 public class RegenerationManager {
 
@@ -147,7 +146,7 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revertAll() {
-        new HashSet<>(cache).forEach(RegenerationProcess::revertSync);
+        new HashSet<>(cache).forEach(RegenerationProcess::placeBack);
     }
 
     private void purgeExpired() {
@@ -163,19 +162,17 @@ public class RegenerationManager {
     }
 
     public void save() {
-        CompletableFuture.runAsync(() -> {
-            purgeExpired();
+        cache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
 
-            final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
+        purgeExpired();
 
-            finalCache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
+        final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
 
-            plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
+        plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
 
-            plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
-                ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
-                return null;
-            });
+        plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
+            ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
+            return null;
         });
     }
 

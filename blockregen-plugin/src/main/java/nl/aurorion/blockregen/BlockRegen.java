@@ -89,6 +89,11 @@ public class BlockRegen extends JavaPlugin {
 
         consoleOutput = ConsoleOutput.getInstance(this);
 
+        files = new Files(this);
+
+        consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
+        consoleOutput.setPrefix(StringUtil.color(Message.PREFIX.getValue()));
+
         versionManager = new VersionManager(this);
         consoleOutput.info("Running on version " + versionManager.getVersion());
 
@@ -103,17 +108,12 @@ public class BlockRegen extends JavaPlugin {
         new FlameCrown().register();
         new WitchSpell().register();
 
-        files = new Files(this);
-
         presetManager = new PresetManager(this);
         regenerationManager = new RegenerationManager(this);
         regionManager = new RegionManager(this);
         eventManager = new EventManager(this);
 
         Message.load();
-
-        consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
-        consoleOutput.setPrefix(StringUtil.color(Message.PREFIX.getValue()));
 
         presetManager.loadAll();
         regionManager.load();
