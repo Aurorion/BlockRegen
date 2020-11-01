@@ -178,11 +178,30 @@ public class RegenerationProcess implements Runnable {
 
         // Set the block
         Material material = originalMaterial.parseMaterial();
-        if (material != null)
+        if (material != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 block.setType(material);
                 plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
             });
+        }
+    }
+
+    public void revertSync() {
+        if (task != null) {
+            task.cancel();
+            task = null;
+        }
+
+        BlockRegen plugin = BlockRegen.getInstance();
+
+        plugin.getRegenerationManager().removeProcess(this);
+
+        // Set the block
+        Material material = originalMaterial.parseMaterial();
+        if (material != null) {
+            block.setType(material);
+            plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
+        }
     }
 
     public void updateTimeLeft(long timeLeft) {
