@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.system.regeneration.struct;
 import lombok.Data;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 
 import java.util.Objects;
 
@@ -43,6 +44,7 @@ public class SimpleLocation {
     }
 
     public Location toLocation() {
-        return new Location(Bukkit.getWorld(world), x, y, z);
+        World world = Bukkit.getWorld(this.world);
+        return world == null ? null : new Location(world, x, y, z);
     }
 }

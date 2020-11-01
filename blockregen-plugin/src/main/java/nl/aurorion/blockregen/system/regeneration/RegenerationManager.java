@@ -173,6 +173,10 @@ public class RegenerationManager {
         plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
             ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
             return null;
+        }).exceptionally(e -> {
+            ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         });
     }
 
@@ -180,24 +184,31 @@ public class RegenerationManager {
         plugin.getGsonHelper().loadListAsync(plugin.getDataFolder().getPath() + "/Data.json", RegenerationProcess.class).thenAcceptAsync(loadedProcesses -> {
             cache.clear();
 
+            if (loadedProcesses == null)
+                loadedProcesses = new ArrayList<>();
+
             for (RegenerationProcess process : loadedProcesses) {
 
                 if (!process.convertLocation()) {
-                    plugin.getConsoleOutput().debug("Could not load location for regeneration process " + process.toString());
+                    ConsoleOutput.getInstance().err("Could not load location for regeneration process " + process.toString());
                     continue;
                 }
 
                 if (!process.convertPreset()) {
-                    plugin.getConsoleOutput().debug("Could not load preset for regeneration process " + process.toString());
+                    ConsoleOutput.getInstance().err("Could not load preset for regeneration process " + process.toString());
                     process.revert();
                     continue;
                 }
 
                 // Start it
                 process.start();
-                plugin.getConsoleOutput().debug("Prepared regeneration process " + process.toString());
+                ConsoleOutput.getInstance().debug("Prepared regeneration process " + process.toString());
             }
-            plugin.getConsoleOutput().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+            ConsoleOutput.getInstance().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+        }).exceptionally(e -> {
+            ConsoleOutput.getInstance().err("Could not load processes: " + e.getMessage());
+            e.printStackTrace();
+            return null;
         });
     }
 

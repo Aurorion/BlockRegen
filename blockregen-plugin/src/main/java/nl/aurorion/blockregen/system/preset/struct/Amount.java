@@ -41,7 +41,8 @@ public class Amount {
     // Load Amount from yaml
     public static Amount loadAmount(FileConfiguration yaml, String path, double defaultValue) {
 
-        if (!yaml.contains(path)) return new Amount(defaultValue);
+        if (!yaml.contains(path))
+            return new Amount(defaultValue);
 
         ConfigurationSection section = yaml.getConfigurationSection(path);
 

@@ -3,11 +3,11 @@ package nl.aurorion.blockregen.system.preset.struct.drop;
 import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
+import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.ParseUtil;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
-import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
@@ -85,8 +85,10 @@ public class ItemDrop {
 
         XMaterial material = ParseUtil.parseMaterial(section.getString("material"));
 
-        if (material == null)
+        if (material == null) {
+            ConsoleOutput.getInstance().warn("Could not load item drop at " + configuration.getName() + "@" + section.getCurrentPath() + ", material is invalid.");
             return null;
+        }
 
         ItemDrop drop = new ItemDrop(material);
 

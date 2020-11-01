@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -78,7 +79,7 @@ public class RegenerationProcess implements Runnable {
 
         // If timeLeft is -1, generate a new one from preset regen delay.
 
-        plugin.getConsoleOutput().debug("Time left: " + this.timeLeft / 1000 + "s");
+        ConsoleOutput.getInstance().debug("Time left: " + this.timeLeft / 1000 + "s");
 
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
@@ -92,7 +93,7 @@ public class RegenerationProcess implements Runnable {
 
         if (this.regenerationTime <= System.currentTimeMillis()) {
             regenerate();
-            plugin.getConsoleOutput().debug("Regenerated the process already.");
+            ConsoleOutput.getInstance().debug("Regenerated the process already.");
             return false;
         }
 
@@ -103,7 +104,7 @@ public class RegenerationProcess implements Runnable {
         if (replaceMaterial != null)
             Bukkit.getScheduler().runTask(plugin, () -> {
                 block.setType(replaceMaterial);
-                plugin.consoleOutput.debug("Replaced block with " + replaceMaterial.toString());
+                ConsoleOutput.getInstance().debug("Replaced block with " + replaceMaterial.toString());
             });
 
         if (this.regenerateInto == null)
@@ -114,8 +115,8 @@ public class RegenerationProcess implements Runnable {
         if (task != null) task.cancel();
 
         task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
-        plugin.getConsoleOutput().debug("Started regeneration...");
-        plugin.getConsoleOutput().debug("Regenerate in " + this.timeLeft / 1000 + "s");
+        ConsoleOutput.getInstance().debug("Started regeneration...");
+        ConsoleOutput.getInstance().debug("Regenerate in " + this.timeLeft / 1000 + "s");
         return true;
     }
 
@@ -153,7 +154,7 @@ public class RegenerationProcess implements Runnable {
         if (material != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 block.setType(material);
-                plugin.getConsoleOutput().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
+                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + regenerateInto);
             });
         }
 
@@ -181,7 +182,7 @@ public class RegenerationProcess implements Runnable {
         if (material != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 block.setType(material);
-                plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
+                ConsoleOutput.getInstance().debug("Reverted block " + originalMaterial);
             });
         }
     }
@@ -192,13 +193,11 @@ public class RegenerationProcess implements Runnable {
             task = null;
         }
 
-        BlockRegen plugin = BlockRegen.getInstance();
-
         // Set the block
         Material material = originalMaterial.parseMaterial();
         if (material != null) {
             block.setType(material);
-            plugin.getConsoleOutput().debug("Reverted block " + originalMaterial);
+            ConsoleOutput.getInstance().debug("Placed back block " + originalMaterial);
         }
     }
 
@@ -215,11 +214,17 @@ public class RegenerationProcess implements Runnable {
     public boolean convertLocation() {
 
         if (location == null) {
-            BlockRegen.getInstance().getConsoleOutput().err("Could not convert block from SimpleLocation in a Regeneration process for preset " + presetName);
+            ConsoleOutput.getInstance().err("Could not load location for process " + toString());
             return false;
         }
 
         Location location = this.location.toLocation();
+
+        if (location == null) {
+            ConsoleOutput.getInstance().err("Could not load location for process " + toString() + ", world is invalid or not loaded.");
+            return false;
+        }
+
         this.block = location.getBlock();
         return true;
     }
@@ -230,7 +235,7 @@ public class RegenerationProcess implements Runnable {
         BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
 
         if (preset == null) {
-            plugin.getConsoleOutput().err("BlockPreset " + presetName + " no longer exists, removing a left over regeneration process.");
+            plugin.getConsoleOutput().err("Could not load process " + toString() + ", it's preset '" + presetName + "' is invalid.");
             revert();
             return false;
         }

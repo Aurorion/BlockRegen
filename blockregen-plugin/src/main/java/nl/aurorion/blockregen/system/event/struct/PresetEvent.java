@@ -64,7 +64,7 @@ public class PresetEvent {
         String displayName = section.getString("event-name");
 
         if (displayName == null) {
-            ConsoleOutput.getInstance().err("Event name for block " + section.getName() + " has not been set, but the section is present.");
+            ConsoleOutput.getInstance().warn("Could not load event at " + configuration.getName() + "@" + section.getCurrentPath() + ", event name is invalid.");
             return null;
         }
 
@@ -74,7 +74,7 @@ public class PresetEvent {
         event.setDoubleExperience(section.getBoolean("double-exp", false));
 
         if (BlockRegen.getInstance().getVersionManager().isAbove("v1_8", false))
-            event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), event.getName()));
+            event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), "&eEvent &6" + displayName + " &eis active!"));
 
         event.setItem(ItemDrop.load(configuration, section.getConfigurationSection(".custom-item")));
 
@@ -83,7 +83,6 @@ public class PresetEvent {
             event.setItemRarity(rarity);
         } else event.setItemRarity(new Amount(1));
 
-        ConsoleOutput.getInstance().debug("Loaded event " + event.getName());
         return event;
     }
 }
