@@ -172,9 +172,6 @@ public class RegenerationManager {
 
         plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
             ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
-            return null;
-        }).exceptionally(e -> {
-            ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
             e.printStackTrace();
             return null;
         });
@@ -189,13 +186,10 @@ public class RegenerationManager {
 
             for (RegenerationProcess process : loadedProcesses) {
 
-                if (!process.convertLocation()) {
-                    ConsoleOutput.getInstance().err("Could not load location for regeneration process " + process.toString());
+                if (!process.convertLocation())
                     continue;
-                }
 
                 if (!process.convertPreset()) {
-                    ConsoleOutput.getInstance().err("Could not load preset for regeneration process " + process.toString());
                     process.revert();
                     continue;
                 }
