@@ -176,6 +176,8 @@ public class BlockBreak implements Listener {
         if (blockRegenBlockBreakEvent.isCancelled())
             return;
 
+        List<ItemStack> vanillaDrops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
+
         // Start regeneration
         process.start();
 
@@ -206,7 +208,7 @@ public class BlockBreak implements Listener {
             // Drop Section -----------------------------------------------------------------------------------------
             if (preset.isNaturalBreak()) {
 
-                for (ItemStack drop : block.getDrops(player.getInventory().getItemInMainHand())) {
+                for (ItemStack drop : vanillaDrops) {
                     Material mat = drop.getType();
                     int amount = drop.getAmount();
 
