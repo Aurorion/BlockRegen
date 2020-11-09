@@ -115,11 +115,11 @@ public class BlockRegen extends JavaPlugin {
 
         Message.load();
 
+        checkDependencies(false);
+
         presetManager.loadAll();
         regionManager.load();
         regenerationManager.load();
-
-        checkDependencies();
 
         registerListeners();
 
@@ -145,7 +145,7 @@ public class BlockRegen extends JavaPlugin {
 
         // Check for deps and start auto save once the server is done loading.
         Bukkit.getScheduler().runTaskLater(this, () -> {
-            checkDependencies();
+            checkDependencies(true);
             if (getConfig().getBoolean("Auto-Save.Enabled", false))
                 regenerationManager.startAutoSave();
         }, 1L);
@@ -162,7 +162,7 @@ public class BlockRegen extends JavaPlugin {
         // Load again in case something got installed.
         versionManager.load();
 
-        checkDependencies();
+        checkDependencies(false);
 
         files.getSettings().load();
         consoleOutput.setDebug(files.getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false));
@@ -201,9 +201,10 @@ public class BlockRegen extends JavaPlugin {
         pluginManager.registerEvents(new PlayerJoin(this), this);
     }
 
-    public void checkDependencies() {
+    public void checkDependencies(boolean reloadPresets) {
+        consoleOutput.info("Checking dependencies...");
         setupEconomy();
-        setupJobs();
+        setupJobs(reloadPresets);
         setupResidence();
         setupGriefPrevention();
         setupPlaceholderAPI();
@@ -226,10 +227,16 @@ public class BlockRegen extends JavaPlugin {
         consoleOutput.info("Vault & economy plugin found! &aEnabling economy functions.");
     }
 
-    private void setupJobs() {
+    private void setupJobs(boolean reloadPresets) {
         if (getServer().getPluginManager().isPluginEnabled("Jobs") && jobsProvider == null) {
             this.jobsProvider = new JobsProvider();
             consoleOutput.info("Jobs found! &aEnabling Jobs requirements and rewards.");
+
+            if (reloadPresets) {
+                // Load presets again because of jobs check.
+                this.presetManager.loadAll();
+                consoleOutput.info("Reloading presets to add jobs requirements...");
+            }
         }
     }
 

@@ -5,7 +5,7 @@
     <parent>
         <artifactId>BlockRegen</artifactId>
         <groupId>nl.aurorion.blockregen</groupId>
-        <version>3.6.0-b7</version>
+        <version>3.6.0-b8</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -29,7 +29,6 @@
                 <configuration>
                     <source>8</source>
                     <target>8</target>
-                    <release>8</release>
                 </configuration>
             </plugin>
             <plugin>
@@ -69,19 +68,19 @@
         <dependency>
             <groupId>nl.aurorion.blockregen</groupId>
             <artifactId>blockregen-common</artifactId>
-            <version>3.6.0-b7</version>
+            <version>3.6.0-b8</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>nl.aurorion.blockregen</groupId>
             <artifactId>blockregen-version</artifactId>
-            <version>3.6.0-b7</version>
+            <version>3.6.0-b8</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>nl.aurorion.blockregen</groupId>
             <artifactId>blockregen-legacy</artifactId>
-            <version>3.6.0-b7</version>
+            <version>3.6.0-b8</version>
             <scope>compile</scope>
         </dependency>
         <!-- Gson -->
