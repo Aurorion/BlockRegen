@@ -1,0 +1,20 @@
+name: BlockRegen
+main: nl.aurorion.blockregen.BlockRegen
+version: ${project.version}
+authors: [ Aurorion, Wertik1206 ]
+softdepend: [ Residence, Vault, WorldEdit, Towny, Jobs, GriefPrevention, PlaceholderAPI, WorldGuard ]
+api-version: "1.13"
+commands:
+  blockregen:
+    aliases: [ br ]
+    description: Main plugin command
+permissions:
+  blockregen.admin:
+    description: Gives access to admin commands
+  blockregen.bypass:
+    description: Allows player to use the bypass
+  blockregen.datacheck:
+    description: Allows player to use the data check
+  blockregen.block.*:
+    default: true
+    description: Gives player the ability to mine ores
