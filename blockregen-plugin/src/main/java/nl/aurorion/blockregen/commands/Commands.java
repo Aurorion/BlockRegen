@@ -225,7 +225,7 @@ public class Commands implements CommandExecutor {
                         }
 
                         plugin.getEventManager().enableEvent(event);
-                        sender.sendMessage(Message.ACTIVATE_EVENT.get().replace("%event%", event.getDisplayName()));
+                        sender.sendMessage(StringUtil.color(Message.ACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
                         return false;
                     }
 
@@ -245,7 +245,7 @@ public class Commands implements CommandExecutor {
                         }
 
                         plugin.getEventManager().disableEvent(event);
-                        sender.sendMessage(Message.DEACTIVATE_EVENT.get().replace("%event%", event.getDisplayName()));
+                        sender.sendMessage(StringUtil.color(Message.DEACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
                         return false;
                     }
                 }
