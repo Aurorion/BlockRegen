@@ -1,7 +1,5 @@
 package nl.aurorion.blockregen.system.regeneration;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
@@ -21,10 +19,6 @@ import java.util.List;
 public class RegenerationManager {
 
     private final BlockRegen plugin;
-
-    private final Gson gson = new GsonBuilder()
-            // .setPrettyPrinting()
-            .create();
 
     private final List<RegenerationProcess> cache = new ArrayList<>();
 
@@ -148,6 +142,7 @@ public class RegenerationManager {
 
         // Clear invalid processes
         for (RegenerationProcess process : new HashSet<>(cache)) {
+
             if (process == null)
                 continue;
 
@@ -157,7 +152,10 @@ public class RegenerationManager {
     }
 
     public void save() {
-        cache.forEach(process -> process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis()));
+        cache.forEach(process -> {
+            if (process != null)
+                process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
+        });
 
         purgeExpired();
 
