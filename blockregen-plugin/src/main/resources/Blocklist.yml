@@ -53,6 +53,10 @@ Blocks:
     # Available particles as of ${project.version}: flame_crown, witch_spell, fireworks
     particles: flame_crown
 
+    # On break there can be sound played.
+    # Available sounds as of ${project.version}: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+    block-break-sound: ENTITY_EXPERIENCE_ORB_PICKUP
+
     # Give drops, exp and amount as it would be in vanilla.
     # Set this to false to use custom drops.
     natural-break: false

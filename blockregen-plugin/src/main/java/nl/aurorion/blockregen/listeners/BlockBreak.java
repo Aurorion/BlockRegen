@@ -4,6 +4,7 @@ import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
+import com.cryptomorin.xseries.XSound;
 import com.palmergames.bukkit.towny.TownyAPI;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
@@ -273,6 +274,10 @@ public class BlockBreak implements Listener {
 
             // Rewards ---------------------------------------------------------------------------------------------
             preset.getRewards().give(player);
+
+            // Block Break Sound ---------------------------------------------------------------------------------------------
+            if (preset.getBlockBreakSound() != null)
+                XSound.play(player, preset.getBlockBreakSound());
 
             // Particles -------------------------------------------------------------------------------------------
             if (preset.getParticle() != null)
