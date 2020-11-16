@@ -132,29 +132,11 @@ public class RegenerationProcess implements Runnable {
      */
     public void regenerate() {
 
-        if (task != null) {
-            task.cancel();
-            task = null;
-        }
+        stop();
 
         BlockRegen plugin = BlockRegen.getInstance();
 
-        // Call the event
-        BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
-        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
-
-        plugin.getRegenerationManager().removeProcess(this);
-
-        if (blockRegenBlockRegenEvent.isCancelled())
-            return;
-
-        // Set type
-        if (getRegenerateInto() != null) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                block.setType(getRegenerateInto());
-                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + getRegenerateInto());
-            });
-        }
+        Bukkit.getScheduler().runTask(plugin, this::regenerateBlock);
 
         // Particle
         if (preset.getRegenerationParticle() != null)
@@ -162,35 +144,47 @@ public class RegenerationProcess implements Runnable {
     }
 
     /**
+     * Simply regenerate the block. This method is unsafe to execute from async context.
+     */
+    public void regenerateBlock() {
+        // Call the event
+        BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
+        Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent);
+
+        BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+
+        if (blockRegenBlockRegenEvent.isCancelled())
+            return;
+
+        // Set type
+        if (getRegenerateInto() != null) {
+            block.setType(getRegenerateInto());
+            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + getRegenerateInto());
+        }
+    }
+
+    /**
      * Revert process to original material.
      */
     public void revert() {
 
-        if (task != null) {
-            task.cancel();
-            task = null;
-        }
+        stop();
 
         BlockRegen plugin = BlockRegen.getInstance();
 
         plugin.getRegenerationManager().removeProcess(this);
 
-        // Set the block
-        Material material = originalMaterial.parseMaterial();
-        if (material != null) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                block.setType(material);
-                ConsoleOutput.getInstance().debug("Reverted block " + originalMaterial);
-            });
-        }
+        Bukkit.getScheduler().runTask(plugin, this::revertBlock);
     }
 
-    public void placeBack() {
+    public void stop() {
         if (task != null) {
             task.cancel();
             task = null;
         }
+    }
 
+    public void revertBlock() {
         // Set the block
         Material material = originalMaterial.parseMaterial();
         if (material != null) {

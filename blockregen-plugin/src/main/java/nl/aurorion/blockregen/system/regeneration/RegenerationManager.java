@@ -135,7 +135,7 @@ public class RegenerationManager {
 
     // Revert blocks before disabling
     public void revertAll() {
-        cache.forEach(RegenerationProcess::placeBack);
+        cache.forEach(RegenerationProcess::revertBlock);
     }
 
     private void purgeExpired() {
@@ -147,7 +147,7 @@ public class RegenerationManager {
                 continue;
 
             if (process.getTimeLeft() < 0)
-                process.regenerate();
+                process.regenerateBlock();
         }
     }
 
