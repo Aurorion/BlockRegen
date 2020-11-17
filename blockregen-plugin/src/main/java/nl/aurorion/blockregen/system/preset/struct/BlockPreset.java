@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
+import com.cryptomorin.xseries.XSound;
 import lombok.Data;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
@@ -28,7 +29,7 @@ public class BlockPreset {
 
     private boolean dropNaturally;
 
-    private String blockBreakSound;
+    private XSound sound;
 
     private PresetConditions conditions;
 

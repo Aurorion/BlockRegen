@@ -28,14 +28,14 @@ Residence-Support: true
 # This triggers a manual Jobs xp and money addition, if you're getting that doubled, disable here.
 Jobs-Rewards: true
 
-# If you wish to disable creative block-breakin, set this to true
-Disable-Creative-Block-Break: true
-
 # If you wish to cancel all other blocks broken besides the blocks in Blocklist.yml set this to true
 Disable-Other-Break: true
 
 # If you wish to cancel all other blocks broken in the region then set this to true
 Disable-Other-Break-Region: true
+
+# Automatically bypass regeneration and protection when in Creative.
+Bypass-In-Creative: true
 
 # Automatic saving for regeneration process cache.
 Auto-Save:

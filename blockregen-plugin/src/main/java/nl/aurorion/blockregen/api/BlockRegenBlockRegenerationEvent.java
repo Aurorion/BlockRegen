@@ -1,6 +1,5 @@
 package nl.aurorion.blockregen.api;
 
-import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;

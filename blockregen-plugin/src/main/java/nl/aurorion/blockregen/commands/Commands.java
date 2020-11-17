@@ -56,11 +56,11 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (!Utils.bypass.contains(player.getName())) {
-                    Utils.bypass.add(player.getName());
+                if (!Utils.bypass.contains(player.getUniqueId())) {
+                    Utils.bypass.add(player.getUniqueId());
                     Message.BYPASS_ON.send(player);
                 } else {
-                    Utils.bypass.remove(player.getName());
+                    Utils.bypass.remove(player.getUniqueId());
                     Message.BYPASS_OFF.send(player);
                 }
                 break;
@@ -75,11 +75,11 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (!Utils.dataCheck.contains(player.getName())) {
-                    Utils.dataCheck.add(player.getName());
+                if (!Utils.dataCheck.contains(player.getUniqueId())) {
+                    Utils.dataCheck.add(player.getUniqueId());
                     Message.DATA_CHECK_ON.send(player);
                 } else {
-                    Utils.dataCheck.remove(player.getName());
+                    Utils.dataCheck.remove(player.getUniqueId());
                     Message.DATA_CHECK_OFF.send(player);
                 }
                 break;

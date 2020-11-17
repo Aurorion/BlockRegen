@@ -2,6 +2,7 @@ package nl.aurorion.blockregen.system.preset;
 
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
+import com.cryptomorin.xseries.XSound;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
@@ -17,12 +18,7 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class PresetManager {
 
@@ -133,10 +129,14 @@ public class PresetManager {
         preset.setDropNaturally(section.getBoolean("drop-naturally", true));
 
         // Block Break Sound
-        String blockBreakSound = section.getString("block-break-sound");
+        String sound = section.getString("sound");
 
-        if (!Strings.isNullOrEmpty(blockBreakSound))
-            preset.setBlockBreakSound(blockBreakSound);
+        if (!Strings.isNullOrEmpty(sound)) {
+            Optional<XSound> xSound = XSound.matchXSound(sound);
+            if (!xSound.isPresent()) {
+                ConsoleOutput.getInstance().warn("Sound " + sound + " in preset " + name + " is invalid.");
+            } else preset.setSound(xSound.get());
+        }
 
         // Particle
         String particleName = section.getString("particles");

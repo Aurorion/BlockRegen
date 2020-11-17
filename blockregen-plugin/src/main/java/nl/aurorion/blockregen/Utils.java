@@ -3,25 +3,20 @@ package nl.aurorion.blockregen;
 import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @UtilityClass
 public class Utils {
 
     //TODO Move all of these somewhere else
-    public final List<String> bypass = new ArrayList<>();
-    public final List<String> dataCheck = new ArrayList<>();
+    public final Set<UUID> bypass = new HashSet<>();
+    public final Set<UUID> dataCheck = new HashSet<>();
 
     public final List<Color> FIREWORK_COLORS = new ArrayList<Color>() {{
         add(Color.AQUA);
