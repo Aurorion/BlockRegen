@@ -1,7 +1,7 @@
 # BlockRegen
 # 
 # Developer(s): Aurorion & Wertik1206
-# Version: ${project.version}
+# Version: 3.6.1
 
 # Get notified when there is a new version available
 Update-Checker: true

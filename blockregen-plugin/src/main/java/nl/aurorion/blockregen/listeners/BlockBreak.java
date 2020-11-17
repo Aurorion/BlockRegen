@@ -4,6 +4,7 @@ import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
+import com.cryptomorin.xseries.XSound;
 import com.palmergames.bukkit.towny.TownyAPI;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
@@ -15,10 +16,7 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -42,6 +40,7 @@ public class BlockBreak implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
+
 
         Player player = event.getPlayer();
         Block block = event.getBlock();
@@ -164,6 +163,14 @@ public class BlockBreak implements Listener {
             return;
         }
 
+        if (plugin.getConfig().getBoolean("Disable-Creative-Block-Break", true)) {
+            if (player.getGameMode().equals(GameMode.CREATIVE)) {
+                Message.CREATIVE_GAMEMODE_ERROR.send(event.getPlayer());
+                event.setCancelled(true);
+                return;
+            }
+        }
+
         if (!preset.getConditions().check(player)) {
             event.setCancelled(true);
             return;
@@ -273,6 +280,10 @@ public class BlockBreak implements Listener {
 
             // Rewards ---------------------------------------------------------------------------------------------
             preset.getRewards().give(player);
+
+            // Block Break Sound ---------------------------------------------------------------------------------------------
+            if (preset.getBlockBreakSound() != null)
+                XSound.play(player, preset.getBlockBreakSound());
 
             // Particles -------------------------------------------------------------------------------------------
             if (preset.getParticle() != null)

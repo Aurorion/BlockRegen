@@ -1,7 +1,7 @@
 # BlockRegen
 # 
 # Developer(s): Aurorion & Wertik1206
-# Version: ${project.version}
+# Version: 3.6.1
 #
 # Material list: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
 
@@ -50,11 +50,11 @@ Blocks:
     # Remove the comment to enable ^^
 
     # On break there can be particles displayed.
-    # Available particles as of ${project.version}: flame_crown, witch_spell, fireworks
+    # Available particles as of 3.6.1: flame_crown, witch_spell, fireworks
     particles: flame_crown
 
     # On break there can be sound played.
-    # Available sounds as of ${project.version}: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
+    # Available sounds as of 3.6.1: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Sound.html
     block-break-sound: ENTITY_EXPERIENCE_ORB_PICKUP
 
     # Give drops, exp and amount as it would be in vanilla.

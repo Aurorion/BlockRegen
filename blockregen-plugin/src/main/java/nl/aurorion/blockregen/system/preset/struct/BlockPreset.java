@@ -28,6 +28,8 @@ public class BlockPreset {
 
     private boolean dropNaturally;
 
+    private String blockBreakSound;
+
     private PresetConditions conditions;
 
     private PresetRewards rewards;
