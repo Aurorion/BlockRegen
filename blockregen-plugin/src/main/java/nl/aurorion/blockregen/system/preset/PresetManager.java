@@ -132,6 +132,12 @@ public class PresetManager {
         // Drop naturally
         preset.setDropNaturally(section.getBoolean("drop-naturally", true));
 
+        // Block Break Sound
+        String blockBreakSound = section.getString("block-break-sound");
+
+        if (!Strings.isNullOrEmpty(blockBreakSound))
+            preset.setBlockBreakSound(blockBreakSound);
+
         // Particle
         String particleName = section.getString("particles");
 
