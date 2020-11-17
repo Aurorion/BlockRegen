@@ -2,3 +2,6 @@
 *.iml
 *.versionsBackup
 *-reduced-pom.xml
+/blockregen-common/target/
+/blockregen-legacy/target/
+/blockregen-plugin/target/
