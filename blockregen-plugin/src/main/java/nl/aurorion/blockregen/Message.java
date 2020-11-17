@@ -73,6 +73,7 @@ public enum Message {
      * Messages on block break errs.
      */
     TOOL_REQUIRED_ERROR("Tool-Required-Error", "&cYou can only break this block with the following tool(s): &b%tool%&c."),
+    CREATIVE_GAMEMODE_ERROR("Creative-Gamemode-Error", "&cYou can't break blocks while you're in creative."),
     ENCHANT_REQUIRED_ERROR("Enchant-Required-Error", "&cYour tool has to have at least one of the following enchantment(s): &b%enchant%&c."),
     JOBS_REQUIRED_ERROR("Jobs-Error", "&cYou need to reach following job levels in order to break this block: &b%job%"),
     PERMISSION_BLOCK_ERROR("Permission-Error", "&cYou don't have the permission to break this block.");

@@ -16,10 +16,7 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
 import org.bukkit.entity.Player;
@@ -43,6 +40,7 @@ public class BlockBreak implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
+
 
         Player player = event.getPlayer();
         Block block = event.getBlock();
@@ -163,6 +161,14 @@ public class BlockBreak implements Listener {
             Message.PERMISSION_BLOCK_ERROR.send(event.getPlayer());
             event.setCancelled(true);
             return;
+        }
+
+        if (plugin.getConfig().getBoolean("Disable-Creative-Block-Break", true)) {
+            if (player.getGameMode().equals(GameMode.CREATIVE)) {
+                Message.CREATIVE_GAMEMODE_ERROR.send(event.getPlayer());
+                event.setCancelled(true);
+                return;
+            }
         }
 
         if (!preset.getConditions().check(player)) {
