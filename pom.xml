@@ -56,7 +56,7 @@
         </repository>
         <repository>
             <id>devport-public</id>
-            <url>https://nexus.pvpcraft.cz/service/rest/repository/browse/devport-public/</url>
+            <url>https://nexus.pvpcraft.cz/repository/devport-public/</url>
         </repository>
         <repository>
             <id>placeholderapi</id>
