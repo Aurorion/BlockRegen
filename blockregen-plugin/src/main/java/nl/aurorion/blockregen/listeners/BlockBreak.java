@@ -165,14 +165,6 @@ public class BlockBreak implements Listener {
             return;
         }
 
-        if (plugin.getConfig().getBoolean("Disable-Creative-Block-Break", true)) {
-            if (player.getGameMode().equals(GameMode.CREATIVE)) {
-                Message.CREATIVE_GAMEMODE_ERROR.send(event.getPlayer());
-                event.setCancelled(true);
-                return;
-            }
-        }
-
         if (!preset.getConditions().check(player)) {
             event.setCancelled(true);
             return;
