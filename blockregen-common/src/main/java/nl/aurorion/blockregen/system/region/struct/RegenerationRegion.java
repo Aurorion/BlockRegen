@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen.system.region.struct;
 
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
 

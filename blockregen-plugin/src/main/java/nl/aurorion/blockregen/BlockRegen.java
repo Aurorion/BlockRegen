@@ -146,8 +146,12 @@ public class BlockRegen extends JavaPlugin {
         // Check for deps and start auto save once the server is done loading.
         Bukkit.getScheduler().runTaskLater(this, () -> {
             checkDependencies(true);
+
             if (getConfig().getBoolean("Auto-Save.Enabled", false))
                 regenerationManager.startAutoSave();
+
+            regenerationManager.reattemptLoad();
+            regionManager.reattemptLoad();
         }, 1L);
     }
 
