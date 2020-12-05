@@ -1,6 +1,6 @@
 package nl.aurorion.blockregen.system.region;
 
-import jdk.internal.joptsimple.internal.Strings;
+import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
