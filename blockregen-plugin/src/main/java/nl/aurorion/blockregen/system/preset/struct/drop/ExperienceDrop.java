@@ -17,14 +17,14 @@ public class ExperienceDrop {
     private Amount amount = new Amount(1);
 
     @Nullable
-    public static ExperienceDrop load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section) {
+    public static ExperienceDrop load(@Nullable ConfigurationSection section) {
 
         if (section == null)
             return null;
 
         ExperienceDrop drop = new ExperienceDrop();
-        drop.setAmount(Amount.loadAmount(configuration, section.getCurrentPath() + ".exp.amount", 0));
-        drop.setDropNaturally(configuration.getBoolean(section.getCurrentPath() + ".exp.drop-naturally", false));
+        drop.setAmount(Amount.load(section, "exp.amount", 0));
+        drop.setDropNaturally(section.getBoolean("exp.drop-naturally", false));
         return drop;
     }
 }

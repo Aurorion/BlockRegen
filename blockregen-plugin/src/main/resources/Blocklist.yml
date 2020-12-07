@@ -123,6 +123,10 @@ Blocks:
       double-drops: true
       double-exp: false
 
+      # You can also use rewards from the root section (console-commands(aka commands), player-commands, drop-item, etc.)
+      commands:
+        - 'say Hello from the event.'
+
       custom-item:
         enabled: false
         amount: 1

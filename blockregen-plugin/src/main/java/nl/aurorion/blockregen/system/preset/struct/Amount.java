@@ -4,8 +4,9 @@ import nl.aurorion.blockregen.BlockRegen;
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
+import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.ParseUtil;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 
 public class Amount {
 
@@ -39,42 +40,50 @@ public class Amount {
     }
 
     // Load Amount from yaml
-    public static Amount loadAmount(FileConfiguration yaml, String path, double defaultValue) {
+    public static Amount load(ConfigurationSection root, String path, double defaultValue) {
 
-        if (!yaml.contains(path))
+        if (root == null)
             return new Amount(defaultValue);
 
-        ConfigurationSection section = yaml.getConfigurationSection(path);
+        // low & high section syntax
+        if (root.isConfigurationSection(path)) {
 
-        if (section == null || !section.contains("high") || !section.contains("low")) {
+            ConfigurationSection section = root.getConfigurationSection(path);
 
-            String data = yaml.getString(path);
+            if (section == null || !section.contains("high") || section.contains("low"))
+                return new Amount(defaultValue);
 
-            if (data == null) return new Amount(defaultValue);
+            if (!(section.get("low") instanceof Number) || !(section.get("high") instanceof Number))
+                return new Amount(defaultValue);
+
+            double low = section.getDouble("low");
+            double high = section.getDouble("high");
+
+            return new Amount(low, high);
+        } else {
+            String data = root.getString(path);
 
             if (Strings.isNullOrEmpty(data))
                 return new Amount(defaultValue);
 
+            // low-high syntax
             if (data.contains("-")) {
-                return new Amount(Double.parseDouble(data.split("-")[0]), Double.parseDouble(data.split("-")[1]));
+                double low = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[0]), defaultValue, e -> {
+                    ConsoleOutput.getInstance().warn("Could not parse low amount at " + root.getCurrentPath() + "." + path);
+                });
+
+                double high = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[1]), defaultValue, e -> {
+                    ConsoleOutput.getInstance().warn("Could not parse high amount at " + root.getCurrentPath() + "." + path);
+                });
+
+                return new Amount(low, high);
             }
 
-            try {
-                return new Amount(yaml.getDouble(path));
-            } catch (NullPointerException e) {
-                return new Amount(defaultValue);
-            }
-        } else {
-            String dataStrLow = yaml.getString(path + ".low");
-            String dataStrHigh = yaml.getString(path + ".high");
-
-            if (Strings.isNullOrEmpty(dataStrHigh) || Strings.isNullOrEmpty(dataStrLow))
-                return new Amount(defaultValue);
-
-            double low = Double.parseDouble(dataStrLow);
-            double high = Double.parseDouble(dataStrHigh);
-
-            return new Amount(low, high);
+            // Fixed value syntax
+            double fixed = ParseUtil.nullOrDefault(() -> root.getDouble(path), defaultValue, e -> {
+                ConsoleOutput.getInstance().warn("Could not parse fixed value amount at " + root.getCurrentPath() + "." + path);
+            });
+            return new Amount(fixed);
         }
     }
 

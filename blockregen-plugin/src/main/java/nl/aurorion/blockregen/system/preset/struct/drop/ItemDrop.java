@@ -78,7 +78,7 @@ public class ItemDrop {
     }
 
     @Nullable
-    public static ItemDrop load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section) {
+    public static ItemDrop load(ConfigurationSection section) {
 
         if (section == null)
             return null;
@@ -86,17 +86,17 @@ public class ItemDrop {
         XMaterial material = ParseUtil.parseMaterial(section.getString("material"));
 
         if (material == null) {
-            ConsoleOutput.getInstance().warn("Could not load item drop at " + configuration.getName() + "@" + section.getCurrentPath() + ", material is invalid.");
+            ConsoleOutput.getInstance().warn("Could not load item drop at " + section.getCurrentPath() + ", material is invalid.");
             return null;
         }
 
         ItemDrop drop = new ItemDrop(material);
 
-        drop.setAmount(Amount.loadAmount(configuration, section.getCurrentPath() + ".amount", 1));
+        drop.setAmount(Amount.load(section, "amount", 1));
         drop.setDisplayName(section.getString("name"));
         drop.setLore(section.getStringList("lores"));
 
-        drop.setExperienceDrop(ExperienceDrop.load(configuration, section.getConfigurationSection("exp")));
+        drop.setExperienceDrop(ExperienceDrop.load(section.getConfigurationSection("exp")));
 
         return drop;
     }

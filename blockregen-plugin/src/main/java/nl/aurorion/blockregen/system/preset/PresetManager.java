@@ -117,7 +117,7 @@ public class PresetManager {
         }
 
         // Delay
-        preset.setDelay(Amount.loadAmount(file, "Blocks." + name + ".regen-delay", 3));
+        preset.setDelay(Amount.load(file, "Blocks." + name + ".regen-delay", 3));
 
         // Natural break
         preset.setNaturalBreak(section.getBoolean("natural-break", true));
@@ -175,40 +175,7 @@ public class PresetManager {
         preset.setConditions(conditions);
 
         // Rewards
-        PresetRewards rewards = new PresetRewards();
-
-        // Money
-        rewards.setMoney(Amount.loadAmount(file, "Blocks." + name + ".money", 0));
-
-        // Console commands
-        rewards.setConsoleCommands(section.getStringList("console-commands"));
-
-        // Player commands
-        rewards.setPlayerCommands(section.getStringList("player-commands"));
-
-        // Items Drops
-        if (section.contains("drop-item")) {
-            List<ItemDrop> drops = new ArrayList<>();
-
-            // Single drop
-            if (section.contains("drop-item.material")) {
-                XMaterial material = ParseUtil.parseMaterial(section.getString("drop-item.material"));
-
-                if (material != null) {
-                    ItemDrop drop = ItemDrop.load(file, section.getConfigurationSection("drop-item"));
-                    if (drop != null)
-                        drops.add(drop);
-                } else
-                    ConsoleOutput.getInstance().warn("Could not load item drop for preset " + name + ", material is invalid.");
-            } else {
-                // Multiple drops
-                for (String dropName : section.getConfigurationSection("drop-item").getKeys(false)) {
-                    // TODO No need to implement more drops yet.
-                }
-            }
-
-            rewards.setDrops(drops);
-        }
+        PresetRewards rewards = PresetRewards.load(section);
 
         preset.setRewards(rewards);
 

@@ -9,6 +9,8 @@ import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @UtilityClass
 public class ParseUtil {
@@ -65,5 +67,24 @@ public class ParseUtil {
         }
 
         return xMaterial.get();
+    }
+
+    public <T> T nullOrDefault(Supplier<T> supplier, T def, Consumer<Throwable> exceptionCallback) {
+        try {
+            T t = supplier.get();
+            return t == null ? def : t;
+        } catch (Exception e) {
+            exceptionCallback.accept(e);
+            return def;
+        }
+    }
+
+    public <T> T nullOrDefault(Supplier<T> supplier, T def) {
+        try {
+            T t = supplier.get();
+            return t == null ? def : t;
+        } catch (Exception e) {
+            return def;
+        }
     }
 }

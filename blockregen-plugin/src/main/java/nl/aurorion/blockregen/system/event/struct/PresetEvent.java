@@ -5,6 +5,7 @@ import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
+import nl.aurorion.blockregen.system.preset.struct.PresetRewards;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
@@ -49,6 +50,10 @@ public class PresetEvent {
     @Setter
     private BossBar activeBossBar;
 
+    @Getter
+    @Setter
+    private PresetRewards rewards = new PresetRewards();
+
     public PresetEvent(String name) {
         this.name = name;
     }
@@ -76,12 +81,14 @@ public class PresetEvent {
         if (BlockRegen.getInstance().getVersionManager().isAbove("v1_8", false))
             event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), "&eEvent &6" + displayName + " &eis active!"));
 
-        event.setItem(ItemDrop.load(configuration, section.getConfigurationSection(".custom-item")));
+        event.setItem(ItemDrop.load(section.getConfigurationSection("custom-item")));
 
         if (section.contains("custom-item.rarity")) {
-            Amount rarity = Amount.loadAmount(configuration, section.getCurrentPath() + ".custom-item.rarity", 1);
+            Amount rarity = Amount.load(configuration, section.getCurrentPath() + ".custom-item.rarity", 1);
             event.setItemRarity(rarity);
         } else event.setItemRarity(new Amount(1));
+
+        event.setRewards(PresetRewards.load(section));
 
         return event;
     }
