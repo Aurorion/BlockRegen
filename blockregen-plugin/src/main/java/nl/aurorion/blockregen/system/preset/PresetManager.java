@@ -179,7 +179,7 @@ public class PresetManager {
 
         preset.setRewards(rewards);
 
-        PresetEvent event = PresetEvent.load(file, section.getConfigurationSection("event"), name);
+        PresetEvent event = PresetEvent.load(section.getConfigurationSection("event"), name);
 
         if (event != null)
             plugin.getEventManager().addEvent(event);
