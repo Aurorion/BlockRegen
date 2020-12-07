@@ -262,6 +262,18 @@ public class BlockBreak implements Listener {
                 }
             }
 
+            if (presetEvent != null) {
+                // Add items from presetEvent
+                for (ItemDrop drop : presetEvent.getRewards().getDrops()) {
+                    ItemStack item = drop.toItemStack(player);
+                    if (item != null)
+                        drops.add(item);
+                }
+
+                // Fire rewards
+                presetEvent.getRewards().give(player);
+            }
+
             for (ItemStack drop : drops) {
                 if (preset.isDropNaturally())
                     Bukkit.getScheduler().runTask(plugin, () -> world.dropItemNaturally(location, drop));
