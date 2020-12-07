@@ -25,6 +25,8 @@ public class RegenerationManager {
     @Getter
     private AutoSaveTask autoSaveTask;
 
+    private boolean retry = false;
+
     public RegenerationManager(BlockRegen plugin) {
         this.plugin = plugin;
     }
@@ -179,24 +181,38 @@ public class RegenerationManager {
 
             for (RegenerationProcess process : loadedProcesses) {
 
-                if (!process.convertLocation())
-                    continue;
+                if (!process.convertLocation()) {
+                    this.retry = true;
+                    break;
+                }
 
                 if (!process.convertPreset()) {
                     process.revert();
                     continue;
                 }
-
-                // Start it
-                process.start();
                 ConsoleOutput.getInstance().debug("Prepared regeneration process " + process.toString());
             }
-            ConsoleOutput.getInstance().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+
+            if (!this.retry) {
+                // Start em
+                loadedProcesses.forEach(RegenerationProcess::start);
+                ConsoleOutput.getInstance().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+            } else
+                ConsoleOutput.getInstance().info("One of the worlds is probably not loaded. Loading after complete server load instead.");
         }).exceptionally(e -> {
             ConsoleOutput.getInstance().err("Could not load processes: " + e.getMessage());
             e.printStackTrace();
             return null;
         });
+    }
+
+    public void reattemptLoad() {
+        if (!retry)
+            return;
+
+        load();
+        // Override retry flag from this load.
+        this.retry = false;
     }
 
     public List<RegenerationProcess> getCache() {

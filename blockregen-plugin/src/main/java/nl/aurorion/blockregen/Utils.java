@@ -7,6 +7,7 @@ import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -41,6 +42,11 @@ public class Utils {
         String[] arr = str.split(";");
         Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
         return newLoc.clone();
+    }
+
+    public boolean isLocationLoaded(@NotNull String str) {
+        String[] arr = str.split(";");
+        return Bukkit.getWorld(arr[0]) != null;
     }
 
     @Nullable

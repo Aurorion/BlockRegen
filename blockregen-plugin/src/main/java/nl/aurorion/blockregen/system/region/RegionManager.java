@@ -1,5 +1,8 @@
 package nl.aurorion.blockregen.system.region;
 
+import com.google.common.base.Strings;
+import lombok.Getter;
+import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Utils;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
@@ -9,10 +12,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
+import java.util.*;
 
 public class RegionManager {
 
@@ -20,8 +20,47 @@ public class RegionManager {
 
     private final Map<String, RegenerationRegion> loadedRegions = new HashMap<>();
 
+    // Set of regions that failed to load.
+    private final Set<RawRegion> failedRegions = new HashSet<>();
+
     public RegionManager(BlockRegen plugin) {
         this.plugin = plugin;
+    }
+
+    public void reattemptLoad() {
+        if (failedRegions.isEmpty())
+            return;
+
+        failedRegions.removeIf(rawRegion -> rawRegion.isReattempt() && loadRegion(rawRegion));
+    }
+
+    private static class RawRegion {
+        @Getter
+        private final String name;
+        @Getter
+        private final String min;
+        @Getter
+        private final String max;
+
+        @Getter
+        @Setter
+        private boolean reattempt = false;
+
+        public RawRegion(String name, String min, String max) {
+            this.name = name;
+            this.min = min;
+            this.max = max;
+        }
+
+        public RegenerationRegion build() {
+            Location min = Utils.stringToLocation(this.min);
+            Location max = Utils.stringToLocation(this.max);
+
+            if (min == null || max == null)
+                return null;
+
+            return new RegenerationRegion(name, min, max);
+        }
     }
 
     public void load() {
@@ -35,21 +74,40 @@ public class RegionManager {
         if (section != null) {
             for (String name : section.getKeys(false)) {
 
-                Location min = Utils.stringToLocation(section.getString(name + ".Min"));
-                Location max = Utils.stringToLocation(section.getString(name + ".Max"));
+                String minString = section.getString(name + ".Min");
+                String maxString = section.getString(name + ".Max");
 
-                if (min == null || max == null) {
-                    plugin.getConsoleOutput().err("Could not load region " + name + ", invalid locations.");
+                RawRegion rawRegion = new RawRegion(name, minString, maxString);
+
+                if (Strings.isNullOrEmpty(minString) || Strings.isNullOrEmpty(maxString)) {
+                    this.failedRegions.add(rawRegion);
+                    plugin.getConsoleOutput().err("Could not load region " + name + ", invalid location strings.");
                     continue;
                 }
 
-                RegenerationRegion regenerationRegion = new RegenerationRegion(name, min, max);
-                this.loadedRegions.put(name, regenerationRegion);
-                plugin.getConsoleOutput().debug("Loaded region " + name);
+                if (!Utils.isLocationLoaded(minString) || !Utils.isLocationLoaded(maxString)) {
+                    rawRegion.setReattempt(true);
+                    this.failedRegions.add(rawRegion);
+                    plugin.getConsoleOutput().info("World for region " + name + " is not loaded. Reattempting after complete server load.");
+                    continue;
+                }
+
+                loadRegion(rawRegion);
             }
         }
 
         plugin.getConsoleOutput().info("Loaded " + this.loadedRegions.size() + " region(s)...");
+    }
+
+    private boolean loadRegion(RawRegion rawRegion) {
+        RegenerationRegion region = rawRegion.build();
+
+        if (region == null)
+            return false;
+
+        this.loadedRegions.put(rawRegion.getName(), region);
+        plugin.getConsoleOutput().debug("Loaded region " + rawRegion.getName());
+        return true;
     }
 
     public void save() {
@@ -58,6 +116,13 @@ public class RegionManager {
         regions.set("Regions", null);
 
         ConfigurationSection section = ensureSection(regions, "Regions");
+
+        for (RawRegion rawRegion : new HashSet<>(this.failedRegions)) {
+            ConfigurationSection regionSection = section.createSection(rawRegion.getName());
+
+            regionSection.set("Min", rawRegion.getMin());
+            regionSection.set("Max", rawRegion.getMax());
+        }
 
         for (RegenerationRegion regenerationRegion : new HashSet<>(this.loadedRegions.values())) {
             ConfigurationSection regionSection = section.createSection(regenerationRegion.getName());
