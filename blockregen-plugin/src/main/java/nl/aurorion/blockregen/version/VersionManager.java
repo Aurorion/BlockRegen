@@ -99,6 +99,7 @@ public class VersionManager {
         return matcher.find() ? matcher.group() : null;
     }
 
+    // Simple version number to compare, v1_8 -> 18
     private int composeVersionNumber(String versionString) {
         String num = versionString.replace("v", "").replace("_", "");
         return ParseUtil.parseInteger(num);

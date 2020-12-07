@@ -59,7 +59,7 @@ public class PresetEvent {
     }
 
     @Nullable
-    public static PresetEvent load(@NotNull FileConfiguration configuration, @Nullable ConfigurationSection section, String presetName) {
+    public static PresetEvent load(@Nullable ConfigurationSection section, String presetName) {
 
         if (section == null)
             return null;
@@ -69,7 +69,7 @@ public class PresetEvent {
         String displayName = section.getString("event-name");
 
         if (displayName == null) {
-            ConsoleOutput.getInstance().warn("Could not load event at " + configuration.getName() + "@" + section.getCurrentPath() + ", event name is invalid.");
+            ConsoleOutput.getInstance().warn("Could not load event at " + section.getCurrentPath() + ", event name is invalid.");
             return null;
         }
 
@@ -84,7 +84,7 @@ public class PresetEvent {
         event.setItem(ItemDrop.load(section.getConfigurationSection("custom-item")));
 
         if (section.contains("custom-item.rarity")) {
-            Amount rarity = Amount.load(configuration, section.getCurrentPath() + ".custom-item.rarity", 1);
+            Amount rarity = Amount.load(section, "custom-item.rarity", 1);
             event.setItemRarity(rarity);
         } else event.setItemRarity(new Amount(1));
 

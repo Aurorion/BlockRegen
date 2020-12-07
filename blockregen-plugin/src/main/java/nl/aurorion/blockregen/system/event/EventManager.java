@@ -94,7 +94,7 @@ public class EventManager {
         event.setEnabled(true);
         ConsoleOutput.getInstance().debug("Enabled event " + event.getName());
 
-        if (plugin.getVersionManager().isBelow("v1_8", true))
+        if (plugin.getVersionManager().isBelow("v1_8", true) || event.getBossBar() == null)
             return;
 
         // Boss bar
