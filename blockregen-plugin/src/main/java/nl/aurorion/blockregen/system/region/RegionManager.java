@@ -1,10 +1,10 @@
 package nl.aurorion.blockregen.system.region;
 
 import com.google.common.base.Strings;
-import lombok.Getter;
-import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.system.region.struct.RawRegion;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
@@ -31,36 +31,10 @@ public class RegionManager {
         if (failedRegions.isEmpty())
             return;
 
+        ConsoleOutput.getInstance().info("Reattempting to load regions...");
+        int count = failedRegions.size();
         failedRegions.removeIf(rawRegion -> rawRegion.isReattempt() && loadRegion(rawRegion));
-    }
-
-    private static class RawRegion {
-        @Getter
-        private final String name;
-        @Getter
-        private final String min;
-        @Getter
-        private final String max;
-
-        @Getter
-        @Setter
-        private boolean reattempt = false;
-
-        public RawRegion(String name, String min, String max) {
-            this.name = name;
-            this.min = min;
-            this.max = max;
-        }
-
-        public RegenerationRegion build() {
-            Location min = Utils.stringToLocation(this.min);
-            Location max = Utils.stringToLocation(this.max);
-
-            if (min == null || max == null)
-                return null;
-
-            return new RegenerationRegion(name, min, max);
-        }
+        ConsoleOutput.getInstance().info("Loaded " + (count - failedRegions.size()) + " of failed regions.");
     }
 
     public void load() {
@@ -102,11 +76,13 @@ public class RegionManager {
     private boolean loadRegion(RawRegion rawRegion) {
         RegenerationRegion region = rawRegion.build();
 
-        if (region == null)
+        if (region == null) {
+            ConsoleOutput.getInstance().warn("Could not load region " + rawRegion.getName() + ", world " + rawRegion.getMax() + " still not loaded.");
             return false;
+        }
 
         this.loadedRegions.put(rawRegion.getName(), region);
-        plugin.getConsoleOutput().debug("Loaded region " + rawRegion.getName());
+        ConsoleOutput.getInstance().debug("Loaded region " + rawRegion.getName());
         return true;
     }
 
@@ -132,7 +108,7 @@ public class RegionManager {
         }
         plugin.getFiles().getRegions().save();
 
-        plugin.getConsoleOutput().debug("Saved " + this.loadedRegions.size() + " region(s)...");
+        plugin.getConsoleOutput().debug("Saved " + (this.loadedRegions.size() + this.failedRegions.size()) + " region(s)...");
     }
 
     private ConfigurationSection ensureSection(FileConfiguration configuration, String path) {

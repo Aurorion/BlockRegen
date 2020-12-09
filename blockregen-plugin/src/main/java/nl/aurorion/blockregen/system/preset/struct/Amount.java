@@ -5,7 +5,7 @@ import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.ParseUtil;
+import nl.aurorion.blockregen.util.ParseUtil;
 import org.bukkit.configuration.ConfigurationSection;
 
 public class Amount {
@@ -68,21 +68,24 @@ public class Amount {
 
             // low-high syntax
             if (data.contains("-")) {
-                double low = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[0]), defaultValue, e -> {
-                    ConsoleOutput.getInstance().warn("Could not parse low amount at " + root.getCurrentPath() + "." + path);
-                });
+                double low = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[0]),
+                        defaultValue,
+                        e -> ConsoleOutput.getInstance().warn("Could not parse low amount at " + root.getCurrentPath() + "." + path)
+                );
 
-                double high = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[1]), defaultValue, e -> {
-                    ConsoleOutput.getInstance().warn("Could not parse high amount at " + root.getCurrentPath() + "." + path);
-                });
+                double high = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[1]),
+                        defaultValue,
+                        e -> ConsoleOutput.getInstance().warn("Could not parse high amount at " + root.getCurrentPath() + "." + path)
+                );
 
                 return new Amount(low, high);
             }
 
             // Fixed value syntax
-            double fixed = ParseUtil.nullOrDefault(() -> root.getDouble(path), defaultValue, e -> {
-                ConsoleOutput.getInstance().warn("Could not parse fixed value amount at " + root.getCurrentPath() + "." + path);
-            });
+            double fixed = ParseUtil.nullOrDefault(() -> root.getDouble(path),
+                    defaultValue,
+                    e -> ConsoleOutput.getInstance().warn("Could not parse fixed value amount at " + root.getCurrentPath() + "." + path)
+            );
             return new Amount(fixed);
         }
     }

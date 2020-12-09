@@ -1,9 +1,11 @@
-package nl.aurorion.blockregen;
+package nl.aurorion.blockregen.util;
 
 import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.Nullable;

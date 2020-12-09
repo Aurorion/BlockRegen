@@ -1,8 +1,10 @@
-package nl.aurorion.blockregen;
+package nl.aurorion.blockregen.util;
 
 import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
 import me.clip.placeholderapi.PlaceholderAPI;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.Message;
 import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -37,11 +39,16 @@ public class Utils {
 
     @Nullable
     public Location stringToLocation(@Nullable String str) {
-        if (Strings.isNullOrEmpty(str)) return null;
+        if (Strings.isNullOrEmpty(str))
+            return null;
 
         String[] arr = str.split(";");
-        Location newLoc = new Location(Bukkit.getWorld(arr[0]), Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
-        return newLoc.clone();
+        World world = Bukkit.getWorld(arr[0]);
+
+        if (world == null || arr.length < 4)
+            return null;
+
+        return new Location(world, Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
     }
 
     public boolean isLocationLoaded(@NotNull String str) {

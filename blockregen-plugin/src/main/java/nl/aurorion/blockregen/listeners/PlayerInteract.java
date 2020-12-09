@@ -2,7 +2,7 @@ package nl.aurorion.blockregen.listeners;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;

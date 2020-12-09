@@ -4,7 +4,7 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ParseUtil;
+import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;

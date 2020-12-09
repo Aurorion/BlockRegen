@@ -7,7 +7,7 @@ import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;

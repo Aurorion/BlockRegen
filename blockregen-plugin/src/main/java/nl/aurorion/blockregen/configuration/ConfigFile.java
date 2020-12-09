@@ -2,8 +2,8 @@ package nl.aurorion.blockregen.configuration;
 
 import nl.aurorion.blockregen.BlockRegen;
 import lombok.Getter;
+import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.StringUtil;
-import nl.aurorion.blockregen.Utils;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -38,26 +38,26 @@ public class ConfigFile {
                 plugin.saveResource(this.path, false);
             } catch (IllegalArgumentException e) {
                 try {
-                    file.createNewFile();
+                    if (!file.createNewFile())
+                        ConsoleOutput.getInstance().err("Could not create file " + this.path);
                 } catch (IOException e1) {
-                    plugin.getServer().getConsoleSender().sendMessage(StringUtil.color("&6[&3BlockRegen&6] &cCould not create " + this.path));
+                    ConsoleOutput.getInstance().err("Could not create file " + this.path);
                     return;
                 }
             }
 
-            plugin.getServer().getConsoleSender().sendMessage(StringUtil.color("&6[&3BlockRegen&6] &aCreated " + this.path));
+            ConsoleOutput.getInstance().info("Created file " + this.path);
         }
 
-        plugin.getServer().getConsoleSender().sendMessage(StringUtil.color("&6[&3BlockRegen&6] &7Loaded " + this.path));
-
-        fileConfiguration = YamlConfiguration.loadConfiguration(file);
+        this.fileConfiguration = YamlConfiguration.loadConfiguration(file);
+        ConsoleOutput.getInstance().info("Loaded file " + this.path);
     }
 
     public void save() {
         try {
             fileConfiguration.save(file);
         } catch (IOException e) {
-            plugin.getServer().getConsoleSender().sendMessage(StringUtil.color("&6[&3BlockRegen&6] &cCould not save " + this.path));
+            ConsoleOutput.getInstance().err("Could not save " + this.path);
         }
     }
 }

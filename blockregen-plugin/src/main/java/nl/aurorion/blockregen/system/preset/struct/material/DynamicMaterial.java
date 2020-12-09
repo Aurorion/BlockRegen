@@ -3,7 +3,7 @@ package nl.aurorion.blockregen.system.preset.struct.material;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ParseUtil;
+import nl.aurorion.blockregen.util.ParseUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;

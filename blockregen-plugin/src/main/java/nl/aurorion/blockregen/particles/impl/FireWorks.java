@@ -1,7 +1,7 @@
 package nl.aurorion.blockregen.particles.impl;
 
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.particles.AbstractParticle;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;

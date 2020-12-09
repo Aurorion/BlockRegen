@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.ParseUtil;
+import nl.aurorion.blockregen.util.ParseUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;

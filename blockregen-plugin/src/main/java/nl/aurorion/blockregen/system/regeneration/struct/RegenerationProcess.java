@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.Bukkit;
@@ -91,7 +91,7 @@ public class RegenerationProcess implements Runnable {
 
         if (this.timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
-            this.timeLeft = regenDelay * 1000;
+            this.timeLeft = regenDelay * 1000L;
         }
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;

@@ -4,16 +4,14 @@ import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.ParseUtil;
+import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.StringUtil;
-import nl.aurorion.blockregen.Utils;
+import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
