@@ -217,7 +217,7 @@ public class RegenerationProcess implements Runnable {
             return false;
         }
 
-        this.block = location.getBlock();
+        Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> this.block = location.getBlock());
         return true;
     }
 
