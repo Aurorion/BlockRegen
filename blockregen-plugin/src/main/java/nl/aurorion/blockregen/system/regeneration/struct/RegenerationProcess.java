@@ -261,6 +261,6 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public String toString() {
-        return "id: " + (task != null ? task.getTaskId() : "NaN") + "=" + presetName + " : " + (block != null ? Utils.locationToString(block.getLocation()) : location == null ? "" : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
+        return "tid: " + (task != null ? task.getTaskId() : "NaN") + "; pN: " + presetName + "; loc: " + (block != null ? Utils.locationToString(block.getLocation()) : location == null ? "" : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
     }
 }
