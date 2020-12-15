@@ -91,7 +91,7 @@ public class PresetManager {
             replaceMaterial = "AIR";
 
         try {
-            preset.setReplaceMaterial(new DynamicMaterial(replaceMaterial));
+            preset.setReplaceMaterial(DynamicMaterial.fromString(replaceMaterial));
         } catch (IllegalArgumentException e) {
             plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid: " + e.getMessage());
             if (plugin.getConsoleOutput().isDebug())
@@ -106,7 +106,7 @@ public class PresetManager {
             regenerateInto = targetMaterial;
 
         try {
-            preset.setRegenMaterial(new DynamicMaterial(regenerateInto));
+            preset.setRegenMaterial(DynamicMaterial.fromString(regenerateInto));
         } catch (IllegalArgumentException e) {
             plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid: " + e.getMessage());
             if (plugin.getConsoleOutput().isDebug())

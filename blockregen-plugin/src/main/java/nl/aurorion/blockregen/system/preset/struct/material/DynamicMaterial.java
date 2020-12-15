@@ -2,23 +2,38 @@ package nl.aurorion.blockregen.system.preset.struct.material;
 
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
+import lombok.Getter;
+import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.ParseUtil;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class DynamicMaterial {
 
-    private boolean fixed = false;
+    @Getter
+    @Setter
+    private XMaterial defaultMaterial;
 
     private final List<XMaterial> valuedMaterials = new ArrayList<>();
 
-    private XMaterial defaultMaterial;
+    public DynamicMaterial(XMaterial defaultMaterial) {
+        this.defaultMaterial = defaultMaterial;
+    }
 
-    public DynamicMaterial(String input) {
+    public DynamicMaterial(XMaterial defaultMaterial, Collection<XMaterial> valuedMaterials) {
+        this.defaultMaterial = defaultMaterial;
+        this.valuedMaterials.addAll(valuedMaterials);
+    }
+
+    public List<XMaterial> getValuedMaterials() {
+        return Collections.unmodifiableList(valuedMaterials);
+    }
+
+    public static DynamicMaterial fromString(String input) throws IllegalArgumentException {
 
         if (Strings.isNullOrEmpty(input))
             throw new IllegalArgumentException("Input string cannot be null");
@@ -26,30 +41,29 @@ public class DynamicMaterial {
         input = input.replace(" ", "").trim().toUpperCase();
 
         List<String> materials;
+        List<XMaterial> valuedMaterials = new ArrayList<>();
+        XMaterial defaultMaterial = null;
 
-        if (input.contains(";")) {
-            materials = new ArrayList<>(Arrays.asList(input.split(";")));
-        } else {
+        if (!input.contains(";")) {
             defaultMaterial = ParseUtil.parseMaterial(input, true);
 
             if (defaultMaterial == null)
-                throw new IllegalArgumentException("Invalid block material");
-
-            fixed = true;
-            return;
+                throw new IllegalArgumentException("Invalid block material " + input);
+            return new DynamicMaterial(defaultMaterial);
         }
 
-        if (materials.isEmpty())
-            throw new IllegalArgumentException("Dynamic material doesn't have the correct syntax");
+        materials = Arrays.asList(input.split(";"));
 
-        else if (materials.size() == 1) {
+        if (materials.isEmpty())
+            throw new IllegalArgumentException("Dynamic material " + input + " doesn't have the correct syntax");
+
+        if (materials.size() == 1) {
             defaultMaterial = ParseUtil.parseMaterial(materials.get(0), true);
 
             if (defaultMaterial == null)
-                throw new IllegalArgumentException("Invalid block material");
+                throw new IllegalArgumentException("Invalid block material " + materials.get(0));
 
-            fixed = true;
-            return;
+            return new DynamicMaterial(defaultMaterial);
         }
 
         int total = 0;
@@ -60,7 +74,7 @@ public class DynamicMaterial {
                 defaultMaterial = ParseUtil.parseMaterial(material, true);
 
                 if (defaultMaterial == null)
-                    throw new IllegalArgumentException("Invalid block material");
+                    throw new IllegalArgumentException("Invalid block material " + material);
 
                 continue;
             }
@@ -68,28 +82,29 @@ public class DynamicMaterial {
             int chance = Integer.parseInt(material.split(":")[1]);
             total += chance;
 
-            for (int i = 0; i < chance; i++) {
-                XMaterial mat = ParseUtil.parseMaterial(material.split(":")[0], true);
+            XMaterial mat = ParseUtil.parseMaterial(material.split(":")[0], true);
 
-                if (mat == null) {
-                    BlockRegen.getInstance().getConsoleOutput().debug("Invalid material " + material.split(":")[0] + " skipped");
-                    continue;
-                }
+            if (mat == null)
+                continue;
 
+            for (int i = 0; i < chance; i++)
                 valuedMaterials.add(mat);
-            }
         }
 
         if (defaultMaterial != null) {
             for (int i = 0; i < (100 - total); i++) valuedMaterials.add(defaultMaterial);
         }
+
+        return new DynamicMaterial(defaultMaterial, valuedMaterials);
+    }
+
+    private XMaterial pickRandom() {
+        XMaterial pickedMaterial = valuedMaterials.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterials.size()));
+        return pickedMaterial != null ? pickedMaterial : defaultMaterial;
     }
 
     @NotNull
     public XMaterial get() {
-        if (fixed)
-            return defaultMaterial;
-        XMaterial pickedMaterial = valuedMaterials.get(BlockRegen.getInstance().getRandom().nextInt(valuedMaterials.size()));
-        return pickedMaterial != null ? pickedMaterial : defaultMaterial;
+        return valuedMaterials.isEmpty() ? defaultMaterial : pickRandom();
     }
 }
