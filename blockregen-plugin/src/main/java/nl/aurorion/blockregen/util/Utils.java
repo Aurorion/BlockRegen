@@ -1,16 +1,11 @@
 package nl.aurorion.blockregen.util;
 
-import com.google.common.base.Strings;
 import lombok.experimental.UtilityClass;
-import me.clip.placeholderapi.PlaceholderAPI;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.Message;
-import org.bukkit.*;
+import org.bukkit.Color;
+import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -31,52 +26,6 @@ public class Utils {
         add(Color.WHITE);
         add(Color.YELLOW);
     }};
-
-    public String locationToString(Location loc) {
-        World world = loc.getWorld();
-        return world == null ? "" : world.getName() + ";" + loc.getX() + ";" + loc.getY() + ";" + loc.getZ();
-    }
-
-    @Nullable
-    public Location stringToLocation(@Nullable String str) {
-        if (Strings.isNullOrEmpty(str))
-            return null;
-
-        String[] arr = str.split(";");
-        World world = Bukkit.getWorld(arr[0]);
-
-        if (world == null || arr.length < 4)
-            return null;
-
-        return new Location(world, Double.parseDouble(arr[1]), Double.parseDouble(arr[2]), Double.parseDouble(arr[3]));
-    }
-
-    public boolean isLocationLoaded(@NotNull String str) {
-        String[] arr = str.split(";");
-        return Bukkit.getWorld(arr[0]) != null;
-    }
-
-    @Nullable
-    public String parse(String string) {
-
-        if (Strings.isNullOrEmpty(string))
-            return string;
-
-        string = string.replaceAll("(?i)%prefix%", Message.PREFIX.getValue());
-        return string;
-    }
-
-    public String parse(String string, Player player) {
-        string = Utils.parse(string);
-
-        if (Strings.isNullOrEmpty(string)) return string;
-
-        string = string.replaceAll("(?i)%player%", player.getName());
-        if (BlockRegen.getInstance().isUsePlaceholderAPI())
-            string = PlaceholderAPI.setPlaceholders(player, string);
-
-        return string;
-    }
 
     /**
      * Returns the quantity of items to drop on block destruction.

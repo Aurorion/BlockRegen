@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen.particles;
 
 import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -20,7 +21,7 @@ public class ParticleManager {
             return;
 
         particles.get(particleName).display(location);
-        ConsoleOutput.getInstance().debug("Displaying particle " + particleName + " at location " + Utils.locationToString(location));
+        ConsoleOutput.getInstance().debug("Displaying particle " + particleName + " at location " + LocationUtil.locationToString(location));
     }
 
     public void addParticle(String name, AbstractParticle particle) {

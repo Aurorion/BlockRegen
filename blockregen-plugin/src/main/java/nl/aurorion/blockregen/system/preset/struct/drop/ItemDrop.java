@@ -6,6 +6,7 @@ import lombok.Setter;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.StringUtil;
+import nl.aurorion.blockregen.util.TextUtil;
 import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import org.bukkit.configuration.ConfigurationSection;
@@ -60,12 +61,12 @@ public class ItemDrop {
         if (itemMeta == null) return null;
 
         if (displayName != null)
-            itemMeta.setDisplayName(StringUtil.color(Utils.parse(displayName, player)));
+            itemMeta.setDisplayName(StringUtil.color(TextUtil.parse(displayName, player)));
 
         if (lore != null) {
             List<String> lore = new ArrayList<>(this.lore);
 
-            lore.replaceAll(o -> StringUtil.color(Utils.parse(o, player)));
+            lore.replaceAll(o -> StringUtil.color(TextUtil.parse(o, player)));
 
             itemMeta.setLore(lore);
         }

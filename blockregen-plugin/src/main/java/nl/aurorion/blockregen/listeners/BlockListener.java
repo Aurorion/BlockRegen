@@ -29,11 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BlockBreak implements Listener {
+public class BlockListener implements Listener {
 
     private final BlockRegen plugin;
 
-    public BlockBreak(BlockRegen plugin) {
+    public BlockListener(BlockRegen plugin) {
         this.plugin = plugin;
     }
 

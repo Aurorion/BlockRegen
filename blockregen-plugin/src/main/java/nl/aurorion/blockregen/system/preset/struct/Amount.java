@@ -10,21 +10,12 @@ import org.bukkit.configuration.ConfigurationSection;
 
 public class Amount {
 
-    @Getter
-    @Setter
-    private double fixedValue;
+    @Getter @Setter private double lowValue;
+    @Getter @Setter private double highValue;
 
-    @Getter
-    @Setter
-    private double lowValue;
+    @Getter @Setter private double fixedValue;
 
-    @Getter
-    @Setter
-    private double highValue;
-
-    @Getter
-    @Setter
-    private boolean fixed;
+    @Getter @Setter private boolean fixed;
 
     public Amount(double low, double high) {
         fixed = false;

@@ -15,44 +15,23 @@ import org.jetbrains.annotations.Nullable;
 
 public class PresetEvent {
 
-    @Getter
-    private final String name;
+    @Getter private final String name;
+    @Getter @Setter private String displayName;
 
-    @Getter
-    @Setter
-    private String displayName;
+    @Getter @Setter private boolean doubleDrops;
+    @Getter @Setter private boolean doubleExperience;
 
-    @Getter
-    @Setter
-    private boolean doubleDrops;
+    @Getter @Setter private Amount itemRarity;
 
-    @Getter
-    @Setter
-    private boolean doubleExperience;
+    @Getter @Setter private ItemDrop item;
 
-    @Getter
-    @Setter
-    private Amount itemRarity;
+    @Getter @Setter private PresetRewards rewards = new PresetRewards();
 
-    @Getter
-    @Setter
-    private ItemDrop item;
+    @Getter @Setter private EventBossBar bossBar;
 
-    @Getter
-    @Setter
-    private EventBossBar bossBar;
+    @Getter @Setter private BossBar activeBossBar;
 
-    @Getter
-    @Setter
-    private boolean enabled = false;
-
-    @Getter
-    @Setter
-    private BossBar activeBossBar;
-
-    @Getter
-    @Setter
-    private PresetRewards rewards = new PresetRewards();
+    @Getter @Setter private boolean enabled = false;
 
     public PresetEvent(String name) {
         this.name = name;

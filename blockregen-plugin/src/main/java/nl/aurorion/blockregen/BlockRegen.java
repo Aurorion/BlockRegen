@@ -7,9 +7,8 @@ import me.ryanhamshire.GriefPrevention.GriefPrevention;
 import net.milkbowl.vault.economy.Economy;
 import nl.aurorion.blockregen.commands.Commands;
 import nl.aurorion.blockregen.configuration.Files;
-import nl.aurorion.blockregen.listeners.BlockBreak;
-import nl.aurorion.blockregen.listeners.PlayerInteract;
-import nl.aurorion.blockregen.listeners.PlayerJoin;
+import nl.aurorion.blockregen.listeners.BlockListener;
+import nl.aurorion.blockregen.listeners.PlayerListener;
 import nl.aurorion.blockregen.particles.ParticleManager;
 import nl.aurorion.blockregen.particles.impl.FireWorks;
 import nl.aurorion.blockregen.particles.impl.FlameCrown;
@@ -125,7 +124,9 @@ public class BlockRegen extends JavaPlugin {
 
         getCommand("blockregen").setExecutor(new Commands(this));
 
-        consoleOutput.info("&bYou are using" + (getDescription().getVersion().contains("-b") ? " &cDEVELOPMENT&b" : "") + " version &f" + getDescription().getVersion());
+        String ver = getDescription().getVersion();
+
+        consoleOutput.info("&bYou are using" + (ver.contains("-SNAPSHOT") || ver.contains("-b") ? " &cDEVELOPMENT&b" : "") + " version &f" + getDescription().getVersion());
         consoleOutput.info("&bReport bugs or suggestions to discord only please. &f( /blockregen discord )");
         consoleOutput.info("&bAlways backup if you are not sure about things.");
 
@@ -200,9 +201,8 @@ public class BlockRegen extends JavaPlugin {
 
     private void registerListeners() {
         PluginManager pluginManager = this.getServer().getPluginManager();
-        pluginManager.registerEvents(new BlockBreak(this), this);
-        pluginManager.registerEvents(new PlayerInteract(this), this);
-        pluginManager.registerEvents(new PlayerJoin(this), this);
+        pluginManager.registerEvents(new BlockListener(this), this);
+        pluginManager.registerEvents(new PlayerListener(this), this);
     }
 
     public void checkDependencies(boolean reloadPresets) {

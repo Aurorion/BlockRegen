@@ -49,10 +49,6 @@ public class GsonHelper {
         return TypeToken.getParameterized(List.class, innerType).getType();
     }
 
-    public static <K, V> Type mapMap(@NotNull Class<K> keyType, @NotNull Class<V> valueType) {
-        return TypeToken.getParameterized(Map.class, keyType, valueType).getType();
-    }
-
     public static <T> Type map(@NotNull Class<T> clazz) {
         return new TypeToken<T>() {
         }.getType();
@@ -128,30 +124,6 @@ public class GsonHelper {
     }
 
     /**
-     * Asynchronously load and parse json from a file.
-     *
-     * @return CompletableFuture with the parsed output or null
-     */
-    @NotNull
-    public <T> CompletableFuture<T> loadAsync(@NotNull final String dataPath, @NotNull Class<T> clazz) {
-        Path path = Paths.get(dataPath);
-
-        if (!Files.exists(path))
-            return new CompletableFuture<>();
-
-        final Type type = map(clazz);
-
-        return read(path).thenApplyAsync(buffer -> {
-            String output = new String(buffer.array(), StandardCharsets.UTF_8).trim();
-
-            if (Strings.isNullOrEmpty(output))
-                return null;
-
-            return gson.fromJson(output, type);
-        });
-    }
-
-    /**
      * Asynchronously load a List<T> from a file.
      *
      * @return CompletableFuture with the resulting list or null.
@@ -164,30 +136,6 @@ public class GsonHelper {
             return new CompletableFuture<>();
 
         final Type type = mapList(innerClazz);
-
-        return read(path).thenApplyAsync(buffer -> {
-            String output = new String(buffer.array(), StandardCharsets.UTF_8).trim();
-
-            if (Strings.isNullOrEmpty(output))
-                return null;
-
-            return gson.fromJson(output, type);
-        });
-    }
-
-    /**
-     * Asynchronously load a Map<K, V> from a json file.
-     *
-     * @return CompletableFuture with the resulting map or null.
-     */
-    @NotNull
-    public <K, V> CompletableFuture<Map<K, V>> loadMapAsync(@NotNull final String dataPath, @NotNull Class<K> keyClazz, @NotNull Class<V> valueClazz) {
-        Path path = Paths.get(dataPath);
-
-        if (!Files.exists(path))
-            return new CompletableFuture<>();
-
-        final Type type = mapMap(keyClazz, valueClazz);
 
         return read(path).thenApplyAsync(buffer -> {
             String output = new String(buffer.array(), StandardCharsets.UTF_8).trim();

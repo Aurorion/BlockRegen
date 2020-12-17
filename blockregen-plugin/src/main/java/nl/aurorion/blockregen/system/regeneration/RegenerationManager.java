@@ -52,11 +52,7 @@ public class RegenerationManager {
      */
     @Nullable
     public RegenerationProcess createProcess(Block block, BlockPreset preset) {
-
-        if (block == null || preset == null)
-            return null;
-
-        return new RegenerationProcess(block, preset);
+        return block == null || preset == null ? null : new RegenerationProcess(block, preset);
     }
 
     /**

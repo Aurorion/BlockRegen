@@ -18,10 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -46,12 +43,16 @@ public class PresetConditions {
                 return true;
         }
 
-        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player).replace("%tool%", toolsRequired.stream()
-                .map(Enum::toString)
-                .collect(Collectors.joining(", "))
-                .replace("_", " ")
-                .toLowerCase()));
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player).replace("%tool%", composeToolRequirements()));
         return false;
+    }
+
+    private String composeToolRequirements() {
+        return toolsRequired.stream()
+                .map(xMaterial -> capitalize(xMaterial.toString()
+                        .toLowerCase()
+                        .replace("_", " ")))
+                .collect(Collectors.joining(", "));
     }
 
     public boolean checkEnchants(Player player) {
@@ -75,9 +76,20 @@ public class PresetConditions {
             }
         }
 
-        // TODO: Make sure first letter is big in materials. (regex)
-        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get(player).replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
+        player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get(player)
+                .replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
         return false;
+    }
+
+    private String capitalizeWord(String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    private String capitalize(String str) {
+        return Arrays.stream(str.split(" "))
+                .map(word -> capitalizeWord(word) + " ")
+                .collect(Collectors.joining())
+                .trim();
     }
 
     public boolean checkJobs(Player player) {
@@ -100,7 +112,7 @@ public class PresetConditions {
         List<String> out = new ArrayList<>();
 
         for (Map.Entry<XEnchantment, Integer> enchant : input.entrySet()) {
-            out.add(enchant.getKey().name() + " (" + enchant.getValue().toString() + ")");
+            out.add(capitalize(enchant.getKey().name()) + " (" + enchant.getValue().toString() + ")");
         }
 
         return String.join(", ", out);

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
+import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -193,13 +194,6 @@ public class RegenerationProcess implements Runnable {
         }
     }
 
-    public void updateTimeLeft(long timeLeft) {
-        this.timeLeft = timeLeft;
-        if (timeLeft > 0)
-            start();
-        else run();
-    }
-
     /**
      * Convert stored Location pointer to the Block at the location.
      */
@@ -236,6 +230,13 @@ public class RegenerationProcess implements Runnable {
         return true;
     }
 
+    public void updateTimeLeft(long timeLeft) {
+        this.timeLeft = timeLeft;
+        if (timeLeft > 0)
+            start();
+        else run();
+    }
+
     public boolean isRunning() {
         return task != null;
     }
@@ -261,6 +262,6 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public String toString() {
-        return "tid: " + (task != null ? task.getTaskId() : "NaN") + "; pN: " + presetName + "; loc: " + (block != null ? Utils.locationToString(block.getLocation()) : location == null ? "" : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
+        return "tid: " + (task != null ? task.getTaskId() : "NaN") + "; pN: " + presetName + "; loc: " + (block != null ? LocationUtil.locationToString(block.getLocation()) : location == null ? "" : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
     }
 }

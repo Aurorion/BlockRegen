@@ -8,6 +8,7 @@ import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.ParseUtil;
+import nl.aurorion.blockregen.util.TextUtil;
 import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import org.bukkit.Bukkit;
@@ -92,14 +93,16 @@ public class PresetRewards {
                 BlockRegen.getInstance().getEconomy().depositPlayer(player, money);
         }
 
+        // Sync commands
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
             playerCommands.forEach(command -> {
                 if (!Strings.isNullOrEmpty(command))
-                    Bukkit.dispatchCommand(player, Utils.parse(command, player));
+                    Bukkit.dispatchCommand(player, TextUtil.parse(command, player));
             });
+
             consoleCommands.forEach(command -> {
                 if (!Strings.isNullOrEmpty(command))
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), Utils.parse(command, player));
+                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TextUtil.parse(command, player));
             });
         });
     }

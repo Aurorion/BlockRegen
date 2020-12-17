@@ -2,7 +2,7 @@ package nl.aurorion.blockregen.system.region.struct;
 
 import lombok.Getter;
 import lombok.Setter;
-import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.util.LocationUtil;
 import org.bukkit.Location;
 
 public class RawRegion {
@@ -25,8 +25,8 @@ public class RawRegion {
     }
 
     public RegenerationRegion build() {
-        Location min = Utils.stringToLocation(this.min);
-        Location max = Utils.stringToLocation(this.max);
+        Location min = LocationUtil.locationFromString(this.min);
+        Location max = LocationUtil.locationFromString(this.max);
 
         if (min == null || max == null)
             return null;

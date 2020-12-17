@@ -3,7 +3,7 @@ package nl.aurorion.blockregen.system.region;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.system.region.struct.RawRegion;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.Location;
@@ -59,7 +59,7 @@ public class RegionManager {
                     continue;
                 }
 
-                if (!Utils.isLocationLoaded(minString) || !Utils.isLocationLoaded(maxString)) {
+                if (!LocationUtil.isLocationLoaded(minString) || !LocationUtil.isLocationLoaded(maxString)) {
                     rawRegion.setReattempt(true);
                     this.failedRegions.add(rawRegion);
                     plugin.getConsoleOutput().info("World for region " + name + " is not loaded. Reattempting after complete server load.");
@@ -91,7 +91,7 @@ public class RegionManager {
 
         regions.set("Regions", null);
 
-        ConfigurationSection section = ensureSection(regions, "Regions");
+        ConfigurationSection section = ensureRegionsSection(regions);
 
         for (RawRegion rawRegion : new HashSet<>(this.failedRegions)) {
             ConfigurationSection regionSection = section.createSection(rawRegion.getName());
@@ -103,16 +103,16 @@ public class RegionManager {
         for (RegenerationRegion regenerationRegion : new HashSet<>(this.loadedRegions.values())) {
             ConfigurationSection regionSection = section.createSection(regenerationRegion.getName());
 
-            regionSection.set("Min", Utils.locationToString(regenerationRegion.getMin()));
-            regionSection.set("Max", Utils.locationToString(regenerationRegion.getMax()));
+            regionSection.set("Min", LocationUtil.locationToString(regenerationRegion.getMin()));
+            regionSection.set("Max", LocationUtil.locationToString(regenerationRegion.getMax()));
         }
         plugin.getFiles().getRegions().save();
 
         plugin.getConsoleOutput().debug("Saved " + (this.loadedRegions.size() + this.failedRegions.size()) + " region(s)...");
     }
 
-    private ConfigurationSection ensureSection(FileConfiguration configuration, String path) {
-        return configuration.contains(path) ? configuration.getConfigurationSection(path) : configuration.createSection(path);
+    private ConfigurationSection ensureRegionsSection(FileConfiguration configuration) {
+        return configuration.contains("Regions") ? configuration.getConfigurationSection("Regions") : configuration.createSection("Regions");
     }
 
     public boolean exists(String name) {

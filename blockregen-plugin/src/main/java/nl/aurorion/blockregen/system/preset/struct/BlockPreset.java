@@ -14,26 +14,21 @@ public class BlockPreset {
     private Material material;
 
     private DynamicMaterial replaceMaterial;
-
     private DynamicMaterial regenMaterial;
 
     private Amount delay;
 
     private String particle;
-
     private String regenerationParticle;
 
     private boolean naturalBreak;
-
     private boolean applyFortune;
-
     private boolean dropNaturally;
 
-    private XSound sound;
-
     private PresetConditions conditions;
-
     private PresetRewards rewards;
+
+    private XSound sound;
 
     public BlockPreset(String name) {
         this.name = name;
