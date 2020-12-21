@@ -20,17 +20,21 @@ public class Commands implements CommandExecutor {
         this.plugin = plugin;
     }
 
+    private void sendHelp(CommandSender sender, String label) {
+        sender.sendMessage(StringUtil.color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
+                + "\n&3/" + label + " reload &8- &7Reload the plugin."
+                + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
+                + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
+                + "\n&3/" + label + " region &8- &7Region management."
+                + "\n&3/" + label + " events &8- &7Event management."
+                + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."
+                + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
+    }
+
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(StringUtil.color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
-                    + "\n&3/" + label + " reload &8- &7Reload the plugin."
-                    + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
-                    + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
-                    + "\n&3/" + label + " region &8- &7Region management."
-                    + "\n&3/" + label + " events &8- &7Event management."
-                    + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."
-                    + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
+            sendHelp(sender, label);
             return false;
         }
 
@@ -95,7 +99,7 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (args.length == 1 || args.length > 3) {
+                if (args.length == 1) {
                     player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Regions &8&m     "
                             + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
                             + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
@@ -103,55 +107,78 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (args.length == 2) {
-                    if (args[1].equalsIgnoreCase("list")) {
+                if (args[1].equalsIgnoreCase("list")) {
 
-                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
-                        for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
-                            message.append("\n&8  - &f").append(name);
-                        }
-                        message.append("\n");
-                        sender.sendMessage(StringUtil.color(message.toString()));
-                        return false;
-                    }
-                }
-
-                if (args.length == 3) {
-                    if (args[1].equalsIgnoreCase("set")) {
-
-                        if (plugin.getRegionManager().exists(args[2])) {
-                            Message.DUPLICATED_REGION.send(player);
-                            return false;
-                        }
-
-                        if (plugin.getVersionManager().getWorldEditProvider() == null) {
-                            Message.WORLD_EDIT_NOT_INSTALLED.send(player);
-                            return false;
-                        }
-
-                        RegenerationRegion region = plugin.getVersionManager().getWorldEditProvider().createFromSelection(args[2], player);
-
-                        if (region == null) {
-                            Message.NO_SELECTION.send(player);
-                            return false;
-                        }
-
-                        plugin.getRegionManager().addRegion(region);
-                        Message.SET_REGION.send(player);
+                    if (args.length > 2) {
+                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region list", label)));
                         return false;
                     }
 
-                    if (args[1].equalsIgnoreCase("remove")) {
+                    StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
+                    for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
+                        message.append("\n&8  - &f").append(name);
+                    }
+                    message.append("\n");
+                    sender.sendMessage(StringUtil.color(message.toString()));
+                    return false;
+                } else if (args[1].equalsIgnoreCase("set")) {
 
-                        if (!plugin.getRegionManager().exists(args[2])) {
-                            Message.UNKNOWN_REGION.send(player);
-                            return false;
-                        }
-
-                        plugin.getRegionManager().removeRegion(args[2]);
-                        Message.REMOVE_REGION.send(player);
+                    if (args.length > 3) {
+                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region set <name>", label)));
+                        return false;
+                    } else if (args.length < 3) {
+                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region set <name>", label)));
                         return false;
                     }
+
+                    if (plugin.getRegionManager().exists(args[2])) {
+                        Message.DUPLICATED_REGION.send(player);
+                        return false;
+                    }
+
+                    if (plugin.getVersionManager().getWorldEditProvider() == null) {
+                        Message.WORLD_EDIT_NOT_INSTALLED.send(player);
+                        return false;
+                    }
+
+                    RegenerationRegion region = plugin.getVersionManager().getWorldEditProvider().createFromSelection(args[2], player);
+
+                    if (region == null) {
+                        Message.NO_SELECTION.send(player);
+                        return false;
+                    }
+
+                    plugin.getRegionManager().addRegion(region);
+                    Message.SET_REGION.send(player);
+                    return false;
+                } else if (args[1].equalsIgnoreCase("remove")) {
+
+                    if (args.length > 3) {
+                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region remove <name>", label)));
+                        return false;
+                    } else if (args.length < 3) {
+                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region remove <name>", label)));
+                        return false;
+                    }
+
+                    if (!plugin.getRegionManager().exists(args[2])) {
+                        Message.UNKNOWN_REGION.send(player);
+                        return false;
+                    }
+
+                    plugin.getRegionManager().removeRegion(args[2]);
+                    Message.REMOVE_REGION.send(player);
+                    return false;
+                } else {
+                    player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Regions &8&m     "
+                            + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
+                            + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
+                            + "\n&3/" + label + " region list &8- &7List your regions."));
                 }
                 break;
             case "debug":
@@ -250,6 +277,8 @@ public class Commands implements CommandExecutor {
                     }
                 }
                 break;
+            default:
+                sendHelp(sender, label);
         }
         return false;
     }

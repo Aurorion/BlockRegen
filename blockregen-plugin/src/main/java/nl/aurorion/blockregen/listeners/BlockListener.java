@@ -275,9 +275,13 @@ public class BlockListener implements Listener {
             }
 
             for (ItemStack drop : drops) {
-                if (preset.isDropNaturally())
+                if (preset.isDropNaturally()) {
                     Bukkit.getScheduler().runTask(plugin, () -> world.dropItemNaturally(location, drop));
-                else player.getInventory().addItem(drop);
+                    plugin.getConsoleOutput().debug("Dropping item " + drop.getType().name() + "x" + drop.getAmount());
+                } else {
+                    player.getInventory().addItem(drop);
+                    plugin.getConsoleOutput().debug("Adding item " + drop.getType().name() + "x" + drop.getAmount() + " to inventory.");
+                }
             }
 
             // Trigger Jobs Break if enabled -----------------------------------------------------------------------

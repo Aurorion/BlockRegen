@@ -29,6 +29,9 @@ public enum Message {
     ONLY_PLAYERS("Console-Sender-Error", "&cI'm sorry but the console can not perform this command!"),
     INVALID_COMMAND("Invalid-Command", "&cThis is not a valid command!"),
 
+    TOO_MANY_ARGS("Too-Many-Arguments", "&cToo many arguments.\n&7Use: &f%help%"),
+    NOT_ENOUGH_ARGS("Not-Enough-Arguments", "&cNot enough arguments.\n&7Use: &f%help%"),
+
     RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
 
     /**

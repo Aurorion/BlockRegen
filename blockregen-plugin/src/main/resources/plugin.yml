@@ -6,7 +6,7 @@ softdepend: [ Mutliverse-Core, Residence, Vault, WorldEdit, Towny, Jobs, GriefPr
 api-version: "1.13"
 commands:
   blockregen:
-    aliases: [ br ]
+    aliases: [ br, bregen, blockr, breg, brg ]
     description: Main plugin command
 permissions:
   blockregen.admin:
