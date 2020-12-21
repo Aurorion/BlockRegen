@@ -84,7 +84,7 @@ public class PresetConditions {
 
     private String compressEnchantRequirements() {
         return enchantsRequired.entrySet().stream()
-                .map(e -> String.format("%s (%d)", TextUtil.capitalize(e.getKey().name().replace("_", " ")), e.getValue()))
+                .map(e -> String.format("%s (%d)", TextUtil.capitalize(e.getKey().name().toLowerCase().replace("_", " ")), e.getValue()))
                 .collect(Collectors.joining(", "));
     }
 
