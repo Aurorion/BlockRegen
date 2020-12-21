@@ -7,6 +7,9 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import org.bukkit.entity.Player;
 
+import java.util.Arrays;
+import java.util.stream.Collectors;
+
 @UtilityClass
 public class TextUtil {
 
@@ -29,5 +32,16 @@ public class TextUtil {
             string = PlaceholderAPI.setPlaceholders(player, string);
 
         return string;
+    }
+
+    public String capitalizeWord(String str) {
+        return str.substring(0, 1).toUpperCase() + str.substring(1);
+    }
+
+    public String capitalize(String str) {
+        return Arrays.stream(str.split(" "))
+                .map(word -> capitalizeWord(word) + " ")
+                .collect(Collectors.joining())
+                .trim();
     }
 }

@@ -11,6 +11,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.util.ParseUtil;
+import nl.aurorion.blockregen.util.TextUtil;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -49,7 +50,7 @@ public class PresetConditions {
 
     private String composeToolRequirements() {
         return toolsRequired.stream()
-                .map(xMaterial -> capitalize(xMaterial.toString()
+                .map(xMaterial -> TextUtil.capitalize(xMaterial.toString()
                         .toLowerCase()
                         .replace("_", " ")))
                 .collect(Collectors.joining(", "));
@@ -77,19 +78,14 @@ public class PresetConditions {
         }
 
         player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get(player)
-                .replace("%enchant%", compressEnchantRequirements(enchantsRequired)));
+                .replace("%enchant%", compressEnchantRequirements()));
         return false;
     }
 
-    private String capitalizeWord(String str) {
-        return str.substring(0, 1).toUpperCase() + str.substring(1);
-    }
-
-    private String capitalize(String str) {
-        return Arrays.stream(str.split(" "))
-                .map(word -> capitalizeWord(word) + " ")
-                .collect(Collectors.joining())
-                .trim();
+    private String compressEnchantRequirements() {
+        return enchantsRequired.entrySet().stream()
+                .map(e -> String.format("%s (%d)", TextUtil.capitalize(e.getKey().name().replace("_", " ")), e.getValue()))
+                .collect(Collectors.joining(", "));
     }
 
     public boolean checkJobs(Player player) {
@@ -104,28 +100,15 @@ public class PresetConditions {
             }
         }
 
-        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player).replace("%job%", compressJobRequirements(jobsRequired)));
+        player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player)
+                .replace("%job%", compressJobRequirements()));
         return false;
     }
 
-    private String compressEnchantRequirements(Map<XEnchantment, Integer> input) {
-        List<String> out = new ArrayList<>();
-
-        for (Map.Entry<XEnchantment, Integer> enchant : input.entrySet()) {
-            out.add(capitalize(enchant.getKey().name()) + " (" + enchant.getValue().toString() + ")");
-        }
-
-        return String.join(", ", out);
-    }
-
-    private String compressJobRequirements(Map<Job, Integer> input) {
-        List<String> out = new ArrayList<>();
-
-        for (Map.Entry<Job, Integer> job : input.entrySet()) {
-            out.add(job.getKey().getName() + " (" + job.getValue().toString() + ")");
-        }
-
-        return String.join(", ", out);
+    private String compressJobRequirements() {
+        return jobsRequired.entrySet().stream()
+                .map(e -> String.format("%s (%d)", e.getKey().getName(), e.getValue()))
+                .collect(Collectors.joining(", "));
     }
 
     public void setToolsRequired(@Nullable String input) {
