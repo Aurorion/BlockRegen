@@ -1,17 +1,16 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
 import lombok.Data;
-import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
-import org.bukkit.Material;
 
 @Data
 public class BlockPreset {
 
     private final String name;
 
-    private Material material;
+    private XMaterial targetMaterial;
 
     private DynamicMaterial replaceMaterial;
     private DynamicMaterial regenMaterial;

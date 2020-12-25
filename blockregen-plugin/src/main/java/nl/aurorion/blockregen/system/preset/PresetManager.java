@@ -1,6 +1,5 @@
 package nl.aurorion.blockregen.system.preset;
 
-import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
 import com.google.common.base.Strings;
@@ -34,7 +33,7 @@ public class PresetManager {
 
     public Optional<BlockPreset> getPresetByBlock(Block block) {
         return presets.values().stream()
-                .filter(p -> XBlock.isSimilar(block, XMaterial.matchXMaterial(p.getMaterial())))
+                .filter(p -> plugin.getVersionManager().getMethods().compareType(block, p.getTargetMaterial()))
                 .findAny();
     }
 
@@ -82,7 +81,7 @@ public class PresetManager {
             return;
         }
 
-        preset.setMaterial(xMaterial.get().parseMaterial());
+        preset.setTargetMaterial(xMaterial.get());
 
         // Replace material
         String replaceMaterial = section.getString("replace-block");

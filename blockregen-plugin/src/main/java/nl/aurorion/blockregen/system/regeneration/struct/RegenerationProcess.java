@@ -7,7 +7,6 @@ import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.LocationUtil;
-import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.Bukkit;
@@ -45,13 +44,13 @@ public class RegenerationProcess implements Runnable {
     @Getter
     private transient long regenerationTime;
 
-    private transient Material replaceMaterial;
+    private transient XMaterial replaceMaterial;
 
     @Getter
     private long timeLeft = -1;
 
     @Setter
-    private transient Material regenerateInto;
+    private transient XMaterial regenerateInto;
 
     private transient BukkitTask task;
 
@@ -67,15 +66,15 @@ public class RegenerationProcess implements Runnable {
         getReplaceMaterial();
     }
 
-    public Material getRegenerateInto() {
+    public XMaterial getRegenerateInto() {
         if (this.regenerateInto == null)
-            this.regenerateInto = preset.getRegenMaterial().get().parseMaterial();
+            this.regenerateInto = preset.getRegenMaterial().get();
         return this.regenerateInto;
     }
 
-    public Material getReplaceMaterial() {
+    public XMaterial getReplaceMaterial() {
         if (this.replaceMaterial == null)
-            this.replaceMaterial = preset.getReplaceMaterial().get().parseMaterial();
+            this.replaceMaterial = preset.getReplaceMaterial().get();
         return this.replaceMaterial;
     }
 
@@ -107,7 +106,7 @@ public class RegenerationProcess implements Runnable {
 
         if (getReplaceMaterial() != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
-                block.setType(getReplaceMaterial());
+                plugin.getVersionManager().getMethods().setType(block, getReplaceMaterial());
                 ConsoleOutput.getInstance().debug("Replaced block with " + replaceMaterial.toString());
             });
         }
@@ -148,19 +147,23 @@ public class RegenerationProcess implements Runnable {
      * Simply regenerate the block. This method is unsafe to execute from async context.
      */
     public void regenerateBlock() {
+
+        BlockRegen plugin = BlockRegen.getInstance();
+
         // Call the event
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
         Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent);
 
-        BlockRegen.getInstance().getRegenerationManager().removeProcess(this);
+        plugin.getRegenerationManager().removeProcess(this);
 
         if (blockRegenBlockRegenEvent.isCancelled())
             return;
 
         // Set type
-        if (getRegenerateInto() != null) {
-            block.setType(getRegenerateInto());
-            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + getRegenerateInto());
+        XMaterial regenerateInto = getRegenerateInto();
+        if (regenerateInto != null) {
+            plugin.getVersionManager().getMethods().setType(block, regenerateInto);
+            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + regenerateInto.toString());
         }
     }
 
@@ -168,7 +171,6 @@ public class RegenerationProcess implements Runnable {
      * Revert process to original material.
      */
     public void revert() {
-
         stop();
 
         BlockRegen plugin = BlockRegen.getInstance();
