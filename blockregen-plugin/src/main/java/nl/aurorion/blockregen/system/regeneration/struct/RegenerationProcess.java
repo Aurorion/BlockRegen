@@ -79,7 +79,6 @@ public class RegenerationProcess implements Runnable {
     }
 
     public boolean start() {
-
         BlockRegen plugin = BlockRegen.getInstance();
 
         // Register that the process is actually running now
@@ -131,10 +130,18 @@ public class RegenerationProcess implements Runnable {
      * Regenerate the block.
      */
     public void regenerate() {
-
         stop();
 
         BlockRegen plugin = BlockRegen.getInstance();
+
+        // Call the event
+        BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
+
+        plugin.getRegenerationManager().removeProcess(this);
+
+        if (blockRegenBlockRegenEvent.isCancelled())
+            return;
 
         Bukkit.getScheduler().runTask(plugin, this::regenerateBlock);
 
@@ -147,17 +154,7 @@ public class RegenerationProcess implements Runnable {
      * Simply regenerate the block. This method is unsafe to execute from async context.
      */
     public void regenerateBlock() {
-
         BlockRegen plugin = BlockRegen.getInstance();
-
-        // Call the event
-        BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
-        Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent);
-
-        plugin.getRegenerationManager().removeProcess(this);
-
-        if (blockRegenBlockRegenEvent.isCancelled())
-            return;
 
         // Set type
         XMaterial regenerateInto = getRegenerateInto();
