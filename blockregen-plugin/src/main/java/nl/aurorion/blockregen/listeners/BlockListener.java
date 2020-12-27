@@ -144,7 +144,9 @@ public class BlockListener implements Listener {
 
         final AtomicInteger expToDrop = new AtomicInteger(event.getExpToDrop());
 
-        event.setDropItems(false);
+        if (plugin.getVersionManager().isAbove("1_8", false))
+            event.setDropItems(false);
+
         event.setExpToDrop(0);
 
         Player player = event.getPlayer();
@@ -177,7 +179,11 @@ public class BlockListener implements Listener {
         if (blockRegenBlockBreakEvent.isCancelled())
             return;
 
-        List<ItemStack> vanillaDrops = new ArrayList<>(block.getDrops(player.getInventory().getItemInMainHand()));
+        List<ItemStack> vanillaDrops = new ArrayList<>(block.getDrops(plugin.getVersionManager().getMethods().getItemInMainHand(player)));
+
+        if (plugin.getVersionManager().isBelow("1_8", true)) {
+            block.setType(Material.AIR);
+        }
 
         // Start regeneration
         process.start();
@@ -235,7 +241,7 @@ public class BlockListener implements Listener {
                     if (itemStack == null) continue;
 
                     if (preset.isApplyFortune())
-                        itemStack.setAmount(Utils.applyFortune(block.getType(), player.getInventory().getItemInMainHand()) + itemStack.getAmount());
+                        itemStack.setAmount(Utils.applyFortune(block.getType(), plugin.getVersionManager().getMethods().getItemInMainHand(player)) + itemStack.getAmount());
 
                     if (doubleDrops)
                         itemStack.setAmount(itemStack.getAmount() * 2);
@@ -296,7 +302,8 @@ public class BlockListener implements Listener {
                 preset.getSound().play(block.getLocation());
 
             // Particles -------------------------------------------------------------------------------------------
-            if (preset.getParticle() != null)
+            // TODO: Make particles work on 1.8 with it's effect API.
+            if (preset.getParticle() != null && plugin.getVersionManager().isAbove("1.8", false))
                 Bukkit.getScheduler().runTask(plugin, () -> plugin.getParticleManager().displayParticle(preset.getParticle(), block));
         });
     }

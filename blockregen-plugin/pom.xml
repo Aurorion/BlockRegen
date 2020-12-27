@@ -42,6 +42,10 @@
                             <pattern>com.cryptomorin.xseries</pattern>
                             <shadedPattern>nl.aurorion.blockregen.xseries</shadedPattern>
                         </relocation>
+                        <relocation>
+                            <pattern>com.google.gson</pattern>
+                            <shadedPattern>nl.aurorion.blockregen.gson</shadedPattern>
+                        </relocation>
                     </relocations>
                 </configuration>
                 <executions>
@@ -80,6 +84,12 @@
         <dependency>
             <groupId>nl.aurorion.blockregen</groupId>
             <artifactId>blockregen-legacy</artifactId>
+            <version>3.6.3-b2</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.aurorion.blockregen</groupId>
+            <artifactId>blockregen-ancient</artifactId>
             <version>3.6.3-b2</version>
             <scope>compile</scope>
         </dependency>

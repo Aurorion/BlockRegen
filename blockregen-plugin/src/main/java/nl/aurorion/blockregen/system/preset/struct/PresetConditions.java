@@ -19,7 +19,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @NoArgsConstructor
@@ -39,12 +42,15 @@ public class PresetConditions {
 
         if (toolsRequired.isEmpty()) return true;
 
+        ItemStack tool = BlockRegen.getInstance().getVersionManager().getMethods().getItemInMainHand(player);
+
         for (XMaterial material : toolsRequired) {
-            if (XMaterial.matchXMaterial(player.getInventory().getItemInMainHand()) == material)
+            if (XMaterial.matchXMaterial(tool) == material)
                 return true;
         }
 
-        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player).replace("%tool%", composeToolRequirements()));
+        player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player)
+                .replace("%tool%", composeToolRequirements()));
         return false;
     }
 
@@ -60,11 +66,11 @@ public class PresetConditions {
 
         if (enchantsRequired.isEmpty()) return true;
 
-        ItemStack tool = player.getInventory().getItemInMainHand();
+        ItemStack tool = BlockRegen.getInstance().getVersionManager().getMethods().getItemInMainHand(player);
 
         ItemMeta meta = tool.getItemMeta();
 
-        if (meta != null && player.getInventory().getItemInMainHand().getType() != Material.AIR) {
+        if (meta != null && tool.getType() != Material.AIR) {
             for (Map.Entry<XEnchantment, Integer> entry : enchantsRequired.entrySet()) {
 
                 Enchantment enchantment = entry.getKey().parseEnchantment();
@@ -95,7 +101,8 @@ public class PresetConditions {
         JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 
         for (Map.Entry<Job, Integer> entry : jobsRequired.entrySet()) {
-            if (Jobs.getPlayerManager().getJobsPlayer(player).isInJob(entry.getKey()) && jobsPlayer.getJobProgression(entry.getKey()).getLevel() >= entry.getValue()) {
+            if (Jobs.getPlayerManager().getJobsPlayer(player).isInJob(entry.getKey()) &&
+                    jobsPlayer.getJobProgression(entry.getKey()).getLevel() >= entry.getValue()) {
                 return true;
             }
         }

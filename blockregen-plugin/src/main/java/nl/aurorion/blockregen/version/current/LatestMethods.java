@@ -11,6 +11,8 @@ import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -78,5 +80,10 @@ public class LatestMethods implements Methods {
             return false;
         }
         return block.getType() == type;
+    }
+
+    @Override
+    public ItemStack getItemInMainHand(@NotNull Player player) {
+        return player.getInventory().getItemInMainHand();
     }
 }

@@ -5,6 +5,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.util.ParseUtil;
+import nl.aurorion.blockregen.version.ancient.AncientMethods;
 import nl.aurorion.blockregen.version.api.Methods;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;
@@ -54,6 +55,12 @@ public class VersionManager {
             // Try to catch 1.7 into legacy. Might work on some occasions.
             case "v1_7":
             case "v1_8":
+                if (worldEdit != null)
+                    useWorldEdit(LegacyWorldEditProvider::new);
+                if (worldGuard != null)
+                    useWorldGuard(LegacyWorldGuardProvider::new);
+                this.methods = new AncientMethods();
+                break;
             case "v1_9":
             case "v1_10":
             case "v1_11":
@@ -102,7 +109,9 @@ public class VersionManager {
 
     // Simple version number to compare, v1_8 -> 18
     private int composeVersionNumber(String versionString) {
-        String num = versionString.replace("v", "").replace("_", "");
+        String num = versionString.replace("v", "")
+                .replace("_", "")
+                .replace(".", "");
         return ParseUtil.parseInteger(num);
     }
 
