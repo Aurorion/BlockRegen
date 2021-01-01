@@ -4,8 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Data
@@ -23,8 +21,8 @@ public class ExperienceDrop {
             return null;
 
         ExperienceDrop drop = new ExperienceDrop();
-        drop.setAmount(Amount.load(section, "exp.amount", 0));
-        drop.setDropNaturally(section.getBoolean("exp.drop-naturally", false));
+        drop.setAmount(Amount.load(section, "amount", 0));
+        drop.setDropNaturally(section.getBoolean("drop-naturally", false));
         return drop;
     }
 }

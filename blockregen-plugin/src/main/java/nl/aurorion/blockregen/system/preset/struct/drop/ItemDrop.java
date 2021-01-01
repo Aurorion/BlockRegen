@@ -4,19 +4,22 @@ import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.StringUtil;
-import nl.aurorion.blockregen.util.TextUtil;
-import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
+import nl.aurorion.blockregen.util.ParseUtil;
+import nl.aurorion.blockregen.util.TextUtil;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ItemDrop {
 
@@ -34,6 +37,14 @@ public class ItemDrop {
     @Getter
     @Setter
     private List<String> lore = new ArrayList<>();
+
+    @Getter
+    @Setter
+    private Set<Enchant> enchants = new HashSet<>();
+
+    @Getter
+    @Setter
+    private Set<ItemFlag> itemFlags = new HashSet<>();
 
     @Getter
     @Setter
@@ -71,6 +82,9 @@ public class ItemDrop {
             itemMeta.setLore(lore);
         }
 
+        enchants.forEach(enchant -> enchant.apply(itemMeta));
+        itemMeta.addItemFlags(itemFlags.toArray(new ItemFlag[0]));
+
         itemStack.setItemMeta(itemMeta);
 
         return itemStack;
@@ -94,6 +108,12 @@ public class ItemDrop {
         drop.setAmount(Amount.load(section, "amount", 1));
         drop.setDisplayName(section.getString("name"));
         drop.setLore(section.getStringList("lores"));
+
+        drop.setEnchants(Enchant.load(section.getStringList("enchants")));
+        drop.setItemFlags(section.getStringList("flags").stream()
+                .map(str -> ParseUtil.parseEnum(str, ItemFlag.class,
+                        e -> ConsoleOutput.getInstance().warn("Could not parse ItemFlag from " + str)))
+                .collect(Collectors.toSet()));
 
         drop.setExperienceDrop(ExperienceDrop.load(section.getConfigurationSection("exp")));
 

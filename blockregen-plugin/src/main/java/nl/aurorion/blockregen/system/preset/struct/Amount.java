@@ -41,7 +41,7 @@ public class Amount {
 
             ConfigurationSection section = root.getConfigurationSection(path);
 
-            if (section == null || !section.contains("high") || section.contains("low"))
+            if (section == null || !section.contains("high") || !section.contains("low"))
                 return new Amount(defaultValue);
 
             if (!(section.get("low") instanceof Number) || !(section.get("high") instanceof Number))

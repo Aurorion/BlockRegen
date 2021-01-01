@@ -20,12 +20,16 @@ public class ParseUtil {
     /**
      * Attempt to parse an integer, return -1 if a NumberFormatException was thrown.
      */
-    public int parseInteger(String input) {
+    public int parseInteger(String input, int def) {
         try {
             return Integer.parseInt(input.trim());
         } catch (NumberFormatException exception) {
-            return -1;
+            return def;
         }
+    }
+
+    public int parseInteger(String input) {
+        return parseInteger(input, -1);
     }
 
     @Nullable
@@ -69,6 +73,24 @@ public class ParseUtil {
         }
 
         return xMaterial.get();
+    }
+
+    public <E extends Enum<E>> E parseEnum(String str, Class<E> clazz) {
+        return parseEnum(str, clazz, null);
+    }
+
+    public <E extends Enum<E>> E parseEnum(String str, Class<E> clazz, Consumer<Throwable> exceptionCallback) {
+
+        if (Strings.isNullOrEmpty(str))
+            return null;
+
+        try {
+            return E.valueOf(clazz, str.trim().toUpperCase());
+        } catch (IllegalArgumentException e) {
+            if (exceptionCallback != null)
+                exceptionCallback.accept(e);
+            return null;
+        }
     }
 
     public <T> T nullOrDefault(Supplier<T> supplier, T def, Consumer<Throwable> exceptionCallback) {
