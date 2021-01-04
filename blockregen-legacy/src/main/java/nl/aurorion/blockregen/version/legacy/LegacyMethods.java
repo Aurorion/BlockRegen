@@ -63,6 +63,7 @@ public class LegacyMethods implements Methods {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public void setType(@NotNull Block block, @NotNull XMaterial xMaterial) {
         Material type = xMaterial.parseMaterial();
         byte data = xMaterial.getData();
@@ -77,6 +78,7 @@ public class LegacyMethods implements Methods {
     }
 
     @Override
+    @SuppressWarnings("deprecation")
     public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
         Material type = xMaterial.parseMaterial();
         if (type == null) {
