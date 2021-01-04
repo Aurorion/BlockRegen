@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.system.regeneration.struct;
 
+import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import lombok.Data;
 import lombok.Getter;
@@ -59,7 +60,7 @@ public class RegenerationProcess implements Runnable {
         this.preset = preset;
 
         this.presetName = preset.getName();
-        this.originalMaterial = XMaterial.matchXMaterial(block.getType());
+        this.originalMaterial = XBlock.getType(block);
         this.location = new SimpleLocation(block.getLocation());
 
         getRegenerateInto();
@@ -67,15 +68,15 @@ public class RegenerationProcess implements Runnable {
     }
 
     public XMaterial getRegenerateInto() {
-        if (this.regenerateInto == null)
+        if (regenerateInto == null)
             this.regenerateInto = preset.getRegenMaterial().get();
-        return this.regenerateInto;
+        return regenerateInto;
     }
 
     public XMaterial getReplaceMaterial() {
-        if (this.replaceMaterial == null)
+        if (replaceMaterial == null)
             this.replaceMaterial = preset.getReplaceMaterial().get();
-        return this.replaceMaterial;
+        return replaceMaterial;
     }
 
     public boolean start() {
@@ -88,14 +89,14 @@ public class RegenerationProcess implements Runnable {
 
         ConsoleOutput.getInstance().debug("Time left: " + this.timeLeft / 1000 + "s");
 
-        if (this.timeLeft == -1) {
+        if (timeLeft == -1) {
             int regenDelay = Math.max(1, preset.getDelay().getInt());
             this.timeLeft = regenDelay * 1000L;
         }
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
-        if (this.regenerationTime <= System.currentTimeMillis()) {
+        if (regenerationTime <= System.currentTimeMillis()) {
             regenerate();
             ConsoleOutput.getInstance().debug("Regenerated the process already.");
             return false;
@@ -160,7 +161,7 @@ public class RegenerationProcess implements Runnable {
         XMaterial regenerateInto = getRegenerateInto();
         if (regenerateInto != null) {
             plugin.getVersionManager().getMethods().setType(block, regenerateInto);
-            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial + " into " + regenerateInto.toString());
+            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
         }
     }
 
@@ -180,7 +181,7 @@ public class RegenerationProcess implements Runnable {
     public void stop() {
         if (task != null) {
             task.cancel();
-            task = null;
+            this.task = null;
         }
     }
 
