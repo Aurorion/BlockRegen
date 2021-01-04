@@ -74,12 +74,7 @@ public class LatestMethods implements Methods {
 
     @Override
     public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material type = xMaterial.parseMaterial();
-        if (type == null) {
-            ConsoleOutput.getInstance().warn("Type " + xMaterial.name() + " is not supported on this version.");
-            return false;
-        }
-        return block.getType() == type;
+        return XMaterial.matchXMaterial(block.getType()) == xMaterial;
     }
 
     @Override

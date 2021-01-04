@@ -80,13 +80,7 @@ public class LegacyMethods implements Methods {
     @Override
     @SuppressWarnings("deprecation")
     public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material type = xMaterial.parseMaterial();
-        if (type == null) {
-            ConsoleOutput.getInstance().warn("Type " + xMaterial.name() + " is not supported on this version.");
-            return false;
-        }
-        byte data = xMaterial.getData();
-        return block.getType() == type && block.getData() == data;
+        return XMaterial.matchXMaterial(block.getType()) == xMaterial && block.getData() == xMaterial.getData();
     }
 
     @Override
