@@ -96,7 +96,7 @@ public class RegenerationProcess implements Runnable {
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
-        if (regenerationTime <= System.currentTimeMillis()) {
+        if (timeLeft == 0 || regenerationTime <= System.currentTimeMillis()) {
             regenerate();
             ConsoleOutput.getInstance().debug("Regenerated the process already.");
             return false;
