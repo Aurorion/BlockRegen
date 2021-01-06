@@ -90,7 +90,7 @@ public class RegenerationProcess implements Runnable {
         ConsoleOutput.getInstance().debug("Time left: " + this.timeLeft / 1000 + "s");
 
         if (timeLeft == -1) {
-            int regenDelay = Math.max(1, preset.getDelay().getInt());
+            int regenDelay = preset.getDelay().getInt();
             this.timeLeft = regenDelay * 1000L;
         }
 
