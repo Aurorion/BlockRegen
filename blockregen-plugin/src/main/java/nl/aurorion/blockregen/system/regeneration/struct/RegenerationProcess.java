@@ -137,14 +137,14 @@ public class RegenerationProcess implements Runnable {
 
         // Call the event
         BlockRegenBlockRegenerationEvent blockRegenBlockRegenEvent = new BlockRegenBlockRegenerationEvent(this);
-        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getServer().getPluginManager().callEvent(blockRegenBlockRegenEvent));
+        Bukkit.getScheduler().runTask(plugin, () -> Bukkit.getPluginManager().callEvent(blockRegenBlockRegenEvent));
 
         plugin.getRegenerationManager().removeProcess(this);
 
         if (blockRegenBlockRegenEvent.isCancelled())
             return;
 
-        Bukkit.getScheduler().runTask(plugin, this::regenerateBlock);
+        regenerateBlock();
 
         // Particle
         if (preset.getRegenerationParticle() != null)
@@ -160,8 +160,10 @@ public class RegenerationProcess implements Runnable {
         // Set type
         XMaterial regenerateInto = getRegenerateInto();
         if (regenerateInto != null) {
-            plugin.getVersionManager().getMethods().setType(block, regenerateInto);
-            ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
+            Bukkit.getScheduler().runTask(plugin, () -> {
+                plugin.getVersionManager().getMethods().setType(block, regenerateInto);
+                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
+            });
         }
     }
 
@@ -175,7 +177,7 @@ public class RegenerationProcess implements Runnable {
 
         plugin.getRegenerationManager().removeProcess(this);
 
-        Bukkit.getScheduler().runTask(plugin, this::revertBlock);
+        revertBlock();
     }
 
     public void stop() {
@@ -185,12 +187,14 @@ public class RegenerationProcess implements Runnable {
         }
     }
 
+    // Revert block to original state
     public void revertBlock() {
-        // Set the block
         Material material = originalMaterial.parseMaterial();
         if (material != null) {
-            block.setType(material);
-            ConsoleOutput.getInstance().debug("Placed back block " + originalMaterial);
+            Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
+                block.setType(material);
+                ConsoleOutput.getInstance().debug("Placed back block " + originalMaterial);
+            });
         }
     }
 
