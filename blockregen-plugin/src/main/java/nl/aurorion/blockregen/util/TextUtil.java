@@ -40,8 +40,7 @@ public class TextUtil {
 
     public String capitalize(String str) {
         return Arrays.stream(str.split(" "))
-                .map(word -> capitalizeWord(word) + " ")
-                .collect(Collectors.joining())
-                .trim();
+                .map(TextUtil::capitalizeWord)
+                .collect(Collectors.joining(" "));
     }
 }
