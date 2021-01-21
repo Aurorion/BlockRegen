@@ -47,7 +47,7 @@ public class PresetRewards {
 
         rewards.setConsoleCommands(getStringOrList(section, "console-commands", "console-command", "commands", "command"));
         rewards.setPlayerCommands(getStringOrList(section, "player-commands", "player-command"));
-        rewards.setMoney(Amount.load(section, "money", 1));
+        rewards.setMoney(Amount.load(section, "money", 0));
 
         ConfigurationSection dropSection = section.getConfigurationSection("drop-item");
 
