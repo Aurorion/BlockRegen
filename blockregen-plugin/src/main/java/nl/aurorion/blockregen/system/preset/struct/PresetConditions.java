@@ -44,10 +44,8 @@ public class PresetConditions {
 
         ItemStack tool = BlockRegen.getInstance().getVersionManager().getMethods().getItemInMainHand(player);
 
-        for (XMaterial material : toolsRequired) {
-            if (XMaterial.matchXMaterial(tool) == material)
-                return true;
-        }
+        if (toolsRequired.contains(XMaterial.matchXMaterial(tool)))
+            return true;
 
         player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player)
                 .replace("%tool%", composeToolRequirements()));
@@ -64,7 +62,8 @@ public class PresetConditions {
 
     public boolean checkEnchants(Player player) {
 
-        if (enchantsRequired.isEmpty()) return true;
+        if (enchantsRequired.isEmpty())
+            return true;
 
         ItemStack tool = BlockRegen.getInstance().getVersionManager().getMethods().getItemInMainHand(player);
 

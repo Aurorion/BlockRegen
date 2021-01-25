@@ -33,7 +33,7 @@ public class PresetManager {
 
     public Optional<BlockPreset> getPresetByBlock(Block block) {
         return presets.values().stream()
-                .filter(p -> plugin.getVersionManager().getMethods().compareType(block, p.getTargetMaterial()))
+                .filter(preset -> plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial()))
                 .findAny();
     }
 

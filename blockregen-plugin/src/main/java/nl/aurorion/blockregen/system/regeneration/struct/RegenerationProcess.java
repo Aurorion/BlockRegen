@@ -7,9 +7,9 @@ import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.util.LocationUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -20,6 +20,8 @@ import java.util.Objects;
 
 @Data
 public class RegenerationProcess implements Runnable {
+
+    //TODO Gson adapter for processes
 
     private SimpleLocation location;
 
@@ -38,7 +40,7 @@ public class RegenerationProcess implements Runnable {
     @Getter
     private transient BlockPreset preset;
 
-    /**
+    /*
      * Holds the system time when the block should regenerate.
      * -- is set after #start()
      */
@@ -57,38 +59,42 @@ public class RegenerationProcess implements Runnable {
 
     public RegenerationProcess(Block block, BlockPreset preset) {
         this.block = block;
-        this.preset = preset;
-
-        this.presetName = preset.getName();
-        this.originalMaterial = XBlock.getType(block);
         this.location = new SimpleLocation(block.getLocation());
 
-        getRegenerateInto();
-        getReplaceMaterial();
+        this.preset = preset;
+        this.presetName = preset.getName();
+
+        this.originalMaterial = XBlock.getType(block);
+        this.regenerateInto = preset.getRegenMaterial().get();
+        this.replaceMaterial = preset.getReplaceMaterial().get();
     }
 
     public XMaterial getRegenerateInto() {
+        // Make sure we always get something.
         if (regenerateInto == null)
             this.regenerateInto = preset.getRegenMaterial().get();
         return regenerateInto;
     }
 
     public XMaterial getReplaceMaterial() {
+        // Make sure we always get something.
         if (replaceMaterial == null)
             this.replaceMaterial = preset.getReplaceMaterial().get();
         return replaceMaterial;
     }
 
+    // Return true if the process started, false otherwise.
     public boolean start() {
+
+        // Ensure to stop and null anything that ran before.
+        stop();
+
         BlockRegen plugin = BlockRegen.getInstance();
 
         // Register that the process is actually running now
         plugin.getRegenerationManager().registerProcess(this);
 
         // If timeLeft is -1, generate a new one from preset regen delay.
-
-        ConsoleOutput.getInstance().debug("Time left: " + this.timeLeft / 1000 + "s");
-
         if (timeLeft == -1) {
             int regenDelay = preset.getDelay().getInt();
             this.timeLeft = regenDelay * 1000L;
@@ -96,9 +102,10 @@ public class RegenerationProcess implements Runnable {
 
         this.regenerationTime = System.currentTimeMillis() + timeLeft;
 
+        // No need to start a task when it's time to regenerate already.
         if (timeLeft == 0 || regenerationTime <= System.currentTimeMillis()) {
             regenerate();
-            ConsoleOutput.getInstance().debug("Regenerated the process already.");
+            ConsoleOutput.getInstance().debug("Regenerated the process upon start.");
             return false;
         }
 
@@ -107,18 +114,13 @@ public class RegenerationProcess implements Runnable {
         if (getReplaceMaterial() != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, getReplaceMaterial());
-                ConsoleOutput.getInstance().debug("Replaced block with " + replaceMaterial.toString());
+                plugin.getConsoleOutput().debug("Replaced block with " + replaceMaterial.toString());
             });
         }
 
-        // Start the regeneration task
-
-        if (task != null)
-            task.cancel();
-
-        task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
-        ConsoleOutput.getInstance().debug("Started regeneration...");
-        ConsoleOutput.getInstance().debug("Regenerate in " + this.timeLeft / 1000 + "s");
+        // Start the task
+        this.task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
+        plugin.getConsoleOutput().debug(String.format("Regenerate %s in %ds", toString(), timeLeft / 50));
         return true;
     }
 
@@ -131,7 +133,10 @@ public class RegenerationProcess implements Runnable {
      * Regenerate the block.
      */
     public void regenerate() {
-        stop();
+
+        // Cancel the task if running.
+        if (task != null)
+            task.cancel();
 
         BlockRegen plugin = BlockRegen.getInstance();
 
@@ -149,6 +154,9 @@ public class RegenerationProcess implements Runnable {
         // Particle
         if (preset.getRegenerationParticle() != null)
             plugin.getParticleManager().displayParticle(preset.getRegenerationParticle(), block);
+
+        // Null the task
+        this.task = null;
     }
 
     /**
@@ -167,9 +175,7 @@ public class RegenerationProcess implements Runnable {
         }
     }
 
-    /**
-     * Revert process to original material.
-     */
+    //Revert process to original material.
     public void revert() {
         stop();
 
@@ -193,14 +199,12 @@ public class RegenerationProcess implements Runnable {
         if (material != null) {
             Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
                 block.setType(material);
-                ConsoleOutput.getInstance().debug("Placed back block " + originalMaterial);
+                ConsoleOutput.getInstance().debug(String.format("Reverted block for %s", toString()));
             });
         }
     }
 
-    /**
-     * Convert stored Location pointer to the Block at the location.
-     */
+    // Convert stored Location pointer to the Block at the location.
     public boolean convertLocation() {
 
         if (location == null) {
@@ -215,6 +219,7 @@ public class RegenerationProcess implements Runnable {
             return false;
         }
 
+        // Prevent async chunk load.
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> this.block = location.getBlock());
         return true;
     }
@@ -266,6 +271,13 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public String toString() {
-        return "tid: " + (task != null ? task.getTaskId() : "NaN") + "; pN: " + presetName + "; loc: " + (block != null ? LocationUtil.locationToString(block.getLocation()) : location == null ? "" : location.toString()) + " - oM:" + originalMaterial.toString() + ", tL: " + timeLeft + " rT: " + regenerationTime;
+        return String.format("{%s;%s;%s;%s;%s;%d;%d}",
+                task == null ? "null" : task.getTaskId(),
+                presetName,
+                block == null ? "null" : LocationUtil.locationToString(block.getLocation()),
+                originalMaterial.toString(),
+                regenerateInto.toString(),
+                timeLeft,
+                regenerationTime);
     }
 }

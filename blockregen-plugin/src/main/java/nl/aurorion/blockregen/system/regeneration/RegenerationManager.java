@@ -66,10 +66,9 @@ public class RegenerationManager {
     }
 
     @Nullable
-    public RegenerationProcess getProcess(@NotNull Location location) {
+    public RegenerationProcess getProcess(@NotNull Block block) {
 
-        // Convert to block location
-        Location blockLocation = location.getBlock().getLocation();
+        Location location = block.getLocation();
 
         for (RegenerationProcess process : new HashSet<>(getCache())) {
 
@@ -77,13 +76,11 @@ public class RegenerationManager {
             if (process == null)
                 continue;
 
-            // Try to convert simple location again if the block's not there.
-            if (process.getBlock() == null) {
-                plugin.getConsoleOutput().err("Could not remap a process block location.");
+            // Try to convert simple location again and exit if the block's not there.
+            if (process.getBlock() == null)
                 continue;
-            }
 
-            if (!process.getBlock().getLocation().equals(blockLocation))
+            if (!process.getBlock().getLocation().equals(location))
                 continue;
 
             // Try to start the process again.
@@ -97,8 +94,8 @@ public class RegenerationManager {
         return null;
     }
 
-    public boolean isRegenerating(@NotNull Location location) {
-        return getProcess(location) != null;
+    public boolean isRegenerating(@NotNull Block block) {
+        return getProcess(block) != null;
     }
 
     public void removeProcess(RegenerationProcess process) {
@@ -108,10 +105,6 @@ public class RegenerationManager {
 
     public void removeProcess(@NotNull Block block) {
         cache.removeIf(process -> process.getBlock().equals(block));
-    }
-
-    public void removeProcess(@NotNull Location location) {
-        removeProcess(location.getBlock());
     }
 
     public void startAutoSave() {

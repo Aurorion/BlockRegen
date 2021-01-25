@@ -44,21 +44,21 @@ public class BlockListener implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onBreak(BlockBreakEvent event) {
 
+        // Respect cancels on higher priorities
+        if (event.isCancelled())
+            return;
+
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
         BlockPreset preset = plugin.getPresetManager().getPresetByBlock(block).orElse(null);
 
-        if (event.isCancelled()) {
-            return;
-        }
-
         // Check if the block is regenerating already
-        if (plugin.getRegenerationManager().isRegenerating(block.getLocation())) {
+        if (plugin.getRegenerationManager().isRegenerating(block)) {
 
             // Remove the process
             if (hasBypass(player)) {
-                plugin.getRegenerationManager().removeProcess(block.getLocation());
+                plugin.getRegenerationManager().removeProcess(block);
                 return;
             }
 
@@ -141,10 +141,6 @@ public class BlockListener implements Listener {
     }
 
     private void process(RegenerationProcess process, BlockPreset preset, BlockBreakEvent event) {
-
-        if (preset == null)
-            return;
-
         Player player = event.getPlayer();
 
         Block block = event.getBlock();
