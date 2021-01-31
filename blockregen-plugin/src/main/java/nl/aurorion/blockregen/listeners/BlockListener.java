@@ -264,7 +264,7 @@ public class BlockListener implements Listener {
                 }
             }
 
-            if (presetEvent != null) {
+            if (presetEvent != null && presetEvent.isEnabled()) {
                 // Add items from presetEvent
                 for (ItemDrop drop : presetEvent.getRewards().getDrops()) {
                     ItemStack item = drop.toItemStack(player);
