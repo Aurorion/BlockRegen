@@ -199,13 +199,6 @@ public class BlockListener implements Listener {
             if (presetEvent != null && presetEvent.isEnabled()) {
                 doubleDrops = presetEvent.isDoubleDrops();
                 doubleExp = presetEvent.isDoubleExperience();
-
-                if (presetEvent.getItem() != null) {
-                    ItemStack eventDrop = presetEvent.getItem().toItemStack(player);
-
-                    if (eventDrop != null && (plugin.getRandom().nextInt((presetEvent.getItemRarity().getInt() - 1) + 1) + 1) == 1)
-                        drops.add(eventDrop);
-                }
             }
 
             // Drop Section -----------------------------------------------------------------------------------------
@@ -265,15 +258,27 @@ public class BlockListener implements Listener {
             }
 
             if (presetEvent != null && presetEvent.isEnabled()) {
-                // Add items from presetEvent
-                for (ItemDrop drop : presetEvent.getRewards().getDrops()) {
-                    ItemStack item = drop.toItemStack(player);
-                    if (item != null)
-                        drops.add(item);
-                }
 
                 // Fire rewards
-                presetEvent.getRewards().give(player);
+                if (plugin.getRandom().nextInt(presetEvent.getItemRarity().getInt()) == 0) {
+
+                    // Event item
+                    if (presetEvent.getItem() != null) {
+                        ItemStack eventDrop = presetEvent.getItem().toItemStack(player);
+
+                        if (eventDrop != null)
+                            drops.add(eventDrop);
+                    }
+
+                    // Add items from presetEvent
+                    for (ItemDrop drop : presetEvent.getRewards().getDrops()) {
+                        ItemStack item = drop.toItemStack(player);
+                        if (item != null)
+                            drops.add(item);
+                    }
+
+                    presetEvent.getRewards().give(player);
+                }
             }
 
             for (ItemStack drop : drops) {
