@@ -6,7 +6,7 @@
 
     <groupId>nl.aurorion.blockregen</groupId>
     <artifactId>BlockRegen</artifactId>
-    <version>3.6.6</version>
+    <version>3.6.7</version>
     <modules>
         <module>blockregen-version</module>
         <module>blockregen-common</module>
