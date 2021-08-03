@@ -6,7 +6,7 @@ I don't have access to the spigot page and it most likely won't be updated, use 
 
 ## Supported versions
 
-``1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16`` (as of 3.6.0)
+``1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17`` (as of 3.6.0)
 
 ### Notes
 
