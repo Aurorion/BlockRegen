@@ -7,7 +7,6 @@ import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
-import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -15,6 +14,7 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
@@ -140,6 +140,7 @@ public class BlockListener implements Listener {
         }
     }
 
+
     private void process(RegenerationProcess process, BlockPreset preset, BlockBreakEvent event) {
         Player player = event.getPlayer();
 
@@ -187,8 +188,6 @@ public class BlockListener implements Listener {
         // Run rewards async
         Bukkit.getScheduler().runTaskAsynchronously(plugin, () -> {
 
-            List<ItemStack> drops = new ArrayList<>();
-
             // Events ---------------------------------------------------------------------------------------------
 
             boolean doubleDrops = false;
@@ -208,20 +207,13 @@ public class BlockListener implements Listener {
                     Material mat = drop.getType();
                     int amount = drop.getAmount();
 
-                    if (doubleDrops)
-                        amount *= 2;
+                    ItemStack item = new ItemStack(mat, doubleDrops ? amount * 2 : amount);
 
-                    ItemStack dropItem = new ItemStack(mat, amount);
-
-                    plugin.getConsoleOutput().debug("Dropping item " + dropItem.getType().toString() + "x" + dropItem.getAmount(), player);
-                    drops.add(dropItem);
+                    giveItem(item, player, block, preset.isDropNaturally());
                 }
 
-                // TODO: Get rid of exp section, add drop-exp-naturally to the main Preset section -- simplifies some stuff
                 if (expToDrop.get() > 0) {
-                    if (doubleExp)
-                        expToDrop.set(expToDrop.get() * 2);
-                    spawnExp(block.getLocation(), expToDrop.get());
+                    giveExp(block.getLocation(), player, doubleExp ? expToDrop.get() * 2 : expToDrop.get(), preset.isDropNaturally());
                 }
             } else {
                 for (ItemDrop drop : preset.getRewards().getDrops()) {
@@ -235,8 +227,9 @@ public class BlockListener implements Listener {
                     if (doubleDrops)
                         itemStack.setAmount(itemStack.getAmount() * 2);
 
-                    drops.add(itemStack);
-                    plugin.getConsoleOutput().debug("Dropping item " + itemStack.getType().toString() + "x" + itemStack.getAmount(), player);
+                    // Drop/Give the item.
+
+                    giveItem(itemStack, player, block, drop.isDropNaturally());
 
                     if (drop.getExperienceDrop() == null) continue;
 
@@ -249,11 +242,9 @@ public class BlockListener implements Listener {
                     if (doubleExp)
                         expAmount.set(expAmount.get() * 2);
 
-                    plugin.getConsoleOutput().debug("Exp: " + expAmount, player);
+                    // Drop/Give the exp.
 
-                    if (experienceDrop.isDropNaturally())
-                        spawnExp(block.getLocation(), expAmount.get());
-                    else player.giveExp(expAmount.get());
+                    giveExp(block.getLocation(), player, expAmount.get(), experienceDrop.isDropNaturally());
                 }
             }
 
@@ -264,30 +255,21 @@ public class BlockListener implements Listener {
 
                     // Event item
                     if (presetEvent.getItem() != null) {
-                        ItemStack eventDrop = presetEvent.getItem().toItemStack(player);
+                        ItemDrop eventDrop = presetEvent.getItem();
 
-                        if (eventDrop != null)
-                            drops.add(eventDrop);
+                        if (eventDrop != null) {
+                            ItemStack eventStack = eventDrop.toItemStack(player);
+                            giveItem(eventStack, player, block, eventDrop.isDropNaturally());
+                        }
                     }
 
                     // Add items from presetEvent
                     for (ItemDrop drop : presetEvent.getRewards().getDrops()) {
                         ItemStack item = drop.toItemStack(player);
-                        if (item != null)
-                            drops.add(item);
+                        giveItem(item, player, block, drop.isDropNaturally());
                     }
 
                     presetEvent.getRewards().give(player);
-                }
-            }
-
-            for (ItemStack drop : drops) {
-                if (preset.isDropNaturally()) {
-                    Bukkit.getScheduler().runTask(plugin, () -> block.getWorld().dropItemNaturally(block.getLocation(), drop));
-                    plugin.getConsoleOutput().debug("Dropping item " + drop.getType().name() + "x" + drop.getAmount());
-                } else {
-                    player.getInventory().addItem(drop);
-                    plugin.getConsoleOutput().debug("Adding item " + drop.getType().name() + "x" + drop.getAmount() + " to inventory.");
                 }
             }
 
@@ -314,5 +296,31 @@ public class BlockListener implements Listener {
             return;
 
         Bukkit.getScheduler().runTask(plugin, () -> location.getWorld().spawn(location, ExperienceOrb.class).setExperience(amount));
+    }
+
+    private void giveExp(Location location, Player player, int amount, boolean naturally) {
+        if (naturally)
+            spawnExp(location, amount);
+        else
+            player.giveExp(amount);
+    }
+
+    private void giveItem(ItemStack item, Player player, Block block, boolean naturally) {
+        if (item == null) return;
+
+        if (naturally)
+            dropItem(item, player, block);
+        else
+            giveItem(item, player);
+    }
+
+    private void dropItem(ItemStack item, Player player, org.bukkit.block.Block block) {
+        Bukkit.getScheduler().runTask(plugin, () -> block.getWorld().dropItemNaturally(block.getLocation(), item));
+        plugin.getConsoleOutput().debug("Dropping item " + item.getType() + "x" + item.getAmount(), player);
+    }
+
+    private void giveItem(ItemStack item, Player player) {
+        Bukkit.getScheduler().runTask(plugin, () -> player.getInventory().addItem(item));
+        plugin.getConsoleOutput().debug("Giving item " + item.getType() + "x" + item.getAmount(), player);
     }
 }

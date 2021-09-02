@@ -15,7 +15,10 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class PresetManager {
 
@@ -172,11 +175,11 @@ public class PresetManager {
         preset.setConditions(conditions);
 
         // Rewards
-        PresetRewards rewards = PresetRewards.load(section);
+        PresetRewards rewards = PresetRewards.load(section, preset);
 
         preset.setRewards(rewards);
 
-        PresetEvent event = PresetEvent.load(section.getConfigurationSection("event"), name);
+        PresetEvent event = PresetEvent.load(section.getConfigurationSection("event"), name, preset);
 
         if (event != null)
             plugin.getEventManager().addEvent(event);

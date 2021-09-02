@@ -38,7 +38,7 @@ public class PresetRewards {
     private List<ItemDrop> drops = new ArrayList<>();
 
     @NotNull
-    public static PresetRewards load(@Nullable ConfigurationSection section) {
+    public static PresetRewards load(@Nullable ConfigurationSection section, BlockPreset preset) {
 
         if (section == null)
             return new PresetRewards();
@@ -58,7 +58,7 @@ public class PresetRewards {
                 XMaterial material = ParseUtil.parseMaterial(dropSection.getString("material"));
 
                 if (material != null) {
-                    ItemDrop drop = ItemDrop.load(dropSection);
+                    ItemDrop drop = ItemDrop.load(dropSection, preset);
                     if (drop != null)
                         rewards.getDrops().add(drop);
                 } else
@@ -66,7 +66,7 @@ public class PresetRewards {
             } else {
                 // Multiple drops
                 for (String dropName : dropSection.getKeys(false)) {
-                    ItemDrop drop = ItemDrop.load(dropSection.getConfigurationSection(dropName));
+                    ItemDrop drop = ItemDrop.load(dropSection.getConfigurationSection(dropName), preset);
                     if (drop != null)
                         rewards.getDrops().add(drop);
                 }

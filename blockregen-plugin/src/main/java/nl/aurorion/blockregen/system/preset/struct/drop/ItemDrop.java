@@ -6,6 +6,7 @@ import lombok.Setter;
 import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.util.TextUtil;
 import org.bukkit.configuration.ConfigurationSection;
@@ -45,6 +46,10 @@ public class ItemDrop {
     @Getter
     @Setter
     private Set<ItemFlag> itemFlags = new HashSet<>();
+
+    @Getter
+    @Setter
+    private boolean dropNaturally = true;
 
     @Getter
     @Setter
@@ -91,7 +96,7 @@ public class ItemDrop {
     }
 
     @Nullable
-    public static ItemDrop load(ConfigurationSection section) {
+    public static ItemDrop load(ConfigurationSection section, BlockPreset preset) {
 
         if (section == null)
             return null;
@@ -115,7 +120,9 @@ public class ItemDrop {
                         e -> ConsoleOutput.getInstance().warn("Could not parse ItemFlag from " + str)))
                 .collect(Collectors.toSet()));
 
-        drop.setExperienceDrop(ExperienceDrop.load(section.getConfigurationSection("exp")));
+        drop.setDropNaturally(section.getBoolean("drop-naturally", preset.isDropNaturally()));
+
+        drop.setExperienceDrop(ExperienceDrop.load(section.getConfigurationSection("exp"), drop));
 
         return drop;
     }
