@@ -135,7 +135,7 @@
         <dependency>
             <groupId>com.bekvon.bukkit</groupId>
             <artifactId>Residence</artifactId>
-            <version>5.0.0.1</version>
+            <version>5.0.1.5</version>
             <scope>provided</scope>
         </dependency>
         <!-- Placeholder API -->
@@ -163,7 +163,7 @@
         <dependency>
             <groupId>com.gamingmesh.jobs</groupId>
             <artifactId>Jobs</artifactId>
-            <version>5.0.0.6</version>
+            <version>5.0.2.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
