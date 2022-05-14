@@ -16,7 +16,7 @@ public class WitchSpell extends AbstractParticle {
 
     @Override
     public void display(@NotNull Location location) {
-        ParticleDisplay display = new ParticleDisplay(Particle.SPELL_WITCH, location.clone().add(.5, .5, .5), 1);
+        ParticleDisplay display = ParticleDisplay.simple(location.clone().add(.5, .5, .5), Particle.SPELL_WITCH);
         XParticle.circle(.5, 10, display);
     }
 }

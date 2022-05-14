@@ -21,7 +21,7 @@ import java.util.Objects;
 @Data
 public class RegenerationProcess implements Runnable {
 
-    //TODO Gson adapter for processes
+    // TODO Gson adapter for processes
 
     private SimpleLocation location;
 
@@ -64,7 +64,7 @@ public class RegenerationProcess implements Runnable {
         this.preset = preset;
         this.presetName = preset.getName();
 
-        this.originalMaterial = XBlock.getType(block);
+        this.originalMaterial = XMaterial.matchXMaterial(block.getType());
         this.regenerateInto = preset.getRegenMaterial().get();
         this.replaceMaterial = preset.getReplaceMaterial().get();
     }
@@ -160,7 +160,8 @@ public class RegenerationProcess implements Runnable {
     }
 
     /**
-     * Simply regenerate the block. This method is unsafe to execute from async context.
+     * Simply regenerate the block. This method is unsafe to execute from async
+     * context.
      */
     public void regenerateBlock() {
         BlockRegen plugin = BlockRegen.getInstance();
@@ -170,12 +171,13 @@ public class RegenerationProcess implements Runnable {
         if (regenerateInto != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, regenerateInto);
-                ConsoleOutput.getInstance().debug("Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
+                ConsoleOutput.getInstance().debug(
+                        "Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
             });
         }
     }
 
-    //Revert process to original material.
+    // Revert process to original material.
     public void revert() {
         stop();
 
@@ -215,7 +217,8 @@ public class RegenerationProcess implements Runnable {
         Location location = this.location.toLocation();
 
         if (location == null) {
-            ConsoleOutput.getInstance().err("Could not load location for process " + toString() + ", world is invalid or not loaded.");
+            ConsoleOutput.getInstance()
+                    .err("Could not load location for process " + toString() + ", world is invalid or not loaded.");
             return false;
         }
 
@@ -230,7 +233,8 @@ public class RegenerationProcess implements Runnable {
         BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
 
         if (preset == null) {
-            plugin.getConsoleOutput().err("Could not load process " + toString() + ", it's preset '" + presetName + "' is invalid.");
+            plugin.getConsoleOutput()
+                    .err("Could not load process " + toString() + ", it's preset '" + presetName + "' is invalid.");
             revert();
             return false;
         }
@@ -243,7 +247,8 @@ public class RegenerationProcess implements Runnable {
         this.timeLeft = timeLeft;
         if (timeLeft > 0)
             start();
-        else run();
+        else
+            run();
     }
 
     public boolean isRunning() {
@@ -258,8 +263,10 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
         RegenerationProcess process = (RegenerationProcess) o;
         return location.equals(process.getLocation());
     }

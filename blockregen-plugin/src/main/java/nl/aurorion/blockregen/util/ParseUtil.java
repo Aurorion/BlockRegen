@@ -43,7 +43,7 @@ public class ParseUtil {
             return null;
         }
 
-        Enchantment enchantment = xEnchantment.get().parseEnchantment();
+        Enchantment enchantment = xEnchantment.get().getEnchant();
         if (enchantment == null) {
             ConsoleOutput.getInstance().warn("Could not parse enchantment " + input);
             return null;

@@ -72,7 +72,7 @@ public class PresetConditions {
         if (meta != null && tool.getType() != Material.AIR) {
             for (Map.Entry<XEnchantment, Integer> entry : enchantsRequired.entrySet()) {
 
-                Enchantment enchantment = entry.getKey().parseEnchantment();
+                Enchantment enchantment = entry.getKey().getEnchant();
 
                 if (enchantment == null)
                     continue;
