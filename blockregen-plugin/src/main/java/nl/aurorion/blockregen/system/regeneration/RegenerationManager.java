@@ -124,9 +124,13 @@ public class RegenerationManager {
         }
     }
 
-    // Revert blocks before disabling
     public void revertAll() {
-        cache.forEach(RegenerationProcess::revertBlock);
+        revertAll(true);
+    }
+
+    // Revert blocks before disabling
+    public void revertAll(boolean synchronize) {
+        cache.forEach(process -> process.revertBlock(synchronize));
     }
 
     private void purgeExpired() {

@@ -195,14 +195,23 @@ public class RegenerationProcess implements Runnable {
         }
     }
 
-    // Revert block to original state
     public void revertBlock() {
+        revertBlock(true);
+    }
+
+    // Revert block to original state
+    public void revertBlock(boolean synchronize) {
         Material material = originalMaterial.parseMaterial();
         if (material != null) {
-            Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
+            if (synchronize) {
+                Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
+                    block.setType(material);
+                    ConsoleOutput.getInstance().debug(String.format("Reverted block for %s", toString()));
+                });
+            } else {
                 block.setType(material);
                 ConsoleOutput.getInstance().debug(String.format("Reverted block for %s", toString()));
-            });
+            }
         }
     }
 
