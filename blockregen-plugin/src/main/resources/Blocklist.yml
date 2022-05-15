@@ -89,6 +89,18 @@ Blocks:
         # Amount of exp dropped.
         amount: 100
 
+      # Enchantments and their corresponding levels you want to add to the dropped item.
+      # Note that these enchants are relative to your server version. The plugin will display a warning if any of the are invalid.
+      # Valid options (latest): https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/enchantments/Enchantment.html
+      enchants:
+        - 'FORTUNE:2'
+
+      # ItemFlags that you want added to the item.
+      # Valid options: HIDE_ATTRIBUTES, HIDE_DESTROYS, HIDE_DYE, HIDE_ENCHANTS, HIDE_PLACED_ONE, HIDE_POTION_EFFECTS, HIDE_UNBREAKABLE
+      # Source: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/inventory/ItemFlag.html
+      flags:
+        - 'HIDE_ENCHANTS'
+
       # How many should the player get?
       # This generates a random number between, in this case, 0 and 5
       # Can be used everywhere where a number is needed. for ex. regen-delay, money, amount
