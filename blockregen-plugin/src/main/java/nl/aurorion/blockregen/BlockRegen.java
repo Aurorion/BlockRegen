@@ -33,8 +33,10 @@ import java.util.Random;
 
 public class BlockRegen extends JavaPlugin {
 
+    private static BlockRegen instance;
+
     public static BlockRegen getInstance() {
-        return getPlugin(BlockRegen.class);
+        return BlockRegen.instance;
     }
 
     // Dependencies
@@ -84,6 +86,8 @@ public class BlockRegen extends JavaPlugin {
 
     @Override
     public void onEnable() {
+        BlockRegen.instance = this;
+
         random = new Random();
 
         consoleOutput = ConsoleOutput.getInstance(this);
