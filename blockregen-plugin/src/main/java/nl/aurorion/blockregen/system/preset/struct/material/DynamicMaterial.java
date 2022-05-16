@@ -1,16 +1,20 @@
 package nl.aurorion.blockregen.system.preset.struct.material;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
+
+import org.jetbrains.annotations.NotNull;
+
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.ParseUtil;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 
 public class DynamicMaterial {
 
