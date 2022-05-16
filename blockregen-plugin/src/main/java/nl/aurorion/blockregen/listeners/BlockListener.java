@@ -158,8 +158,12 @@ public class BlockListener implements Listener {
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region")) {
                         event.setCancelled(true);
                         log.fine("Not a valid preset. Denied BlockBreak.");
+                        return;
                     }
+                    log.fine("Not a valid preset.");
                 }
+            } else {
+                log.fine("Not in region.");
             }
         } else {
             if (isInWorld) {
@@ -169,8 +173,13 @@ public class BlockListener implements Listener {
                     if (plugin.getConfig().getBoolean("Disable-Other-Break", false)) {
                         event.setCancelled(true);
                         log.fine("Not a valid preset. Denied BlockBreak.");
+                        return;
                     }
+                    log.fine("Not a valid preset.");
                 }
+            } else {
+                log.fine(String.format("Not in world. World: %s, enabled: %s", world.getName(),
+                        plugin.getConfig().getStringList("Worlds-Enabled").toString()));
             }
         }
     }
