@@ -2,7 +2,6 @@ package nl.aurorion.blockregen.version.ancient;
 
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -10,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
+import lombok.extern.java.Log;
+
+@Log
 @SuppressWarnings("deprecation")
 public class AncientMethods implements Methods {
 
@@ -32,14 +34,14 @@ public class AncientMethods implements Methods {
         Material type = xMaterial.parseMaterial();
 
         if (type == null) {
-            ConsoleOutput.getInstance().warn("Type " + xMaterial.name() + " is not supported on this version.");
+            log.warning("Type " + xMaterial.name() + " is not supported on this version.");
             return false;
         }
 
         byte data = xMaterial.getData();
         boolean result = block.getType() == type && block.getData() == data;
-        ConsoleOutput.getInstance().debug(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(),
-                block.getType().toString(), (int) block.getData(), result));
+        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(), block.getType().toString(),
+                (int) block.getData(), result));
         return result;
     }
 

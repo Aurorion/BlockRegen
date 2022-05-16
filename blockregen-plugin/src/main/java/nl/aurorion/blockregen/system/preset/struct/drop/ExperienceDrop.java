@@ -3,7 +3,6 @@ package nl.aurorion.blockregen.system.preset.struct.drop;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
-import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
 

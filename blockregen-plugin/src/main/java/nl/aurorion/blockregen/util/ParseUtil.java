@@ -1,19 +1,21 @@
 package nl.aurorion.blockregen.util;
 
-import com.cryptomorin.xseries.XEnchantment;
-import com.cryptomorin.xseries.XMaterial;
-import com.google.common.base.Strings;
-import lombok.experimental.UtilityClass;
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
-import org.bukkit.Material;
-import org.bukkit.enchantments.Enchantment;
-import org.jetbrains.annotations.Nullable;
-
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import com.cryptomorin.xseries.XEnchantment;
+import com.cryptomorin.xseries.XMaterial;
+import com.google.common.base.Strings;
+
+import org.bukkit.Material;
+import org.bukkit.enchantments.Enchantment;
+import org.jetbrains.annotations.Nullable;
+
+import lombok.experimental.UtilityClass;
+import lombok.extern.java.Log;
+
+@Log
 @UtilityClass
 public class ParseUtil {
 
@@ -39,13 +41,13 @@ public class ParseUtil {
 
         Optional<XEnchantment> xEnchantment = XEnchantment.matchXEnchantment(input);
         if (!xEnchantment.isPresent()) {
-            ConsoleOutput.getInstance().warn("Could not parse enchantment " + input);
+            log.warning("Could not parse enchantment " + input);
             return null;
         }
 
         Enchantment enchantment = xEnchantment.get().getEnchant();
         if (enchantment == null) {
-            ConsoleOutput.getInstance().warn("Could not parse enchantment " + input);
+            log.warning("Could not parse enchantment " + input);
             return null;
         }
 
@@ -61,14 +63,14 @@ public class ParseUtil {
         Optional<XMaterial> xMaterial = XMaterial.matchXMaterial(input);
 
         if (!xMaterial.isPresent()) {
-            ConsoleOutput.getInstance().debug("Could not parse material " + input);
+            log.fine("Could not parse material " + input);
             return null;
         }
 
         Material material = xMaterial.get().parseMaterial();
 
         if (material != null && blocksOnly.length > 0 && blocksOnly[0] && !material.isBlock()) {
-            BlockRegen.getInstance().getConsoleOutput().debug("Material " + input + " is not a block.");
+            log.fine("Material " + input + " is not a block.");
             return null;
         }
 

@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.version;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.version.ancient.AncientMethods;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Log
 public class VersionManager {
 
     private final BlockRegen plugin;
@@ -125,14 +127,6 @@ public class VersionManager {
         return include ? current <= version : current < version;
     }
 
-    private void setWorldEditProvider(WorldEditProvider worldEditProvider) {
-        this.worldEditProvider = worldEditProvider;
-    }
-
-    private void setWorldGuardProvider(WorldGuardProvider worldGuardProvider) {
-        this.worldGuardProvider = worldGuardProvider;
-    }
-
     private void setupWorldEdit() {
 
         if (worldEditProvider != null)
@@ -144,7 +138,7 @@ public class VersionManager {
             return;
 
         this.worldEdit = (WorldEditPlugin) worldEditPlugin;
-        plugin.getConsoleOutput().info("WorldEdit found! &aEnabling regions.");
+        log.info("WorldEdit found! &aEnabling regions.");
     }
 
     private void setupWorldGuard() {
@@ -157,6 +151,6 @@ public class VersionManager {
             return;
 
         this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
-        plugin.getConsoleOutput().info("WorldGuard found! &aSupporting it's Region protection.");
+        log.info("WorldGuard found! &aSupporting it's Region protection.");
     }
 }

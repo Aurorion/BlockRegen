@@ -4,7 +4,6 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import org.bukkit.Location;
@@ -26,8 +25,7 @@ public class LatestWorldEditProvider implements WorldEditProvider {
         try {
             selection = worldEdit.getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
         } catch (IncompleteRegionException e) {
-            if (ConsoleOutput.getInstance().isDebug())
-                e.printStackTrace();
+            e.printStackTrace();
             return null;
         }
         return selection;

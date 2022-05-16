@@ -4,11 +4,12 @@ import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XMaterial;
 import com.gamingmesh.jobs.Jobs;
 import com.gamingmesh.jobs.container.Job;
+import com.gamingmesh.jobs.container.JobProgression;
 import com.gamingmesh.jobs.container.JobsPlayer;
 import com.google.common.base.Strings;
 import lombok.NoArgsConstructor;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.util.TextUtil;
@@ -25,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Log
 @NoArgsConstructor
 public class PresetConditions {
 
@@ -40,15 +42,20 @@ public class PresetConditions {
 
     public boolean checkTools(Player player) {
 
-        if (toolsRequired.isEmpty()) return true;
+        if (toolsRequired.isEmpty())
+            return true;
 
         ItemStack tool = BlockRegen.getInstance().getVersionManager().getMethods().getItemInMainHand(player);
 
         if (toolsRequired.contains(XMaterial.matchXMaterial(tool)))
             return true;
 
+        String requirements = composeToolRequirements();
+
         player.sendMessage(Message.TOOL_REQUIRED_ERROR.get(player)
-                .replace("%tool%", composeToolRequirements()));
+                .replace("%tool%", requirements));
+        log.fine(String.format("Player doesn't have the required tools. Tool: %s, required: %s",
+                tool.getType().toString(), requirements));
         return false;
     }
 
@@ -69,7 +76,12 @@ public class PresetConditions {
 
         ItemMeta meta = tool.getItemMeta();
 
+        String requirements = compressEnchantRequirements();
+        String enchants = "None";
+
         if (meta != null && tool.getType() != Material.AIR) {
+            enchants = meta.getEnchants().toString();
+
             for (Map.Entry<XEnchantment, Integer> entry : enchantsRequired.entrySet()) {
 
                 Enchantment enchantment = entry.getKey().getEnchant();
@@ -83,19 +95,22 @@ public class PresetConditions {
         }
 
         player.sendMessage(Message.ENCHANT_REQUIRED_ERROR.get(player)
-                .replace("%enchant%", compressEnchantRequirements()));
+                .replace("%enchant%", requirements));
+        log.fine(String.format("Player doesn't have the required enchants. Enchants: %s, required: %s", enchants, requirements));
         return false;
     }
 
     private String compressEnchantRequirements() {
         return enchantsRequired.entrySet().stream()
-                .map(e -> String.format("%s (%d)", TextUtil.capitalize(e.getKey().name().toLowerCase().replace("_", " ")), e.getValue()))
+                .map(e -> String.format("%s (%d)",
+                        TextUtil.capitalize(e.getKey().name().toLowerCase().replace("_", " ")), e.getValue()))
                 .collect(Collectors.joining(", "));
     }
 
     public boolean checkJobs(Player player) {
 
-        if (BlockRegen.getInstance().getJobsProvider() == null || jobsRequired.isEmpty()) return true;
+        if (BlockRegen.getInstance().getJobsProvider() == null || jobsRequired.isEmpty())
+            return true;
 
         JobsPlayer jobsPlayer = Jobs.getPlayerManager().getJobsPlayer(player);
 
@@ -106,8 +121,11 @@ public class PresetConditions {
             }
         }
 
+        String requirements = compressJobRequirements();
+
         player.sendMessage(Message.JOBS_REQUIRED_ERROR.get(player)
-                .replace("%job%", compressJobRequirements()));
+                .replace("%job%", requirements));
+        log.fine(String.format("Player doesn't have the required jobs. Jobs: %s, required: %s", jobsPlayer.getJobProgression().stream().map(JobProgression::toString).collect(Collectors.joining(", ")), requirements));
         return false;
     }
 
@@ -128,7 +146,7 @@ public class PresetConditions {
         for (String loop : arr) {
             XMaterial material = ParseUtil.parseMaterial(loop);
             if (material == null) {
-                ConsoleOutput.getInstance().warn("Could not parse tool material " + loop);
+                log.warning("Could not parse tool material " + loop);
                 continue;
             }
             toolsRequired.add(material);
@@ -137,7 +155,8 @@ public class PresetConditions {
 
     public void setEnchantsRequired(@Nullable String input) {
 
-        if (Strings.isNullOrEmpty(input)) return;
+        if (Strings.isNullOrEmpty(input))
+            return;
 
         String[] arr = input.split(", ");
 
@@ -147,7 +166,7 @@ public class PresetConditions {
             String enchantmentName = loop.split(";")[0];
             XEnchantment enchantment = ParseUtil.parseEnchantment(enchantmentName);
             if (enchantment == null) {
-                ConsoleOutput.getInstance().warn("Could not parse enchantment " + enchantmentName + " in " + input);
+                log.warning("Could not parse enchantment " + enchantmentName + " in " + input);
                 continue;
             }
 
@@ -156,7 +175,7 @@ public class PresetConditions {
                 level = Integer.parseInt(loop.split(";")[1]);
 
                 if (level < 0) {
-                    ConsoleOutput.getInstance().warn("Could not parse an enchantment level in " + input);
+                    log.warning("Could not parse an enchantment level in " + input);
                     continue;
                 }
             }
@@ -167,7 +186,8 @@ public class PresetConditions {
 
     public void setJobsRequired(@Nullable String input) {
 
-        if (Strings.isNullOrEmpty(input)) return;
+        if (Strings.isNullOrEmpty(input))
+            return;
 
         String[] arr = input.split(", ");
 

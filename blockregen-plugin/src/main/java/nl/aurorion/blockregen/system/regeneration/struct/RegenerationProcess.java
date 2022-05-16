@@ -4,8 +4,8 @@ import com.cryptomorin.xseries.XMaterial;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.util.LocationUtil;
@@ -17,6 +17,7 @@ import org.bukkit.scheduler.BukkitTask;
 
 import java.util.Objects;
 
+@Log
 @Data
 public class RegenerationProcess implements Runnable {
 
@@ -104,7 +105,7 @@ public class RegenerationProcess implements Runnable {
         // No need to start a task when it's time to regenerate already.
         if (timeLeft == 0 || regenerationTime <= System.currentTimeMillis()) {
             regenerate();
-            ConsoleOutput.getInstance().debug("Regenerated the process upon start.");
+            log.fine("Regenerated the process upon start.");
             return false;
         }
 
@@ -113,13 +114,13 @@ public class RegenerationProcess implements Runnable {
         if (getReplaceMaterial() != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, getReplaceMaterial());
-                plugin.getConsoleOutput().debug("Replaced block with " + replaceMaterial.toString());
+                log.fine("Replaced block with " + replaceMaterial.toString());
             });
         }
 
         // Start the task
         this.task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
-        plugin.getConsoleOutput().debug(String.format("Regenerate %s in %ds", toString(), timeLeft / 50));
+        log.fine(String.format("Regenerate %s in %ds", toString(), timeLeft / 50));
         return true;
     }
 
@@ -170,7 +171,7 @@ public class RegenerationProcess implements Runnable {
         if (regenerateInto != null) {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, regenerateInto);
-                ConsoleOutput.getInstance().debug(
+                log.fine(
                         "Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
             });
         }
@@ -205,11 +206,11 @@ public class RegenerationProcess implements Runnable {
             if (synchronize) {
                 Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
                     block.setType(material);
-                    ConsoleOutput.getInstance().debug(String.format("Reverted block for %s", toString()));
+                    log.fine(String.format("Reverted block for %s", toString()));
                 });
             } else {
                 block.setType(material);
-                ConsoleOutput.getInstance().debug(String.format("Reverted block for %s", toString()));
+                log.fine(String.format("Reverted block for %s", toString()));
             }
         }
     }
@@ -218,15 +219,14 @@ public class RegenerationProcess implements Runnable {
     public boolean convertLocation() {
 
         if (location == null) {
-            ConsoleOutput.getInstance().err("Could not load location for process " + toString());
+            log.severe("Could not load location for process " + toString());
             return false;
         }
 
         Location location = this.location.toLocation();
 
         if (location == null) {
-            ConsoleOutput.getInstance()
-                    .err("Could not load location for process " + toString() + ", world is invalid or not loaded.");
+            log.severe("Could not load location for process " + toString() + ", world is invalid or not loaded.");
             return false;
         }
 
@@ -241,8 +241,7 @@ public class RegenerationProcess implements Runnable {
         BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
 
         if (preset == null) {
-            plugin.getConsoleOutput()
-                    .err("Could not load process " + toString() + ", it's preset '" + presetName + "' is invalid.");
+            log.severe("Could not load process " + toString() + ", it's preset '" + presetName + "' is invalid.");
             revert();
             return false;
         }

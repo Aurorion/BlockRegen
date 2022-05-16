@@ -1,12 +1,13 @@
 package nl.aurorion.blockregen.system.event.struct;
 
 import lombok.Data;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+@Log
 @Data
 public class EventBossBar {
 
@@ -27,14 +28,14 @@ public class EventBossBar {
         String barStyle = section.getString("style", "SOLID");
 
         if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarStyleValid(barStyle)) {
-            ConsoleOutput.getInstance().warn("Boss bar style " + barStyle + " is invalid, using SOLID as default.");
+            log.warning("Boss bar style " + barStyle + " is invalid, using SOLID as default.");
             bossBar.setStyle("SOLID");
         } else bossBar.setStyle(barStyle);
 
         String barColor = section.getString("color", "BLUE");
 
         if (!BlockRegen.getInstance().getVersionManager().getMethods().isBarColorValid(barColor)) {
-            ConsoleOutput.getInstance().warn("Boss bar color " + barColor + " is invalid, using BLUE as default.");
+            log.warning("Boss bar color " + barColor + " is invalid, using BLUE as default.");
             bossBar.setColor("BLUE");
         } else bossBar.setColor(barColor);
 

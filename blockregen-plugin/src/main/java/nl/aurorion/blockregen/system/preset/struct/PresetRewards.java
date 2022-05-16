@@ -1,26 +1,28 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
-import nl.aurorion.blockregen.util.ParseUtil;
-import nl.aurorion.blockregen.util.TextUtil;
-import nl.aurorion.blockregen.util.Utils;
-import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
+
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.java.Log;
+import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
+import nl.aurorion.blockregen.util.ParseUtil;
+import nl.aurorion.blockregen.util.TextUtil;
 
+@Log
 @NoArgsConstructor
 public class PresetRewards {
 
@@ -45,7 +47,8 @@ public class PresetRewards {
 
         PresetRewards rewards = new PresetRewards();
 
-        rewards.setConsoleCommands(getStringOrList(section, "console-commands", "console-command", "commands", "command"));
+        rewards.setConsoleCommands(
+                getStringOrList(section, "console-commands", "console-command", "commands", "command"));
         rewards.setPlayerCommands(getStringOrList(section, "player-commands", "player-command"));
         rewards.setMoney(Amount.load(section, "money", 0));
 
@@ -62,7 +65,8 @@ public class PresetRewards {
                     if (drop != null)
                         rewards.getDrops().add(drop);
                 } else
-                    ConsoleOutput.getInstance().warn("Could not load item drop at " + dropSection.getCurrentPath() + ".drop-item, material is invalid.");
+                    log.warning("Could not load item drop at " + dropSection.getCurrentPath()
+                            + ".drop-item, material is invalid.");
             } else {
                 // Multiple drops
                 for (String dropName : dropSection.getKeys(false)) {

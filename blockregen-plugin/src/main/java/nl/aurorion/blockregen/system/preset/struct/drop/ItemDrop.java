@@ -3,7 +3,7 @@ package nl.aurorion.blockregen.system.preset.struct.drop;
 import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
-import nl.aurorion.blockregen.ConsoleOutput;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Log
 public class ItemDrop {
 
     @Getter
@@ -104,7 +105,7 @@ public class ItemDrop {
         XMaterial material = ParseUtil.parseMaterial(section.getString("material"));
 
         if (material == null) {
-            ConsoleOutput.getInstance().warn("Could not load item drop at " + section.getCurrentPath() + ", material is invalid.");
+            log.warning("Could not load item drop at " + section.getCurrentPath() + ", material is invalid.");
             return null;
         }
 
@@ -117,7 +118,7 @@ public class ItemDrop {
         drop.setEnchants(Enchant.load(section.getStringList("enchants")));
         drop.setItemFlags(section.getStringList("flags").stream()
                 .map(str -> ParseUtil.parseEnum(str, ItemFlag.class,
-                        e -> ConsoleOutput.getInstance().warn("Could not parse ItemFlag from " + str)))
+                        e -> log.warning("Could not parse ItemFlag from " + str)))
                 .collect(Collectors.toSet()));
 
         drop.setDropNaturally(section.getBoolean("drop-naturally", preset.isDropNaturally()));

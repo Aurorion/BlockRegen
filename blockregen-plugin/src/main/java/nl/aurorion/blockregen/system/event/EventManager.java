@@ -1,13 +1,14 @@
 package nl.aurorion.blockregen.system.event;
 
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import org.bukkit.Bukkit;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import lombok.extern.java.Log;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -16,6 +17,7 @@ import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+@Log
 public class EventManager {
 
     private final BlockRegen plugin;
@@ -61,7 +63,7 @@ public class EventManager {
             return;
 
         event.setEnabled(false);
-        ConsoleOutput.getInstance().debug("Disabled event " + event.getName());
+        log.fine("Disabled event " + event.getName());
 
         if (plugin.getVersionManager().isBelow("v1_8", true))
             return;
@@ -92,13 +94,14 @@ public class EventManager {
             return;
 
         event.setEnabled(true);
-        ConsoleOutput.getInstance().debug("Enabled event " + event.getName());
+        log.fine("Enabled event " + event.getName());
 
         if (plugin.getVersionManager().isBelow("v1_8", true) || event.getBossBar() == null)
             return;
 
         // Boss bar
-        BossBar bossBar = plugin.getVersionManager().getMethods().createBossBar(event.getBossBar().getText(), event.getBossBar().getColor(), event.getBossBar().getStyle());
+        BossBar bossBar = plugin.getVersionManager().getMethods().createBossBar(event.getBossBar().getText(),
+                event.getBossBar().getColor(), event.getBossBar().getStyle());
         if (bossBar == null)
             return;
 
@@ -115,7 +118,7 @@ public class EventManager {
 
     public void addEvent(PresetEvent event) {
         this.loadedEvents.put(event.getName(), event);
-        ConsoleOutput.getInstance().debug("Added event " + event.getName());
+        log.fine("Added event " + event.getName());
     }
 
     public boolean isEnabled(String name) {

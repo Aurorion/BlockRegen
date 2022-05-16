@@ -27,8 +27,7 @@ public class Commands implements CommandExecutor {
                 + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
                 + "\n&3/" + label + " region &8- &7Region management."
                 + "\n&3/" + label + " events &8- &7Event management."
-                + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."
-                + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
+                + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."));
     }
 
     @Override
@@ -189,21 +188,13 @@ public class Commands implements CommandExecutor {
 
                 player = (Player) sender;
 
-                if (args.length > 1 && args[1].equalsIgnoreCase("all")) {
-                    if (plugin.getConsoleOutput().getListeners().contains(sender)) {
-                        plugin.getConsoleOutput().removeListener(sender);
-                        sender.sendMessage(StringUtil.color(Message.PREFIX.getValue() + " &cYou are no longer listening."));
-                    } else {
-                        plugin.getConsoleOutput().addListener(sender);
-                        sender.sendMessage(StringUtil.color(Message.PREFIX.getValue() + " &aYou are listening to everything."));
-                    }
-                    return false;
-                }
-
-                if (plugin.getConsoleOutput().switchPersonalDebug(sender))
-                    sender.sendMessage(Message.DEBUG_ON.get(player));
-                else
+                if (plugin.getConsoleHandler().getListeners().contains(sender)) {
+                    plugin.getConsoleHandler().removeListener(sender);
                     sender.sendMessage(Message.DEBUG_OFF.get(player));
+                } else {
+                    plugin.getConsoleHandler().addListener(sender);
+                    sender.sendMessage(Message.DEBUG_ON.get(player));
+                }
                 break;
             case "discord":
                 sender.sendMessage(StringUtil.color("&8&m      &3 BlockRegen Discord Server" +
