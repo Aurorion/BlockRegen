@@ -27,8 +27,6 @@ public class ConfigFile {
     public ConfigFile(BlockRegen plugin, String path) {
         this.path = path.contains(".yml") ? path : path + ".yml";
         this.plugin = plugin;
-
-        load();
     }
 
     public void load() {

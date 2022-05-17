@@ -134,7 +134,8 @@ public class BlockRegen extends JavaPlugin {
 
         this.setupLogger();
 
-        files = new Files(this);
+        this.files = new Files(this);
+        this.files.load();
 
         this.configureLogger();
 
