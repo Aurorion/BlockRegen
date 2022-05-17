@@ -4,18 +4,27 @@ import nl.aurorion.blockregen.BlockRegen;
 import com.google.common.base.Strings;
 import lombok.Getter;
 import lombok.Setter;
-import nl.aurorion.blockregen.ConsoleOutput;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.util.ParseUtil;
 import org.bukkit.configuration.ConfigurationSection;
 
+@Log
 public class Amount {
 
-    @Getter @Setter private double lowValue;
-    @Getter @Setter private double highValue;
+    @Getter
+    @Setter
+    private double lowValue;
+    @Getter
+    @Setter
+    private double highValue;
 
-    @Getter @Setter private double fixedValue;
+    @Getter
+    @Setter
+    private double fixedValue;
 
-    @Getter @Setter private boolean fixed;
+    @Getter
+    @Setter
+    private boolean fixed;
 
     public Amount(double low, double high) {
         fixed = false;
@@ -61,13 +70,11 @@ public class Amount {
             if (data.contains("-")) {
                 double low = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[0]),
                         defaultValue,
-                        e -> ConsoleOutput.getInstance().warn("Could not parse low amount at " + root.getCurrentPath() + "." + path)
-                );
+                        e -> log.warning("Could not parse low amount at " + root.getCurrentPath() + "." + path));
 
                 double high = ParseUtil.nullOrDefault(() -> Double.parseDouble(data.split("-")[1]),
                         defaultValue,
-                        e -> ConsoleOutput.getInstance().warn("Could not parse high amount at " + root.getCurrentPath() + "." + path)
-                );
+                        e -> log.warning("Could not parse high amount at " + root.getCurrentPath() + "." + path));
 
                 return new Amount(low, high);
             }
@@ -75,14 +82,14 @@ public class Amount {
             // Fixed value syntax
             double fixed = ParseUtil.nullOrDefault(() -> root.getDouble(path),
                     defaultValue,
-                    e -> ConsoleOutput.getInstance().warn("Could not parse fixed value amount at " + root.getCurrentPath() + "." + path)
-            );
+                    e -> log.warning("Could not parse fixed value amount at " + root.getCurrentPath() + "." + path));
             return new Amount(fixed);
         }
     }
 
     public int getInt() {
-        return fixed ? (int) fixedValue : Math.max(BlockRegen.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
+        return fixed ? (int) fixedValue
+                : Math.max(BlockRegen.getInstance().getRandom().nextInt((int) highValue + 1), (int) lowValue);
     }
 
     public double getDouble() {

@@ -1,9 +1,10 @@
 package nl.aurorion.blockregen;
 
-import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+
+import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class StringUtil {

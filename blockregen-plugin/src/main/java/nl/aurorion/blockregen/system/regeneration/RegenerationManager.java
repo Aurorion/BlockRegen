@@ -1,8 +1,8 @@
 package nl.aurorion.blockregen.system.regeneration;
 
 import lombok.Getter;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
+@Log
 public class RegenerationManager {
 
     private final BlockRegen plugin;
@@ -61,7 +62,7 @@ public class RegenerationManager {
     public void registerProcess(RegenerationProcess process) {
         if (!cache.contains(process)) {
             cache.add(process);
-            plugin.getConsoleOutput().debug("Registered regeneration process " + process.toString());
+            log.fine("Registered regeneration process " + process.toString());
         }
     }
 
@@ -100,7 +101,7 @@ public class RegenerationManager {
 
     public void removeProcess(RegenerationProcess process) {
         cache.remove(process);
-        plugin.getConsoleOutput().debug("Removed process from cache: " + process.toString());
+        log.fine("Removed process from cache: " + process.toString());
     }
 
     public void removeProcess(@NotNull Block block) {
@@ -124,9 +125,13 @@ public class RegenerationManager {
         }
     }
 
-    // Revert blocks before disabling
     public void revertAll() {
-        cache.forEach(RegenerationProcess::revertBlock);
+        revertAll(true);
+    }
+
+    // Revert blocks before disabling
+    public void revertAll(boolean synchronize) {
+        cache.forEach(process -> process.revertBlock(synchronize));
     }
 
     private void purgeExpired() {
@@ -152,10 +157,10 @@ public class RegenerationManager {
 
         final List<RegenerationProcess> finalCache = new ArrayList<>(cache);
 
-        plugin.getConsoleOutput().debug("Saving " + finalCache.size() + " regeneration processes..");
+        log.fine("Saving " + finalCache.size() + " regeneration processes..");
 
         plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
-            ConsoleOutput.getInstance().err("Could not save processes: " + e.getMessage());
+            log.severe("Could not save processes: " + e.getMessage());
             e.printStackTrace();
             return null;
         });
@@ -179,17 +184,17 @@ public class RegenerationManager {
                     process.revert();
                     continue;
                 }
-                ConsoleOutput.getInstance().debug("Prepared regeneration process " + process.toString());
+                log.fine("Prepared regeneration process " + process.toString());
             }
 
             if (!this.retry) {
                 // Start em
                 loadedProcesses.forEach(RegenerationProcess::start);
-                ConsoleOutput.getInstance().info("Loaded " + this.cache.size() + " regeneration process(es)...");
+                log.info("Loaded " + this.cache.size() + " regeneration process(es)...");
             } else
-                ConsoleOutput.getInstance().info("One of the worlds is probably not loaded. Loading after complete server load instead.");
+                log.info("One of the worlds is probably not loaded. Loading after complete server load instead.");
         }).exceptionally(e -> {
-            ConsoleOutput.getInstance().err("Could not load processes: " + e.getMessage());
+            log.severe("Could not load processes: " + e.getMessage());
             e.printStackTrace();
             return null;
         });

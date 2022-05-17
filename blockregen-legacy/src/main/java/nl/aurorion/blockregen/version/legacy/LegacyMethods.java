@@ -1,8 +1,8 @@
 package nl.aurorion.blockregen.version.legacy;
 
+import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
@@ -16,6 +16,9 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.extern.java.Log;
+
+@Log
 public class LegacyMethods implements Methods {
 
     @Override
@@ -63,24 +66,25 @@ public class LegacyMethods implements Methods {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
     public void setType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material type = xMaterial.parseMaterial();
-        byte data = xMaterial.getData();
-
-        if (type == null) {
-            ConsoleOutput.getInstance().warn("Type " + xMaterial.name() + " is not supported on this version.");
-            return;
-        }
-
-        block.setType(type);
-        block.setData(data);
+        XBlock.setType(block, xMaterial);
     }
 
     @Override
     @SuppressWarnings("deprecation")
     public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        return XMaterial.matchXMaterial(block.getType()) == xMaterial && block.getData() == xMaterial.getData();
+        Material type = xMaterial.parseMaterial();
+
+        if (type == null) {
+            log.warning("Type " + xMaterial.name() + " is not supported on this version.");
+            return false;
+        }
+
+        byte data = xMaterial.getData();
+        boolean result = block.getType() == type && block.getData() == data;
+        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(),
+                block.getType().toString(), (int) block.getData(), result));
+        return result;
     }
 
     @Override

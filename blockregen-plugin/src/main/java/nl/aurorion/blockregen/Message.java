@@ -1,12 +1,12 @@
 package nl.aurorion.blockregen;
 
-import lombok.Getter;
-import lombok.Setter;
-import nl.aurorion.blockregen.util.TextUtil;
-import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
+
+import lombok.Getter;
+import lombok.Setter;
+import nl.aurorion.blockregen.util.TextUtil;
 
 /**
  * Message system, loaded on enable & reload.
@@ -43,8 +43,8 @@ public enum Message {
     /**
      * Debug
      */
-    DEBUG_ON("Debug-On", "&aYou are now listening to debug about actions caused by you."),
-    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to debug."),
+    DEBUG_ON("Debug-On", "&aYou are now listening to debug messages."),
+    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to debug messages."),
 
     /**
      * Data check

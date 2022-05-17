@@ -2,7 +2,6 @@ package nl.aurorion.blockregen.system.region;
 
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.system.region.struct.RawRegion;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
@@ -12,8 +11,11 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import lombok.extern.java.Log;
+
 import java.util.*;
 
+@Log
 public class RegionManager {
 
     private final BlockRegen plugin;
@@ -31,10 +33,10 @@ public class RegionManager {
         if (failedRegions.isEmpty())
             return;
 
-        ConsoleOutput.getInstance().info("Reattempting to load regions...");
+        log.info("Reattempting to load regions...");
         int count = failedRegions.size();
         failedRegions.removeIf(rawRegion -> rawRegion.isReattempt() && loadRegion(rawRegion));
-        ConsoleOutput.getInstance().info("Loaded " + (count - failedRegions.size()) + " of failed regions.");
+        log.info("Loaded " + (count - failedRegions.size()) + " of failed regions.");
     }
 
     public void load() {
@@ -55,14 +57,14 @@ public class RegionManager {
 
                 if (Strings.isNullOrEmpty(minString) || Strings.isNullOrEmpty(maxString)) {
                     this.failedRegions.add(rawRegion);
-                    plugin.getConsoleOutput().err("Could not load region " + name + ", invalid location strings.");
+                    log.severe("Could not load region " + name + ", invalid location strings.");
                     continue;
                 }
 
                 if (!LocationUtil.isLocationLoaded(minString) || !LocationUtil.isLocationLoaded(maxString)) {
                     rawRegion.setReattempt(true);
                     this.failedRegions.add(rawRegion);
-                    plugin.getConsoleOutput().info("World for region " + name + " is not loaded. Reattempting after complete server load.");
+                    log.info("World for region " + name + " is not loaded. Reattempting after complete server load.");
                     continue;
                 }
 
@@ -70,19 +72,19 @@ public class RegionManager {
             }
         }
 
-        plugin.getConsoleOutput().info("Loaded " + this.loadedRegions.size() + " region(s)...");
+        log.info("Loaded " + this.loadedRegions.size() + " region(s)...");
     }
 
     private boolean loadRegion(RawRegion rawRegion) {
         RegenerationRegion region = rawRegion.build();
 
         if (region == null) {
-            ConsoleOutput.getInstance().warn("Could not load region " + rawRegion.getName() + ", world " + rawRegion.getMax() + " still not loaded.");
+            log.warning("Could not load region " + rawRegion.getName() + ", world " + rawRegion.getMax() + " still not loaded.");
             return false;
         }
 
         this.loadedRegions.put(rawRegion.getName(), region);
-        ConsoleOutput.getInstance().debug("Loaded region " + rawRegion.getName());
+        log.fine("Loaded region " + rawRegion.getName());
         return true;
     }
 
@@ -108,7 +110,7 @@ public class RegionManager {
         }
         plugin.getFiles().getRegions().save();
 
-        plugin.getConsoleOutput().debug("Saved " + (this.loadedRegions.size() + this.failedRegions.size()) + " region(s)...");
+        log.fine("Saved " + (this.loadedRegions.size() + this.failedRegions.size()) + " region(s)...");
     }
 
     private ConfigurationSection ensureRegionsSection(FileConfiguration configuration) {
@@ -141,7 +143,7 @@ public class RegionManager {
     @NotNull
     public RegenerationRegion addRegion(RegenerationRegion region) {
         this.loadedRegions.put(region.getName(), region);
-        plugin.getConsoleOutput().debug("Added region " + region.getName());
+        log.fine("Added region " + region.getName());
         save();
         return region;
     }

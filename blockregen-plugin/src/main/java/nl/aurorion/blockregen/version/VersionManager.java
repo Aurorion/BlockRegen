@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.version;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import lombok.Getter;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.version.ancient.AncientMethods;
@@ -21,6 +22,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+@Log
 public class VersionManager {
 
     private final BlockRegen plugin;
@@ -49,38 +51,36 @@ public class VersionManager {
 
         /*
          * Latest - 1.13+
-         * Legacy - 1.12 - 1.8
-         * */
+         * Legacy - 1.12 - 1.9
+         * Ancient - 1.8 - 1.7
+         */
         switch (version) {
-            // Try to catch 1.7 into legacy. Might work on some occasions.
+            // Try to catch 1.7 into ancient. Might work on some occasions.
             case "v1_7":
             case "v1_8":
-                if (worldEdit != null)
-                    useWorldEdit(LegacyWorldEditProvider::new);
-                if (worldGuard != null)
-                    useWorldGuard(LegacyWorldGuardProvider::new);
+                useWorldEdit(LegacyWorldEditProvider::new);
+                useWorldGuard(LegacyWorldGuardProvider::new);
                 this.methods = new AncientMethods();
                 break;
             case "v1_9":
             case "v1_10":
             case "v1_11":
             case "v1_12":
-                if (worldEdit != null)
-                    useWorldEdit(LegacyWorldEditProvider::new);
-                if (worldGuard != null)
-                    useWorldGuard(LegacyWorldGuardProvider::new);
+                useWorldEdit(LegacyWorldEditProvider::new);
+                useWorldGuard(LegacyWorldGuardProvider::new);
                 this.methods = new LegacyMethods();
                 break;
             case "v1_13":
             case "v1_14":
             case "v1_15":
             case "v1_16":
+            case "v1_17":
+            case "v1_18":
             default:
-                if (worldEdit != null)
-                    useWorldEdit(LatestWorldEditProvider::new);
-                if (worldGuard != null)
-                    useWorldGuard(LatestWorldGuardProvider::new);
+                useWorldEdit(LatestWorldEditProvider::new);
+                useWorldGuard(LatestWorldGuardProvider::new);
                 this.methods = new LatestMethods();
+                break;
         }
     }
 
@@ -89,13 +89,13 @@ public class VersionManager {
     }
 
     public void useWorldGuard(InstanceProvider<WorldGuardProvider, WorldGuardPlugin> instanceProvider) {
-        if (worldGuardProvider == null) {
+        if (worldGuardProvider == null && this.worldGuard != null) {
             this.worldGuardProvider = instanceProvider.provide(worldGuard);
         }
     }
 
     public void useWorldEdit(InstanceProvider<WorldEditProvider, WorldEditPlugin> instanceProvider) {
-        if (worldEditProvider == null) {
+        if (worldEditProvider == null && this.worldEdit != null) {
             this.worldEditProvider = instanceProvider.provide(worldEdit);
         }
     }
@@ -127,14 +127,6 @@ public class VersionManager {
         return include ? current <= version : current < version;
     }
 
-    private void setWorldEditProvider(WorldEditProvider worldEditProvider) {
-        this.worldEditProvider = worldEditProvider;
-    }
-
-    private void setWorldGuardProvider(WorldGuardProvider worldGuardProvider) {
-        this.worldGuardProvider = worldGuardProvider;
-    }
-
     private void setupWorldEdit() {
 
         if (worldEditProvider != null)
@@ -146,17 +138,19 @@ public class VersionManager {
             return;
 
         this.worldEdit = (WorldEditPlugin) worldEditPlugin;
-        plugin.getConsoleOutput().info("WorldEdit found! &aEnabling regions.");
+        log.info("WorldEdit found! &aEnabling regions.");
     }
 
     private void setupWorldGuard() {
-        if (worldGuardProvider != null) return;
+        if (worldGuardProvider != null)
+            return;
 
         Plugin worldGuardPlugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
 
-        if (!(worldGuardPlugin instanceof WorldGuardPlugin)) return;
+        if (!(worldGuardPlugin instanceof WorldGuardPlugin))
+            return;
 
         this.worldGuard = (WorldGuardPlugin) worldGuardPlugin;
-        plugin.getConsoleOutput().info("WorldGuard found! &aSupporting it's Region protection.");
+        log.info("WorldGuard found! &aSupporting it's Region protection.");
     }
 }

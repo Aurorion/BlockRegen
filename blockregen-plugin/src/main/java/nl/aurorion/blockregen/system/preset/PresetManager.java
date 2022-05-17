@@ -4,7 +4,6 @@ import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
 import com.google.common.base.Strings;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -15,11 +14,14 @@ import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import lombok.extern.java.Log;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+@Log
 public class PresetManager {
 
     private final BlockRegen plugin;
@@ -36,7 +38,8 @@ public class PresetManager {
 
     public Optional<BlockPreset> getPresetByBlock(Block block) {
         return presets.values().stream()
-                .filter(preset -> plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial()))
+                .filter(preset -> plugin.getVersionManager().getMethods().compareType(block,
+                        preset.getTargetMaterial()))
                 .findAny();
     }
 
@@ -50,16 +53,18 @@ public class PresetManager {
         // Clear all events before loading.
         plugin.getEventManager().clearEvents();
 
-        ConfigurationSection blocks = plugin.getFiles().getBlockList().getFileConfiguration().getConfigurationSection("Blocks");
+        ConfigurationSection blocks = plugin.getFiles().getBlockList().getFileConfiguration()
+                .getConfigurationSection("Blocks");
 
-        if (blocks == null) return;
+        if (blocks == null)
+            return;
 
         for (String key : blocks.getKeys(false)) {
             load(key);
         }
 
-        ConsoleOutput.getInstance().info("Loaded " + presets.size() + " block preset(s)...");
-        ConsoleOutput.getInstance().info("Added " + plugin.getEventManager().getLoadedEvents().size() + " event(s)...");
+        log.info("Loaded " + presets.size() + " block preset(s)...");
+        log.info("Added " + plugin.getEventManager().getLoadedEvents().size() + " event(s)...");
     }
 
     public void load(String name) {
@@ -67,7 +72,8 @@ public class PresetManager {
 
         ConfigurationSection section = file.getConfigurationSection("Blocks." + name);
 
-        if (section == null) return;
+        if (section == null)
+            return;
 
         BlockPreset preset = new BlockPreset(name);
 
@@ -80,7 +86,7 @@ public class PresetManager {
         Optional<XMaterial> xMaterial = XMaterial.matchXMaterial(targetMaterial.toUpperCase());
 
         if (!xMaterial.isPresent()) {
-            ConsoleOutput.getInstance().warn("Could not load preset " + name + ", invalid target material.");
+            log.warning("Could not load preset " + name + ", invalid target material.");
             return;
         }
 
@@ -95,9 +101,9 @@ public class PresetManager {
         try {
             preset.setReplaceMaterial(DynamicMaterial.fromString(replaceMaterial));
         } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name + " is invalid: " + e.getMessage());
-            if (plugin.getConsoleOutput().isDebug())
-                e.printStackTrace();
+            log.severe("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name
+                    + " is invalid: " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
@@ -110,9 +116,9 @@ public class PresetManager {
         try {
             preset.setRegenMaterial(DynamicMaterial.fromString(regenerateInto));
         } catch (IllegalArgumentException e) {
-            plugin.getConsoleOutput().err("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name + " is invalid: " + e.getMessage());
-            if (plugin.getConsoleOutput().isDebug())
-                e.printStackTrace();
+            log.severe("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name
+                    + " is invalid: " + e.getMessage());
+            e.printStackTrace();
             return;
         }
 
@@ -134,8 +140,9 @@ public class PresetManager {
         if (!Strings.isNullOrEmpty(sound)) {
             Optional<XSound> xSound = XSound.matchXSound(sound);
             if (!xSound.isPresent()) {
-                ConsoleOutput.getInstance().warn("Sound " + sound + " in preset " + name + " is invalid.");
-            } else preset.setSound(xSound.get());
+                log.warning("Sound " + sound + " in preset " + name + " is invalid.");
+            } else
+                preset.setSound(xSound.get());
         }
 
         // Particle

@@ -6,6 +6,9 @@ import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+
+import java.util.logging.Level;
+
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -21,18 +24,20 @@ public class Commands implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender, String label) {
-        sender.sendMessage(StringUtil.color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
-                + "\n&3/" + label + " reload &8- &7Reload the plugin."
-                + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
-                + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
-                + "\n&3/" + label + " region &8- &7Region management."
-                + "\n&3/" + label + " events &8- &7Event management."
-                + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."
-                + "\n&3/" + label + " debug (all) &8- &7Enable player debug channel."));
+        sender.sendMessage(StringUtil
+                .color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
+                        + "\n&3/" + label + " reload &8- &7Reload the plugin."
+                        + "\n&3/" + label + " debug &8- &7Turn on debug. Receive debug messages in chat."
+                        + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
+                        + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
+                        + "\n&3/" + label + " region &8- &7Region management."
+                        + "\n&3/" + label + " events &8- &7Event management."
+                        + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."));
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label,
+            @NotNull String[] args) {
         if (args.length == 0) {
             sendHelp(sender, label);
             return false;
@@ -144,7 +149,8 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
 
-                    RegenerationRegion region = plugin.getVersionManager().getWorldEditProvider().createFromSelection(args[2], player);
+                    RegenerationRegion region = plugin.getVersionManager().getWorldEditProvider()
+                            .createFromSelection(args[2], player);
 
                     if (region == null) {
                         Message.NO_SELECTION.send(player);
@@ -189,21 +195,23 @@ public class Commands implements CommandExecutor {
 
                 player = (Player) sender;
 
-                if (args.length > 1 && args[1].equalsIgnoreCase("all")) {
-                    if (plugin.getConsoleOutput().getListeners().contains(sender)) {
-                        plugin.getConsoleOutput().removeListener(sender);
-                        sender.sendMessage(StringUtil.color(Message.PREFIX.getValue() + " &cYou are no longer listening."));
-                    } else {
-                        plugin.getConsoleOutput().addListener(sender);
-                        sender.sendMessage(StringUtil.color(Message.PREFIX.getValue() + " &aYou are listening to everything."));
+                if (plugin.getConsoleHandler().getListeners().contains(sender)) {
+                    // Change log level if the debug is not configured.
+                    if (!plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false) && plugin.getLogLevel().intValue() <= Level.FINE.intValue()) {
+                        plugin.setLogLevel(Level.INFO);
                     }
-                    return false;
-                }
-
-                if (plugin.getConsoleOutput().switchPersonalDebug(sender))
-                    sender.sendMessage(Message.DEBUG_ON.get(player));
-                else
+                    
+                    plugin.getConsoleHandler().removeListener(sender);
                     sender.sendMessage(Message.DEBUG_OFF.get(player));
+                } else {
+                    // Change log level.
+                    if (plugin.getLogLevel().intValue() > Level.FINE.intValue()) {
+                        plugin.setLogLevel(Level.FINE);
+                    }
+
+                    plugin.getConsoleHandler().addListener(sender);
+                    sender.sendMessage(Message.DEBUG_ON.get(player));
+                }
                 break;
             case "discord":
                 sender.sendMessage(StringUtil.color("&8&m      &3 BlockRegen Discord Server" +
@@ -228,7 +236,8 @@ public class Commands implements CommandExecutor {
                             "&7You have the following events loaded:").append("\n&r ");
 
                     for (PresetEvent event : plugin.getEventManager().getEvents(e -> true)) {
-                        list.append("\n&8 - &r").append(event.getDisplayName()).append(" &7(Name: &f").append(event.getName()).append("&7) ")
+                        list.append("\n&8 - &r").append(event.getDisplayName()).append(" &7(Name: &f")
+                                .append(event.getName()).append("&7) ")
                                 .append(event.isEnabled() ? " &a(active)&r" : " &c(inactive)&r");
                     }
 
@@ -252,7 +261,8 @@ public class Commands implements CommandExecutor {
                         }
 
                         plugin.getEventManager().enableEvent(event);
-                        sender.sendMessage(StringUtil.color(Message.ACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
+                        sender.sendMessage(StringUtil
+                                .color(Message.ACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
                         return false;
                     }
 
@@ -272,7 +282,8 @@ public class Commands implements CommandExecutor {
                         }
 
                         plugin.getEventManager().disableEvent(event);
-                        sender.sendMessage(StringUtil.color(Message.DEACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
+                        sender.sendMessage(StringUtil
+                                .color(Message.DEACTIVATE_EVENT.get().replace("%event%", event.getDisplayName())));
                         return false;
                     }
                 }

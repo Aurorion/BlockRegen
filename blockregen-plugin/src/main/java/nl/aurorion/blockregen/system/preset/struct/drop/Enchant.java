@@ -61,7 +61,7 @@ public class Enchant {
         if (meta == null)
             return;
 
-        Enchantment enchantment = this.enchantment.parseEnchantment();
+        Enchantment enchantment = this.enchantment.getEnchant();
 
         if (enchantment == null)
             return;

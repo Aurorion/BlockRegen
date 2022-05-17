@@ -2,8 +2,8 @@ package nl.aurorion.blockregen.system.event.struct;
 
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.ConsoleOutput;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.PresetRewards;
@@ -12,6 +12,7 @@ import org.bukkit.boss.BossBar;
 import org.bukkit.configuration.ConfigurationSection;
 import org.jetbrains.annotations.Nullable;
 
+@Log
 public class PresetEvent {
 
     @Getter
@@ -66,7 +67,7 @@ public class PresetEvent {
         String displayName = section.getString("event-name");
 
         if (displayName == null) {
-            ConsoleOutput.getInstance().warn("Could not load event at " + section.getCurrentPath() + ", event name is invalid.");
+            log.warning("Could not load event at " + section.getCurrentPath() + ", event name is invalid.");
             return null;
         }
 
