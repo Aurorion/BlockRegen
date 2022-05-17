@@ -3,16 +3,23 @@ package nl.aurorion.blockregen.version.legacy;
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
+
+import nl.aurorion.blockregen.BlockUtil;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.TreeSpecies;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wood;
+import org.bukkit.material.Wool;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -73,18 +80,51 @@ public class LegacyMethods implements Methods {
     @Override
     @SuppressWarnings("deprecation")
     public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material type = xMaterial.parseMaterial();
+        Material material = xMaterial.parseMaterial();
 
-        if (type == null) {
-            log.warning("Type " + xMaterial.name() + " is not supported on this version.");
+        if (material == null) {
+            log.severe(String.format("Material %s not supported on this version.", xMaterial.name()));
             return false;
         }
 
-        byte data = xMaterial.getData();
-        boolean result = block.getType() == type && block.getData() == data;
-        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(),
-                block.getType().toString(), (int) block.getData(), result));
-        return result;
+        byte blockData = block.getData();
+        
+        log.fine(String.format("Block: %s:%d, Material: %s:%d", block.getType().name(), blockData, xMaterial.name(),
+                xMaterial.getData()));
+
+        if (block.getType() != material) {
+            log.fine("Block type doesn't match.");
+            return false;
+        }
+
+        BlockState state = block.getState();
+        MaterialData materialData = state.getData();
+
+        // We compare these by hand because byte data contains direction as well.
+        
+        // Compare colors
+
+        // The only block that can be colored on 1.8 should be wool.
+        if (BlockUtil.isWool(xMaterial)) {
+            if (!(materialData instanceof Wool)) {
+                return false;
+            }
+
+            return xMaterial.getData() == block.getData();
+        }
+
+        // Compare wood types
+
+        if (BlockUtil.isWood(xMaterial)) {
+            if (!(materialData instanceof Wood)) {
+                return false;
+            }
+
+            TreeSpecies species = ((Wood) materialData).getSpecies();
+            return xMaterial.getData() == species.getData();
+        }
+
+        return true;
     }
 
     @Override
