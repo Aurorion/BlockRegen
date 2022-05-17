@@ -8,15 +8,18 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.version.ancient.AncientMethods;
 import nl.aurorion.blockregen.version.api.Methods;
+import nl.aurorion.blockregen.version.api.NodeData;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;
 import nl.aurorion.blockregen.version.current.LatestMethods;
+import nl.aurorion.blockregen.version.current.LatestNodeData;
 import nl.aurorion.blockregen.version.current.LatestWorldEditProvider;
 import nl.aurorion.blockregen.version.current.LatestWorldGuardProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyMethods;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldEditProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldGuardProvider;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 
 import java.util.regex.Matcher;
@@ -39,6 +42,8 @@ public class VersionManager {
     private WorldGuardProvider worldGuardProvider;
     @Getter
     private Methods methods;
+
+    private NodeDataProvider nodeProvider;
 
     public VersionManager(BlockRegen plugin) {
         this.plugin = plugin;
@@ -88,6 +93,14 @@ public class VersionManager {
                 this.methods = new LatestMethods();
                 break;
         }
+    }
+
+    public NodeData createNodeData() {
+        return this.nodeProvider.provide();
+    }
+
+    public interface NodeDataProvider {
+        NodeData provide();
     }
 
     public void useWorldGuard(WorldGuardProvider provider) {

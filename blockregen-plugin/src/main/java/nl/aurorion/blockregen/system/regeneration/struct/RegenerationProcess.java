@@ -9,9 +9,10 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.api.BlockRegenBlockRegenerationEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.util.LocationUtil;
+import nl.aurorion.blockregen.version.api.NodeData;
+
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 
@@ -28,7 +29,7 @@ public class RegenerationProcess implements Runnable {
     private transient Block block;
 
     @Getter
-    private XMaterial originalMaterial;
+    private NodeData originalData;
 
     @Getter
     private String regionName;
@@ -57,14 +58,14 @@ public class RegenerationProcess implements Runnable {
 
     private transient BukkitTask task;
 
-    public RegenerationProcess(Block block, BlockPreset preset) {
+    public RegenerationProcess(Block block, NodeData originalData, BlockPreset preset) {
         this.block = block;
         this.location = new SimpleLocation(block.getLocation());
 
         this.preset = preset;
         this.presetName = preset.getName();
 
-        this.originalMaterial = XMaterial.matchXMaterial(block.getType());
+        this.originalData = originalData;
         this.regenerateInto = preset.getRegenMaterial().get();
         this.replaceMaterial = preset.getReplaceMaterial().get();
     }
@@ -172,7 +173,7 @@ public class RegenerationProcess implements Runnable {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, regenerateInto);
                 log.fine(
-                        "Regenerated block " + originalMaterial.toString() + " into " + regenerateInto.toString());
+                        "Regenerated block " + originalData.toString() + " into " + regenerateInto.toString());
             });
         }
     }
@@ -201,17 +202,14 @@ public class RegenerationProcess implements Runnable {
 
     // Revert block to original state
     public void revertBlock(boolean synchronize) {
-        Material material = originalMaterial.parseMaterial();
-        if (material != null) {
-            if (synchronize) {
-                Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
-                    block.setType(material);
-                    log.fine(String.format("Reverted block for %s", toString()));
-                });
-            } else {
-                block.setType(material);
+        if (synchronize) {
+            Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
+                originalData.place(this.block);
                 log.fine(String.format("Reverted block for %s", toString()));
-            }
+            });
+        } else {
+            originalData.place(this.block);
+            log.fine(String.format("Reverted block for %s", toString()));
         }
     }
 
@@ -289,7 +287,7 @@ public class RegenerationProcess implements Runnable {
                 task == null ? "null" : task.getTaskId(),
                 presetName,
                 block == null ? "null" : LocationUtil.locationToString(block.getLocation()),
-                originalMaterial.toString(),
+                originalData.toString(),
                 regenerateInto.toString(),
                 timeLeft,
                 regenerationTime);
