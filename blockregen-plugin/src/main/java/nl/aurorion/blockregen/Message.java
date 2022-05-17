@@ -43,8 +43,8 @@ public enum Message {
     /**
      * Debug
      */
-    DEBUG_ON("Debug-On", "&aYou are now listening to debug about actions caused by you."),
-    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to debug."),
+    DEBUG_ON("Debug-On", "&aYou are now listening to debug messages."),
+    DEBUG_OFF("Debug-Off", "&cYou are no longer listening to debug messages."),
 
     /**
      * Data check

@@ -121,7 +121,11 @@ public class BlockRegen extends JavaPlugin {
         this.consoleHandler = null;
     }
 
-    private void setLogLevel(Level level) {
+    public Level getLogLevel() {
+        return getParentLogger().getLevel();
+    }
+
+    public void setLogLevel(Level level) {
         Logger parentLogger = getParentLogger();
         parentLogger.setLevel(level);
     }
