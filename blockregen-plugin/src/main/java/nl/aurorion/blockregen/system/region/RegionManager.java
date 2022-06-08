@@ -1,17 +1,18 @@
 package nl.aurorion.blockregen.system.region;
 
 import com.google.common.base.Strings;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.util.LocationUtil;
 import nl.aurorion.blockregen.system.region.struct.RawRegion;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+import nl.aurorion.blockregen.system.region.struct.RegionSelection;
+import nl.aurorion.blockregen.util.LocationUtil;
 import org.bukkit.Location;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import lombok.extern.java.Log;
 
 import java.util.*;
 
@@ -25,13 +26,55 @@ public class RegionManager {
     // Set of regions that failed to load.
     private final Set<RawRegion> failedRegions = new HashSet<>();
 
+    private final Map<UUID, RegionSelection> selections = new HashMap<>();
+
     public RegionManager(BlockRegen plugin) {
         this.plugin = plugin;
     }
 
+    // ---- Selection
+
+    public boolean isSelecting(@NotNull Player player) {
+        return selections.containsKey(player.getUniqueId());
+    }
+
+    public RegionSelection getSelection(@NotNull Player player) {
+        return selections.get(player.getUniqueId());
+    }
+
+    @NotNull
+    public RegionSelection getOrCreateSelection(@NotNull Player player) {
+        RegionSelection selection = selections.get(player.getUniqueId());
+
+        if (selection == null) {
+            selection = new RegionSelection();
+
+            selections.put(player.getUniqueId(), selection);
+        }
+
+        return selection;
+    }
+
+    public boolean finishSelection(@NotNull Player player, @NotNull String name) {
+        RegionSelection selection = selections.get(player.getUniqueId());
+
+        if (selection == null) {
+            return false;
+        }
+
+        this.selections.remove(player.getUniqueId());
+
+        RegenerationRegion region = selection.createRegion(name);
+
+        addRegion(region);
+
+        return true;
+    }
+
     public void reattemptLoad() {
-        if (failedRegions.isEmpty())
+        if (failedRegions.isEmpty()) {
             return;
+        }
 
         log.info("Reattempting to load regions...");
         int count = failedRegions.size();

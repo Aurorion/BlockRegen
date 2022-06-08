@@ -1,12 +1,11 @@
 package nl.aurorion.blockregen;
 
-import org.bukkit.command.CommandSender;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.entity.Player;
-
 import lombok.Getter;
 import lombok.Setter;
 import nl.aurorion.blockregen.util.TextUtil;
+import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.entity.Player;
 
 /**
  * Message system, loaded on enable & reload.
@@ -57,13 +56,14 @@ public enum Message {
     /**
      * Regions
      */
-    WORLD_EDIT_NOT_INSTALLED("WorldEdit-Not-Installed", "&cRegion functions require World Edit."),
-    NO_SELECTION("No-Region-Selected", "&cI'm sorry but you need to select a CUBOID regenerationRegion first!"),
-    DUPLICATED_REGION("Duplicated-Region", "&cThere is already a regenerationRegion with that name!"),
+    NO_SELECTION("No-Region-Selected", "&cSelect a region with WorldEdit first."),
+    DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&aRegion successfully saved!"),
     REMOVE_REGION("Remove-Region", "&aRegion successfully removed!"),
-    UNKNOWN_REGION("Unknown-Region", "&cThere is no regenerationRegion with that name!"),
+    UNKNOWN_REGION("Unknown-Region", "&cThere is no region with that name!"),
     COULD_NOT_CREATE_REGION("Could-Not-Create-Region", "&cCould not created a region."),
+    SELECT_FIRST("Select-First", "&7Set first position to &f%x%, %y%, %z%."),
+    SELECT_SECOND("Select-Second", "&7Set second position to &f%x%, %y%, %z%."),
 
     /**
      * Events

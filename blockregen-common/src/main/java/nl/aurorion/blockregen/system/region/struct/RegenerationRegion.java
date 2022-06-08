@@ -23,8 +23,9 @@ public class RegenerationRegion {
     public boolean contains(@NotNull Location location) {
 
         // Check world
-        if (max.getWorld() != null && !max.getWorld().equals(location.getWorld()))
+        if (max.getWorld() != null && !max.getWorld().equals(location.getWorld())) {
             return false;
+        }
 
         // Check coordinates
         return location.getX() <= max.getX() && location.getX() >= min.getX()

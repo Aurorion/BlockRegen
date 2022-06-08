@@ -18,3 +18,5 @@ permissions:
   blockregen.block.*:
     default: true
     description: Gives player the ability to mine ores
+  blockregen.select:
+    description: Allows player to select locations for regions
