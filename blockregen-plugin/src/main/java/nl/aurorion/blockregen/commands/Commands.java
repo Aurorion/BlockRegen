@@ -4,7 +4,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
-import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+import nl.aurorion.blockregen.system.region.struct.RegionSelection;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -161,23 +161,22 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
 
-                    RegenerationRegion region;
+                    RegionSelection selection;
 
                     if (plugin.getVersionManager().getWorldEditProvider() != null) {
-                        region = plugin.getVersionManager().getWorldEditProvider()
-                                .createFromSelection(args[2], player);
+                        selection = plugin.getVersionManager().getWorldEditProvider().createSelection(player);
 
-                        if (region == null) {
+                        if (selection == null) {
                             Message.NO_SELECTION.send(player);
                             return false;
                         }
-
-                        plugin.getRegionManager().addRegion(region);
                     } else {
-                        if (!plugin.getRegionManager().finishSelection(player, args[2])) {
-                            sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
-                            return false;
-                        }
+                        selection = plugin.getRegionManager().getSelection(player);
+                    }
+
+                    if (!plugin.getRegionManager().finishSelection(args[2], selection)) {
+                        sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                        return false;
                     }
 
                     Message.SET_REGION.send(player);

@@ -368,13 +368,15 @@ public class BlockListener implements Listener {
         if (item == null)
             return;
 
-        if (naturally)
-            dropItem(item, player, block);
-        else
+        if (naturally) {
+            dropItem(item, block);
+        }
+        else {
             giveItem(item, player);
+        }
     }
 
-    private void dropItem(ItemStack item, Player player, org.bukkit.block.Block block) {
+    private void dropItem(ItemStack item, Block block) {
         Bukkit.getScheduler().runTask(plugin, () -> block.getWorld().dropItemNaturally(block.getLocation(), item));
         log.fine("Dropping item " + item.getType() + "x" + item.getAmount());
     }

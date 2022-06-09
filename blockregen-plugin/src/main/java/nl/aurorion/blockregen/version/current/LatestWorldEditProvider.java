@@ -4,7 +4,7 @@ import com.sk89q.worldedit.IncompleteRegionException;
 import com.sk89q.worldedit.bukkit.BukkitAdapter;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.regions.Region;
-import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+import nl.aurorion.blockregen.system.region.struct.RegionSelection;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -31,7 +31,7 @@ public class LatestWorldEditProvider implements WorldEditProvider {
     }
 
     @Nullable
-    public RegenerationRegion createFromSelection(@NotNull String name, Player player) {
+    public RegionSelection createSelection(@NotNull Player player) {
 
         Region selection = getSelection(player);
 
@@ -44,6 +44,6 @@ public class LatestWorldEditProvider implements WorldEditProvider {
         Location min = BukkitAdapter.adapt(world, selection.getMinimumPoint());
         Location max = BukkitAdapter.adapt(world, selection.getMaximumPoint());
 
-        return new RegenerationRegion(name, min, max);
+        return new RegionSelection(min, max);
     }
 }

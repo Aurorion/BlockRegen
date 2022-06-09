@@ -2,7 +2,7 @@ package nl.aurorion.blockregen.version.legacy;
 
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldedit.bukkit.selections.Selection;
-import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
+import nl.aurorion.blockregen.system.region.struct.RegionSelection;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -18,7 +18,7 @@ public class LegacyWorldEditProvider implements WorldEditProvider {
     }
 
     @Override
-    public @Nullable RegenerationRegion createFromSelection(@NotNull String name, Player player) {
+    public @Nullable RegionSelection createSelection(@NotNull Player player) {
         Selection selection = worldEditPlugin.getSelection(player);
 
         if (selection == null || selection.getWorld() == null)
@@ -27,6 +27,6 @@ public class LegacyWorldEditProvider implements WorldEditProvider {
         Location min = selection.getMinimumPoint();
         Location max = selection.getMaximumPoint();
 
-        return new RegenerationRegion(name, min, max);
+        return new RegionSelection(min, max);
     }
 }

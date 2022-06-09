@@ -55,16 +55,24 @@ public class RegionManager {
         return selection;
     }
 
-    public boolean finishSelection(@NotNull Player player, @NotNull String name) {
-        RegionSelection selection = selections.get(player.getUniqueId());
+    public RegenerationRegion createRegion(@NotNull String name, RegionSelection selection) {
+        Location first = selection.getFirst();
+        Location second = selection.getSecond();
 
-        if (selection == null) {
-            return false;
+        if (first.getWorld() != second.getWorld()) {
+            throw new IllegalStateException("Selection points have to be in the same world.");
         }
 
-        this.selections.remove(player.getUniqueId());
+        // Find out min and max.
 
-        RegenerationRegion region = selection.createRegion(name);
+        Location min = new Location(first.getWorld(), Math.min(first.getX(), second.getX()), Math.min(first.getY(), second.getY()), Math.min(first.getZ(), second.getZ()));
+        Location max = new Location(first.getWorld(), Math.max(first.getX(), second.getX()), Math.max(first.getY(), second.getY()), Math.max(first.getZ(), second.getZ()));
+
+        return new RegenerationRegion(name, min, max);
+    }
+
+    public boolean finishSelection(@NotNull String name, @NotNull RegionSelection selection) {
+        RegenerationRegion region = createRegion(name, selection);
 
         addRegion(region);
 
@@ -183,12 +191,10 @@ public class RegionManager {
         return null;
     }
 
-    @NotNull
-    public RegenerationRegion addRegion(RegenerationRegion region) {
+    public void addRegion(@NotNull RegenerationRegion region) {
         this.loadedRegions.put(region.getName(), region);
         log.fine("Added region " + region.getName());
         save();
-        return region;
     }
 
     public Map<String, RegenerationRegion> getLoadedRegions() {
