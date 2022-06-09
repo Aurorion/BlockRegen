@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.system.region;
 import com.google.common.base.Strings;
 import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.region.struct.RawRegion;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
@@ -15,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Log
 public class RegionManager {
@@ -96,15 +98,25 @@ public class RegionManager {
 
         FileConfiguration regions = plugin.getFiles().getRegions().getFileConfiguration();
 
-        ConfigurationSection section = regions.getConfigurationSection("Regions");
+        ConfigurationSection parentSection = regions.getConfigurationSection("Regions");
 
-        if (section != null) {
-            for (String name : section.getKeys(false)) {
+        if (parentSection != null) {
+            for (String name : parentSection.getKeys(false)) {
 
-                String minString = section.getString(name + ".Min");
-                String maxString = section.getString(name + ".Max");
+                ConfigurationSection section = parentSection.getConfigurationSection(name);
 
-                RawRegion rawRegion = new RawRegion(name, minString, maxString);
+                // Shouldn't happen
+                if (section == null) {
+                    continue;
+                }
+
+                String minString = section.getString("Min");
+                String maxString = section.getString("Max");
+
+                boolean all = section.getBoolean("All", true);
+                List<String> presets = section.getStringList("Presets");
+
+                RawRegion rawRegion = new RawRegion(name, minString, maxString, presets, all);
 
                 if (Strings.isNullOrEmpty(minString) || Strings.isNullOrEmpty(maxString)) {
                     this.failedRegions.add(rawRegion);
@@ -134,9 +146,61 @@ public class RegionManager {
             return false;
         }
 
+        // Attach presets
+        for (String presetName : rawRegion.getBlockPresets()) {
+            Optional<BlockPreset> preset = plugin.getPresetManager().getPreset(presetName);
+
+            if (!preset.isPresent()) {
+                log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, rawRegion.getName()));
+                continue;
+            }
+
+            region.addPreset(preset.get());
+        }
+
+        region.setAll(rawRegion.isAll());
+
         this.loadedRegions.put(rawRegion.getName(), region);
         log.fine("Loaded region " + rawRegion.getName());
         return true;
+    }
+
+    // Only attempt to reload the presets configured as they could've changed.
+    // Reloading whole regions could lead to the regeneration disabling. Could hurt the builds etc.
+    public void reload() {
+        plugin.getFiles().getRegions().load();
+
+        FileConfiguration regions = plugin.getFiles().getRegions().getFileConfiguration();
+
+        ConfigurationSection parentSection = regions.getConfigurationSection("Regions");
+
+        if (parentSection != null) {
+            for (String name : parentSection.getKeys(false)) {
+                RegenerationRegion region = getRegion(name);
+
+                // The region is not loaded but in file, just dodge this bullet.
+                if (region == null) {
+                    continue;
+                }
+
+                List<String> presets = parentSection.getStringList(name + ".Presets");
+
+                // Attach presets
+                for (String presetName : presets) {
+                    Optional<BlockPreset> preset = plugin.getPresetManager().getPreset(presetName);
+
+                    if (!preset.isPresent()) {
+                        log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, name));
+                        continue;
+                    }
+
+                    region.addPreset(preset.get());
+                    log.fine("Reloaded region " + region.getName());
+                }
+            }
+        }
+
+        log.info("Reloaded " + this.loadedRegions.size() + " region(s)...");
     }
 
     public void save() {
@@ -151,6 +215,9 @@ public class RegionManager {
 
             regionSection.set("Min", rawRegion.getMin());
             regionSection.set("Max", rawRegion.getMax());
+
+            regionSection.set("All", rawRegion.isAll());
+            regionSection.set("Presets", rawRegion.getBlockPresets());
         }
 
         for (RegenerationRegion regenerationRegion : new HashSet<>(this.loadedRegions.values())) {
@@ -158,7 +225,13 @@ public class RegionManager {
 
             regionSection.set("Min", LocationUtil.locationToString(regenerationRegion.getMin()));
             regionSection.set("Max", LocationUtil.locationToString(regenerationRegion.getMax()));
+
+            regionSection.set("All", regenerationRegion.isAll());
+            regionSection.set("Presets", regenerationRegion.getPresets().stream()
+                    .map(BlockPreset::getName)
+                    .collect(Collectors.toList()));
         }
+
         plugin.getFiles().getRegions().save();
 
         log.fine("Saved " + (this.loadedRegions.size() + this.failedRegions.size()) + " region(s)...");
