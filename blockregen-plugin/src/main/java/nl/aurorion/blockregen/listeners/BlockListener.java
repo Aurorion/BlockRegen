@@ -5,6 +5,7 @@ import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
@@ -15,7 +16,7 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.util.ItemUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
@@ -40,7 +41,7 @@ public class BlockListener implements Listener {
     }
 
     private boolean hasBypass(Player player) {
-        return Utils.bypass.contains(player.getUniqueId())
+        return plugin.getRegenerationManager().hasBypass(player)
                 || (plugin.getConfig().getBoolean("Bypass-In-Creative", false)
                 && player.getGameMode() == GameMode.CREATIVE);
     }
@@ -81,7 +82,7 @@ public class BlockListener implements Listener {
         }
 
         // Block data check
-        if (Utils.dataCheck.contains(player.getUniqueId())) {
+        if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
             log.fine("Player has block check.");
             return;
@@ -91,8 +92,9 @@ public class BlockListener implements Listener {
         if (plugin.getConfig().getBoolean("Towny-Support", true)
                 && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
 
-            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null
-                    && TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown()) {
+            TownBlock townBlock = TownyAPI.getInstance().getTownBlock(block.getLocation());
+
+            if (townBlock != null && townBlock.hasTown()) {
                 log.fine("Let Towny handle this.");
                 return;
             }
@@ -267,7 +269,7 @@ public class BlockListener implements Listener {
                         continue;
 
                     if (preset.isApplyFortune())
-                        itemStack.setAmount(Utils.applyFortune(block.getType(),
+                        itemStack.setAmount(ItemUtil.applyFortune(block.getType(),
                                 plugin.getVersionManager().getMethods().getItemInMainHand(player))
                                 + itemStack.getAmount());
 

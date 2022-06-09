@@ -5,7 +5,6 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -69,11 +68,9 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (!Utils.bypass.contains(player.getUniqueId())) {
-                    Utils.bypass.add(player.getUniqueId());
+                if (plugin.getRegenerationManager().switchBypass(player)) {
                     Message.BYPASS_ON.send(player);
                 } else {
-                    Utils.bypass.remove(player.getUniqueId());
                     Message.BYPASS_OFF.send(player);
                 }
                 break;
@@ -88,11 +85,9 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (!Utils.dataCheck.contains(player.getUniqueId())) {
-                    Utils.dataCheck.add(player.getUniqueId());
+                if (plugin.getRegenerationManager().switchDataCheck(player)) {
                     Message.DATA_CHECK_ON.send(player);
                 } else {
-                    Utils.dataCheck.remove(player.getUniqueId());
                     Message.DATA_CHECK_OFF.send(player);
                 }
                 break;

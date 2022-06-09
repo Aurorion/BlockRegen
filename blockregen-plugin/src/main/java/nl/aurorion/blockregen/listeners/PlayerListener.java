@@ -3,7 +3,6 @@ package nl.aurorion.blockregen.listeners;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
-import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -67,7 +66,7 @@ public class PlayerListener implements Listener {
 
         // Data check
 
-        if (Utils.dataCheck.contains(player.getUniqueId())) {
+        if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
 
             player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));

@@ -1,25 +1,17 @@
 package nl.aurorion.blockregen.util;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
-
+import lombok.experimental.UtilityClass;
+import nl.aurorion.blockregen.BlockRegen;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
 
-import lombok.experimental.UtilityClass;
-import nl.aurorion.blockregen.BlockRegen;
+import java.util.ArrayList;
+import java.util.List;
 
 @UtilityClass
-public class Utils {
-
-    //TODO Move all of these somewhere else
-    public final Set<UUID> bypass = new HashSet<>();
-    public final Set<UUID> dataCheck = new HashSet<>();
+public class ItemUtil {
 
     public final List<Color> FIREWORK_COLORS = new ArrayList<Color>() {{
         add(Color.AQUA);
