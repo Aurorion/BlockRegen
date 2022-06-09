@@ -20,3 +20,5 @@ permissions:
     description: Gives player the ability to mine ores
   blockregen.select:
     description: Allows player to select locations for regions
+  blockregen.region:
+    description: Allows player to select presets for regions

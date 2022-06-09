@@ -146,10 +146,14 @@ public class BlockListener implements Listener {
             boolean isInRegion = region != null;
 
             if (isInRegion) {
-                if (preset != null) {
+                if (preset != null && region.hasPreset(preset)) {
                     process(plugin.getRegenerationManager().createProcess(block, preset, region.getName()), preset,
                             event);
                 } else {
+                    if (!region.hasPreset(preset)) {
+                        log.fine(String.format("Region %s doesn't have preset %s added.", region.getName(), preset != null ? preset.getName() : "null"));
+                    }
+
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region")) {
                         event.setCancelled(true);
                         log.fine("Not a valid preset. Denied BlockBreak.");
@@ -370,8 +374,7 @@ public class BlockListener implements Listener {
 
         if (naturally) {
             dropItem(item, block);
-        }
-        else {
+        } else {
             giveItem(item, player);
         }
     }

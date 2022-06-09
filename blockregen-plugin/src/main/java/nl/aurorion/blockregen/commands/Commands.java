@@ -1,17 +1,24 @@
 package nl.aurorion.blockregen.commands;
 
+import com.google.common.collect.Lists;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 public class Commands implements CommandExecutor {
 
@@ -20,8 +27,10 @@ public class Commands implements CommandExecutor {
             + "\n&3/%label% debug &8- &7Turn on debug. Receive debug messages in chat."
             + "\n&3/%label% bypass &8- &7Bypass block regeneration."
             + "\n&3/%label% check &8- &7Check the correct material name to use. Just hit a block."
+            + "\n&3/%label% tools &8- &7Gives you tools for regions."
             + "\n&3/%label% regions &8- &7List regions."
-            + "\n&3/%label% region set <name> &8- &7Create a region from your WorldEdit selection."
+            + "\n&3/%label% region set <name> &8- &7Create a region from your selection."
+            + "\n&3/%label% region all <name> &8- &7Switch 'all presets' mode."
             + "\n&3/%label% region remove <name> &8- &7Delete a region."
             + "\n&3/%label% events &8- &7Event management."
             + "\n&3/%label% discord &8- &7BlockRegen discord invite. Ask for support there.";
@@ -91,6 +100,36 @@ public class Commands implements CommandExecutor {
                     Message.DATA_CHECK_OFF.send(player);
                 }
                 break;
+            case "tools": {
+                if (checkConsole(sender)) {
+                    return false;
+                }
+
+                player = (Player) sender;
+
+                ItemStack shovel = new ItemStack(Material.WOODEN_SHOVEL);
+
+                ItemMeta meta = shovel.getItemMeta();
+                meta.setDisplayName(StringUtil.color("&3BlockRegen preset tool"));
+                meta.setLore(Lists.newArrayList(StringUtil.color(
+                        "&fLeft click &7on a block in a region to add the blocks preset.",
+                        "&fRight click &7on a block in a region to remove the blocks preset.")));
+                shovel.setItemMeta(meta);
+
+                ItemStack axe = new ItemStack(Material.WOODEN_AXE);
+
+                meta = axe.getItemMeta();
+                meta.setDisplayName(StringUtil.color("&3BlockRegen selection tool"));
+                meta.setLore(Lists.newArrayList(StringUtil.color("&fLeft click &7to select first position.",
+                        "&fRight click &7to select second position.",
+                        "&f/blockregen region set <name> &7to create a region from selection.")));
+                axe.setItemMeta(meta);
+
+                player.getInventory().addItem(shovel, axe);
+
+                Message.TOOLS.send(player);
+                break;
+            }
             case "regions": {
 
                 if (checkConsole(sender)) {
@@ -105,11 +144,21 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
-                for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
-                    message.append("\n&8  - &f").append(name);
+                StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
+                for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
+
+                    message.append(String.format("&8  - &f%s", region.getName()));
+
+                    if (region.isAll()) {
+                        message.append("&8 (&aall&8)\n");
+                    } else {
+                        if (!region.getPresets().isEmpty()) {
+                            message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                        } else {
+                            message.append("&8 (&cnone&8)\n");
+                        }
+                    }
                 }
-                message.append("\n");
                 sender.sendMessage(StringUtil.color(message.toString()));
                 break;
             }
@@ -137,11 +186,21 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
 
-                    StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
-                    for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
-                        message.append("\n&8  - &f").append(name);
+                    StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
+                    for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
+
+                        message.append(String.format("&8  - &f%s", region.getName()));
+
+                        if (region.isAll()) {
+                            message.append("&8 (&aall&8)\n");
+                        } else {
+                            if (!region.getPresets().isEmpty()) {
+                                message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                            } else {
+                                message.append("&8 (&cnone&8)\n");
+                            }
+                        }
                     }
-                    message.append("\n");
                     sender.sendMessage(StringUtil.color(message.toString()));
                     return false;
                 } else if (args[1].equalsIgnoreCase("set")) {
@@ -179,7 +238,8 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
 
-                    Message.SET_REGION.send(player);
+                    player.sendMessage(StringUtil.color(Message.SET_REGION.get(player)
+                            .replace("%region%", args[2])));
                     return false;
                 } else if (args[1].equalsIgnoreCase("remove")) {
 
@@ -200,6 +260,26 @@ public class Commands implements CommandExecutor {
 
                     plugin.getRegionManager().removeRegion(args[2]);
                     Message.REMOVE_REGION.send(player);
+                    return false;
+                } else if (args[1].equalsIgnoreCase("all")) {
+                    if (args.length > 3) {
+                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region all <name>", label)));
+                        return false;
+                    } else if (args.length < 3) {
+                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                .replace("%help%", String.format("/%s region all <name>", label)));
+                        return false;
+                    }
+
+                    RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                    if (region == null) {
+                        Message.UNKNOWN_REGION.send(player);
+                        return false;
+                    }
+
+                    player.sendMessage(StringUtil.color(String.format(Message.SET_ALL.get(player), region.setAll(!region.isAll()) ? "&aall" : "&cnot all")));
                     return false;
                 } else {
                     sendHelp(sender, label);
