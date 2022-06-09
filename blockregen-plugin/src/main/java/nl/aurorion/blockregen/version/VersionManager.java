@@ -19,7 +19,6 @@ import nl.aurorion.blockregen.version.legacy.LegacyMethods;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldEditProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldGuardProvider;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.plugin.Plugin;
 
 import java.util.regex.Matcher;
@@ -91,6 +90,7 @@ public class VersionManager {
                 if (worldGuard != null)
                     useWorldGuard(new LatestWorldGuardProvider(this.worldGuard));
                 this.methods = new LatestMethods();
+                this.nodeProvider = LatestNodeData::new;
                 break;
         }
     }
