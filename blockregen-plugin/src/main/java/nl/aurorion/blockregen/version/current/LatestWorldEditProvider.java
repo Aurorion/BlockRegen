@@ -25,7 +25,6 @@ public class LatestWorldEditProvider implements WorldEditProvider {
         try {
             selection = worldEdit.getSession(player).getSelection(BukkitAdapter.adapt(player.getWorld()));
         } catch (IncompleteRegionException e) {
-            e.printStackTrace();
             return null;
         }
         return selection;
@@ -36,8 +35,9 @@ public class LatestWorldEditProvider implements WorldEditProvider {
 
         Region selection = getSelection(player);
 
-        if (selection == null || selection.getWorld() == null)
+        if (selection == null || selection.getWorld() == null) {
             return null;
+        }
 
         World world = BukkitAdapter.adapt(selection.getWorld());
 

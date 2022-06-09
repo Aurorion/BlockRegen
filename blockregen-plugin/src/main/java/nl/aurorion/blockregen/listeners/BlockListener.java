@@ -5,6 +5,7 @@ import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.api.BlockRegenBlockBreakEvent;
@@ -25,8 +26,6 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.ItemStack;
 
-import lombok.extern.java.Log;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -43,7 +42,7 @@ public class BlockListener implements Listener {
     private boolean hasBypass(Player player) {
         return Utils.bypass.contains(player.getUniqueId())
                 || (plugin.getConfig().getBoolean("Bypass-In-Creative", false)
-                        && player.getGameMode() == GameMode.CREATIVE);
+                && player.getGameMode() == GameMode.CREATIVE);
     }
 
     @EventHandler(priority = EventPriority.HIGHEST)
@@ -140,12 +139,6 @@ public class BlockListener implements Listener {
         boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
 
         if (useRegions) {
-
-            if (plugin.getVersionManager().getWorldEditProvider() == null) {
-                log.fine("No WorldEdit provider found.");
-                return;
-            }
-
             RegenerationRegion region = plugin.getRegionManager().getRegion(block.getLocation());
 
             boolean isInRegion = region != null;
@@ -179,7 +172,7 @@ public class BlockListener implements Listener {
                 }
             } else {
                 log.fine(String.format("Not in world. World: %s, enabled: %s", world.getName(),
-                        plugin.getConfig().getStringList("Worlds-Enabled").toString()));
+                        plugin.getConfig().getStringList("Worlds-Enabled")));
             }
         }
     }

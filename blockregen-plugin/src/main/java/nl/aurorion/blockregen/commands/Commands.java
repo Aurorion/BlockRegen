@@ -3,19 +3,29 @@ package nl.aurorion.blockregen.commands;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
-import nl.aurorion.blockregen.util.Utils;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-
-import java.util.logging.Level;
-
+import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.logging.Level;
+
 public class Commands implements CommandExecutor {
+
+    private static final String HELP = "&8&m        &r &3BlockRegen &f%version% &8&m        &r"
+            + "\n&3/%label% reload &8- &7Reload the plugin."
+            + "\n&3/%label% debug &8- &7Turn on debug. Receive debug messages in chat."
+            + "\n&3/%label% bypass &8- &7Bypass block regeneration."
+            + "\n&3/%label% check &8- &7Check the correct material name to use. Just hit a block."
+            + "\n&3/%label% regions &8- &7List regions."
+            + "\n&3/%label% region set <name> &8- &7Create a region from your WorldEdit selection."
+            + "\n&3/%label% region remove <name> &8- &7Delete a region."
+            + "\n&3/%label% events &8- &7Event management."
+            + "\n&3/%label% discord &8- &7BlockRegen discord invite. Ask for support there.";
 
     private final BlockRegen plugin;
 
@@ -24,20 +34,14 @@ public class Commands implements CommandExecutor {
     }
 
     private void sendHelp(CommandSender sender, String label) {
-        sender.sendMessage(StringUtil
-                .color("&8&m        &r &3BlockRegen &f" + plugin.getDescription().getVersion() + " &8&m        &r"
-                        + "\n&3/" + label + " reload &8- &7Reload the plugin."
-                        + "\n&3/" + label + " debug &8- &7Turn on debug. Receive debug messages in chat."
-                        + "\n&3/" + label + " bypass &8- &7Bypass block regeneration."
-                        + "\n&3/" + label + " check &8- &7Check the correct material name to use. Just hit a block."
-                        + "\n&3/" + label + " region &8- &7Region management."
-                        + "\n&3/" + label + " events &8- &7Event management."
-                        + "\n&3/" + label + " discord &8- &7BlockRegen discord invite. Ask for support here."));
+        sender.sendMessage(StringUtil.color(HELP
+                .replace("%version%", plugin.getDescription().getVersion())
+                .replace("%label%", label)));
     }
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command cmd, @NotNull String label,
-            @NotNull String[] args) {
+                             @NotNull String[] args) {
         if (args.length == 0) {
             sendHelp(sender, label);
             return false;
@@ -92,7 +96,29 @@ public class Commands implements CommandExecutor {
                     Message.DATA_CHECK_OFF.send(player);
                 }
                 break;
-            case "region":
+            case "regions": {
+
+                if (checkConsole(sender)) {
+                    return false;
+                }
+
+                player = (Player) sender;
+
+                if (args.length > 1) {
+                    sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                            .replace("%help%", String.format("/%s regions", label)));
+                    return false;
+                }
+
+                StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r");
+                for (String name : plugin.getRegionManager().getLoadedRegions().keySet()) {
+                    message.append("\n&8  - &f").append(name);
+                }
+                message.append("\n");
+                sender.sendMessage(StringUtil.color(message.toString()));
+                break;
+            }
+            case "region": {
 
                 if (checkConsole(sender))
                     return false;
@@ -105,15 +131,11 @@ public class Commands implements CommandExecutor {
                 }
 
                 if (args.length == 1) {
-                    player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Regions &8&m     "
-                            + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
-                            + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
-                            + "\n&3/" + label + " region list &8- &7List your regions."));
+                    sendHelp(sender, label);
                     return false;
                 }
 
                 if (args[1].equalsIgnoreCase("list")) {
-
                     if (args.length > 2) {
                         sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
                                 .replace("%help%", String.format("/%s region list", label)));
@@ -144,20 +166,25 @@ public class Commands implements CommandExecutor {
                         return false;
                     }
 
-                    if (plugin.getVersionManager().getWorldEditProvider() == null) {
-                        Message.WORLD_EDIT_NOT_INSTALLED.send(player);
-                        return false;
+                    RegenerationRegion region;
+
+                    if (plugin.getVersionManager().getWorldEditProvider() != null) {
+                        region = plugin.getVersionManager().getWorldEditProvider()
+                                .createFromSelection(args[2], player);
+
+                        if (region == null) {
+                            Message.NO_SELECTION.send(player);
+                            return false;
+                        }
+
+                        plugin.getRegionManager().addRegion(region);
+                    } else {
+                        if (!plugin.getRegionManager().finishSelection(player, args[2])) {
+                            sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                            return false;
+                        }
                     }
 
-                    RegenerationRegion region = plugin.getVersionManager().getWorldEditProvider()
-                            .createFromSelection(args[2], player);
-
-                    if (region == null) {
-                        Message.NO_SELECTION.send(player);
-                        return false;
-                    }
-
-                    plugin.getRegionManager().addRegion(region);
                     Message.SET_REGION.send(player);
                     return false;
                 } else if (args[1].equalsIgnoreCase("remove")) {
@@ -181,12 +208,10 @@ public class Commands implements CommandExecutor {
                     Message.REMOVE_REGION.send(player);
                     return false;
                 } else {
-                    player.sendMessage(StringUtil.color("&8&m     &r &3BlockRegen Regions &8&m     "
-                            + "\n&3/" + label + " region set <name> &8- &7Create a regeneration region."
-                            + "\n&3/" + label + " region remove <name> &8- &7Remove a region."
-                            + "\n&3/" + label + " region list &8- &7List your regions."));
+                    sendHelp(sender, label);
                 }
                 break;
+            }
             case "debug":
                 if (!(sender instanceof Player)) {
                     sender.sendMessage(Message.ONLY_PLAYERS.get());
@@ -200,7 +225,7 @@ public class Commands implements CommandExecutor {
                     if (!plugin.getFiles().getSettings().getFileConfiguration().getBoolean("Debug-Enabled", false) && plugin.getLogLevel().intValue() <= Level.FINE.intValue()) {
                         plugin.setLogLevel(Level.INFO);
                     }
-                    
+
                     plugin.getConsoleHandler().removeListener(sender);
                     sender.sendMessage(Message.DEBUG_OFF.get(player));
                 } else {

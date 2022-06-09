@@ -58,16 +58,20 @@ public class VersionManager {
             // Try to catch 1.7 into ancient. Might work on some occasions.
             case "v1_7":
             case "v1_8":
-                useWorldEdit(LegacyWorldEditProvider::new);
-                useWorldGuard(LegacyWorldGuardProvider::new);
+                if (worldEdit != null)
+                    useWorldEdit(new LegacyWorldEditProvider(this.worldEdit));
+                if (worldGuard != null)
+                    useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new AncientMethods();
                 break;
             case "v1_9":
             case "v1_10":
             case "v1_11":
             case "v1_12":
-                useWorldEdit(LegacyWorldEditProvider::new);
-                useWorldGuard(LegacyWorldGuardProvider::new);
+                if (worldEdit != null)
+                    useWorldEdit(new LegacyWorldEditProvider(this.worldEdit));
+                if (worldGuard != null)
+                    useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new LegacyMethods();
                 break;
             case "v1_13":
@@ -77,26 +81,24 @@ public class VersionManager {
             case "v1_17":
             case "v1_18":
             default:
-                useWorldEdit(LatestWorldEditProvider::new);
-                useWorldGuard(LatestWorldGuardProvider::new);
+                if (worldEdit != null)
+                    useWorldEdit(new LatestWorldEditProvider(this.worldEdit));
+                if (worldGuard != null)
+                    useWorldGuard(new LatestWorldGuardProvider(this.worldGuard));
                 this.methods = new LatestMethods();
                 break;
         }
     }
 
-    public interface InstanceProvider<X, Y> {
-        X provide(Y plugin);
-    }
-
-    public void useWorldGuard(InstanceProvider<WorldGuardProvider, WorldGuardPlugin> instanceProvider) {
-        if (worldGuardProvider == null && this.worldGuard != null) {
-            this.worldGuardProvider = instanceProvider.provide(worldGuard);
+    public void useWorldGuard(WorldGuardProvider provider) {
+        if (worldGuardProvider == null) {
+            this.worldGuardProvider = provider;
         }
     }
 
-    public void useWorldEdit(InstanceProvider<WorldEditProvider, WorldEditPlugin> instanceProvider) {
-        if (worldEditProvider == null && this.worldEdit != null) {
-            this.worldEditProvider = instanceProvider.provide(worldEdit);
+    public void useWorldEdit(WorldEditProvider provider) {
+        if (worldEditProvider == null) {
+            this.worldEditProvider = provider;
         }
     }
 
@@ -129,13 +131,15 @@ public class VersionManager {
 
     private void setupWorldEdit() {
 
-        if (worldEditProvider != null)
+        if (worldEditProvider != null) {
             return;
+        }
 
         Plugin worldEditPlugin = plugin.getServer().getPluginManager().getPlugin("WorldEdit");
 
-        if (!(worldEditPlugin instanceof WorldEditPlugin))
+        if (!(worldEditPlugin instanceof WorldEditPlugin)) {
             return;
+        }
 
         this.worldEdit = (WorldEditPlugin) worldEditPlugin;
         log.info("WorldEdit found! &aEnabling regions.");
