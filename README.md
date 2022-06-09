@@ -1,7 +1,10 @@
 # BlockRegen
-Updated version of BlockRegen.
 
-You can get the latest version from [releases](https://github.com/Wertik/BlockRegen/releases).
+BlockRegen is a Bukkit/Spigot plugin that allows you to create regenerative ore nodes like you see in MMOs.
+
+You can download the latest version [here](https://github.com/Wertik/BlockRegen/releases/latest).
+
+Watch a video about how this plugin works [here](https://www.youtube.com/watch?v=fiMwm317oaA&ab_channel=SoulStriker).
 
 ## Supported versions
 
@@ -13,10 +16,6 @@ You can get the latest version from [releases](https://github.com/Wertik/BlockRe
 * For materials on version 1.12 (and below) use their 1.13+ names.
   * ex.: Cyan dye -> ~~INK_SACK;4~~ CYAN_DYE
   * You can find a list of materials [here](https://github.com/CryptoMorin/XSeries/blob/master/src/main/java/com/cryptomorin/xseries/XMaterial.java).
-
-## BlockRegen WorldGuard Flag
-
-If you're looking for something more basic and use WorldGuard, explore [BlockRegenFlag](https://github.com/Wertik/BlockRegenFlag) which adds a simple flag to restore blocks.
 
 ## Development trello
 
