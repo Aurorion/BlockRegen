@@ -1,7 +1,7 @@
 package nl.aurorion.blockregen.particles.impl;
 
 import nl.aurorion.blockregen.BlockRegen;
-import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.util.ItemUtil;
 import nl.aurorion.blockregen.particles.AbstractParticle;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
@@ -17,6 +17,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Random;
 
 public class FireWorks extends AbstractParticle {
+
+    private final Random random = new Random();
 
     @Override
     public String name() {
@@ -35,7 +37,7 @@ public class FireWorks extends AbstractParticle {
 
         fwm.addEffect(FireworkEffect.builder()
                 .with(Type.BALL)
-                .withColor(Utils.FIREWORK_COLORS.get(new Random().nextInt(Utils.FIREWORK_COLORS.size())))
+                .withColor(ItemUtil.FIREWORK_COLORS.get(random.nextInt(ItemUtil.FIREWORK_COLORS.size())))
                 .withFade(Color.WHITE)
                 .flicker(true)
                 .build());

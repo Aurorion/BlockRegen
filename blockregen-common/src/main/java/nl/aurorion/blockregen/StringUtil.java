@@ -1,10 +1,9 @@
 package nl.aurorion.blockregen;
 
+import lombok.experimental.UtilityClass;
 import org.bukkit.ChatColor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class StringUtil {
@@ -15,6 +14,15 @@ public class StringUtil {
     @NotNull
     public String color(@Nullable String msg) {
         return color(msg, '&');
+    }
+
+    @NotNull
+    public String[] color(String... msgs) {
+        String[] res = new String[msgs.length];
+        for (int i = 0; i < msgs.length; i++) {
+            res[i] = color(msgs[i]);
+        }
+        return res;
     }
 
     @NotNull

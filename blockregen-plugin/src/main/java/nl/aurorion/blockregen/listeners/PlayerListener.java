@@ -2,8 +2,10 @@ package nl.aurorion.blockregen.listeners;
 
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
-import nl.aurorion.blockregen.util.Utils;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -65,9 +67,62 @@ public class PlayerListener implements Listener {
             return;
         }
 
+        // Adding presets to regions,... with a shovel?
+
+        RegenerationRegion region = plugin.getRegionManager().getRegion(event.getClickedBlock().getLocation());
+
+        if (player.hasPermission("blockregen.region") && plugin.getVersionManager().getMethods().getItemInMainHand(player).getType() == Material.WOODEN_SHOVEL && region != null) {
+            BlockPreset preset = plugin.getPresetManager().getPresetByBlock(event.getClickedBlock()).orElse(null);
+
+            if (preset == null) {
+
+                RegenerationProcess process = plugin.getRegenerationManager().getProcess(event.getClickedBlock());
+
+                if (process == null) {
+                    return;
+                }
+
+                preset = process.getPreset();
+            }
+
+            if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
+                // Add a block
+
+                if (region.hasPreset(preset)) {
+                    player.sendMessage(Message.HAS_PRESET_ALREADY.get(player)
+                            .replace("%region%", region.getName())
+                            .replace("%preset%", preset.getName()));
+                    return;
+                }
+
+                region.addPreset(preset);
+
+                player.sendMessage(Message.PRESET_ADDED.get(player)
+                        .replace("%region%", region.getName())
+                        .replace("%preset%", preset.getName()));
+            } else {
+                // Remove a block
+
+                if (!region.hasPreset(preset)) {
+                    player.sendMessage(Message.DOES_NOT_HAVE_PRESET.get(player)
+                            .replace("%region%", region.getName())
+                            .replace("%preset%", preset.getName()));
+                    return;
+                }
+
+                region.removePreset(preset);
+
+                player.sendMessage(Message.PRESET_REMOVED.get(player)
+                        .replace("%region%", region.getName())
+                        .replace("%preset%", preset.getName()));
+            }
+
+            return;
+        }
+
         // Data check
 
-        if (Utils.dataCheck.contains(player.getUniqueId())) {
+        if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
 
             player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));

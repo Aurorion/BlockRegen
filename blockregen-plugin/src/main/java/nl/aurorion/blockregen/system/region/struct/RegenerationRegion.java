@@ -1,8 +1,14 @@
 package nl.aurorion.blockregen.system.region.struct;
 
 import lombok.Getter;
+import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import org.bukkit.Location;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class RegenerationRegion {
 
@@ -14,10 +20,39 @@ public class RegenerationRegion {
     @Getter
     private final Location max;
 
+    private final Set<BlockPreset> presets = new HashSet<>();
+
+    @Getter
+    private boolean all = true;
+
     public RegenerationRegion(String name, Location min, Location max) {
         this.name = name;
         this.min = min;
         this.max = max;
+    }
+
+    public boolean setAll(boolean all) {
+        return this.all = all;
+    }
+
+    public boolean hasPreset(@Nullable BlockPreset preset) {
+        return all || (preset != null && this.presets.contains(preset));
+    }
+
+    public void addPreset(@NotNull BlockPreset preset) {
+        this.presets.add(preset);
+    }
+
+    public void removePreset(@NotNull BlockPreset preset) {
+        this.presets.remove(preset);
+    }
+
+    public void clearPresets() {
+        this.presets.clear();
+    }
+
+    public Set<BlockPreset> getPresets() {
+        return Collections.unmodifiableSet(this.presets);
     }
 
     public boolean contains(@NotNull Location location) {

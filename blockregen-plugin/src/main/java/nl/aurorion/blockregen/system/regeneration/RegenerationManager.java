@@ -8,13 +8,11 @@ import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 @Log
 public class RegenerationManager {
@@ -28,8 +26,47 @@ public class RegenerationManager {
 
     private boolean retry = false;
 
+    private final Set<UUID> bypass = new HashSet<>();
+
+    private final Set<UUID> dataCheck = new HashSet<>();
+
     public RegenerationManager(BlockRegen plugin) {
         this.plugin = plugin;
+    }
+
+    // --- Bypass
+
+    public boolean hasBypass(@NotNull Player player) {
+        return bypass.contains(player.getUniqueId());
+    }
+
+    /**
+     * Switch the bypass status of the player. Return the state after the change.
+     */
+    public boolean switchBypass(@NotNull Player player) {
+        if (bypass.contains(player.getUniqueId())) {
+            bypass.remove(player.getUniqueId());
+            return false;
+        } else {
+            bypass.add(player.getUniqueId());
+            return true;
+        }
+    }
+
+    // --- Data Check
+
+    public boolean hasDataCheck(@NotNull Player player) {
+        return dataCheck.contains(player.getUniqueId());
+    }
+
+    public boolean switchDataCheck(@NotNull Player player) {
+        if (dataCheck.contains(player.getUniqueId())) {
+            dataCheck.remove(player.getUniqueId());
+            return false;
+        } else {
+            dataCheck.add(player.getUniqueId());
+            return true;
+        }
     }
 
     /**
@@ -184,7 +221,7 @@ public class RegenerationManager {
                     process.revert();
                     continue;
                 }
-                log.fine("Prepared regeneration process " + process.toString());
+                log.fine("Prepared regeneration process " + process);
             }
 
             if (!this.retry) {

@@ -5,6 +5,7 @@ import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
 import com.palmergames.bukkit.towny.TownyAPI;
+import com.palmergames.bukkit.towny.object.TownBlock;
 import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
@@ -15,7 +16,7 @@ import nl.aurorion.blockregen.system.preset.struct.drop.ExperienceDrop;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
-import nl.aurorion.blockregen.util.Utils;
+import nl.aurorion.blockregen.util.ItemUtil;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.ExperienceOrb;
@@ -40,7 +41,7 @@ public class BlockListener implements Listener {
     }
 
     private boolean hasBypass(Player player) {
-        return Utils.bypass.contains(player.getUniqueId())
+        return plugin.getRegenerationManager().hasBypass(player)
                 || (plugin.getConfig().getBoolean("Bypass-In-Creative", false)
                 && player.getGameMode() == GameMode.CREATIVE);
     }
@@ -81,7 +82,7 @@ public class BlockListener implements Listener {
         }
 
         // Block data check
-        if (Utils.dataCheck.contains(player.getUniqueId())) {
+        if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
             log.fine("Player has block check.");
             return;
@@ -91,8 +92,9 @@ public class BlockListener implements Listener {
         if (plugin.getConfig().getBoolean("Towny-Support", true)
                 && plugin.getServer().getPluginManager().getPlugin("Towny") != null) {
 
-            if (TownyAPI.getInstance().getTownBlock(block.getLocation()) != null
-                    && TownyAPI.getInstance().getTownBlock(block.getLocation()).hasTown()) {
+            TownBlock townBlock = TownyAPI.getInstance().getTownBlock(block.getLocation());
+
+            if (townBlock != null && townBlock.hasTown()) {
                 log.fine("Let Towny handle this.");
                 return;
             }
@@ -144,10 +146,14 @@ public class BlockListener implements Listener {
             boolean isInRegion = region != null;
 
             if (isInRegion) {
-                if (preset != null) {
+                if (preset != null && region.hasPreset(preset)) {
                     process(plugin.getRegenerationManager().createProcess(block, preset, region.getName()), preset,
                             event);
                 } else {
+                    if (!region.hasPreset(preset)) {
+                        log.fine(String.format("Region %s doesn't have preset %s added.", region.getName(), preset != null ? preset.getName() : "null"));
+                    }
+
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region")) {
                         event.setCancelled(true);
                         log.fine("Not a valid preset. Denied BlockBreak.");
@@ -267,7 +273,7 @@ public class BlockListener implements Listener {
                         continue;
 
                     if (preset.isApplyFortune())
-                        itemStack.setAmount(Utils.applyFortune(block.getType(),
+                        itemStack.setAmount(ItemUtil.applyFortune(block.getType(),
                                 plugin.getVersionManager().getMethods().getItemInMainHand(player))
                                 + itemStack.getAmount());
 
@@ -366,13 +372,14 @@ public class BlockListener implements Listener {
         if (item == null)
             return;
 
-        if (naturally)
-            dropItem(item, player, block);
-        else
+        if (naturally) {
+            dropItem(item, block);
+        } else {
             giveItem(item, player);
+        }
     }
 
-    private void dropItem(ItemStack item, Player player, org.bukkit.block.Block block) {
+    private void dropItem(ItemStack item, Block block) {
         Bukkit.getScheduler().runTask(plugin, () -> block.getWorld().dropItemNaturally(block.getLocation(), item));
         log.fine("Dropping item " + item.getType() + "x" + item.getAmount());
     }
