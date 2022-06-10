@@ -109,24 +109,14 @@ public class VersionManager {
         return matcher.find() ? matcher.group() : null;
     }
 
-    // Simple version number to compare, v1_8 -> 18
-    private int composeVersionNumber(String versionString) {
-        String num = versionString.replace("v", "")
-                .replace("_", "")
-                .replace(".", "");
-        return ParseUtil.parseInteger(num);
+    public boolean isCurrenAbove(String versionString, boolean include) {
+        int res = ParseUtil.compareVersions(this.version.replace("v", "").replace("_", "."), versionString, 2);
+        return include ? res >= 0 : res > 0;
     }
 
-    public boolean isAbove(String versionString, boolean include) {
-        int version = composeVersionNumber(versionString);
-        int current = composeVersionNumber(this.version);
-        return include ? current >= version : current > version;
-    }
-
-    public boolean isBelow(String versionString, boolean include) {
-        int version = composeVersionNumber(versionString);
-        int current = composeVersionNumber(this.version);
-        return include ? current <= version : current < version;
+    public boolean isCurrentBelow(String versionString, boolean include) {
+        int res = ParseUtil.compareVersions(this.version.replace("v", "").replace("_", "."), versionString, 2);
+        return include ? res <= 0 : res < 0;
     }
 
     private void setupWorldEdit() {

@@ -1,19 +1,17 @@
 package nl.aurorion.blockregen.util;
 
-import java.util.Optional;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
-
 import com.cryptomorin.xseries.XEnchantment;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
-
+import lombok.experimental.UtilityClass;
+import lombok.extern.java.Log;
 import org.bukkit.Material;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.Nullable;
 
-import lombok.experimental.UtilityClass;
-import lombok.extern.java.Log;
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Log
 @UtilityClass
@@ -112,5 +110,38 @@ public class ParseUtil {
         } catch (Exception e) {
             return def;
         }
+    }
+
+    public int compareVersions(String version1, String version2) {
+        return compareVersions(version1, version2, -1);
+    }
+
+    // Compare simple semver
+    public int compareVersions(String version1, String version2, int depth) {
+        // Compare major
+        String[] arr1 = version1.split("-")[0].split("\\.");
+        String[] arr2 = version2.split("-")[0].split("\\.");
+
+        int len = depth == -1 ? Math.max(arr1.length, arr2.length) : depth;
+
+        for (int i = 0; i < len; i++) {
+
+            if (arr1.length < i) {
+                return -1;
+            } else if (arr2.length < i) {
+                return 1;
+            }
+
+            int num1 = ParseUtil.parseInteger(arr1[i]);
+            int num2 = ParseUtil.parseInteger(arr2[i]);
+
+            if (num1 > num2) {
+                return 1;
+            } else if (num2 > num1) {
+                return -1;
+            }
+        }
+
+        return 0;
     }
 }

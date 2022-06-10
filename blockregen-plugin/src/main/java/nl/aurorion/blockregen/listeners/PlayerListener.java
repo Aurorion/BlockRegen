@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
 
         // Ignore offhand events at 1.9+
-        if (plugin.getVersionManager().isAbove("1_9", true) && event.getHand() == EquipmentSlot.OFF_HAND) {
+        if (plugin.getVersionManager().isCurrenAbove("1_9", true) && event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
 
