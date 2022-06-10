@@ -1,12 +1,12 @@
 package nl.aurorion.blockregen.listeners;
 
+import com.cryptomorin.xseries.XMaterial;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -42,7 +42,9 @@ public class PlayerListener implements Listener {
 
         // Use our own selection only if WorldEdit is not installed.
 
-        if (player.hasPermission("blockregen.select") && plugin.getVersionManager().getMethods().getItemInMainHand(player).getType() == Material.WOODEN_AXE && plugin.getVersionManager().getWorldEditProvider() == null) {
+        XMaterial handMaterial = XMaterial.matchXMaterial(plugin.getVersionManager().getMethods().getItemInMainHand(player));
+
+        if (player.hasPermission("blockregen.select") && handMaterial == XMaterial.WOODEN_AXE && plugin.getVersionManager().getWorldEditProvider() == null) {
             RegionSelection selection = plugin.getRegionManager().getOrCreateSelection(player);
 
             // Selecting first.
@@ -71,7 +73,7 @@ public class PlayerListener implements Listener {
 
         RegenerationRegion region = plugin.getRegionManager().getRegion(event.getClickedBlock().getLocation());
 
-        if (player.hasPermission("blockregen.region") && plugin.getVersionManager().getMethods().getItemInMainHand(player).getType() == Material.WOODEN_SHOVEL && region != null) {
+        if (player.hasPermission("blockregen.region") && handMaterial == XMaterial.WOODEN_SHOVEL && region != null) {
             BlockPreset preset = plugin.getPresetManager().getPresetByBlock(event.getClickedBlock()).orElse(null);
 
             if (preset == null) {

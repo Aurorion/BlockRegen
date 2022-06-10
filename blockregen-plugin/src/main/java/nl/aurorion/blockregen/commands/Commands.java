@@ -1,5 +1,6 @@
 package nl.aurorion.blockregen.commands;
 
+import com.cryptomorin.xseries.XMaterial;
 import com.google.common.collect.Lists;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.Message;
@@ -8,7 +9,6 @@ import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
-import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -107,7 +107,7 @@ public class Commands implements CommandExecutor {
 
                 player = (Player) sender;
 
-                ItemStack shovel = new ItemStack(Material.WOODEN_SHOVEL);
+                ItemStack shovel = XMaterial.WOODEN_SHOVEL.parseItem();
 
                 ItemMeta meta = shovel.getItemMeta();
                 meta.setDisplayName(StringUtil.color("&3BlockRegen preset tool"));
@@ -116,7 +116,7 @@ public class Commands implements CommandExecutor {
                         "&fRight click &7on a block in a region to remove the blocks preset.")));
                 shovel.setItemMeta(meta);
 
-                ItemStack axe = new ItemStack(Material.WOODEN_AXE);
+                ItemStack axe = XMaterial.WOODEN_AXE.parseItem();
 
                 meta = axe.getItemMeta();
                 meta.setDisplayName(StringUtil.color("&3BlockRegen selection tool"));
