@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.version.legacy;
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
@@ -15,8 +16,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import lombok.extern.java.Log;
 
 @Log
 public class LegacyMethods implements Methods {
@@ -81,9 +80,8 @@ public class LegacyMethods implements Methods {
         }
 
         byte data = xMaterial.getData();
-        boolean result = block.getType() == type && block.getData() == data;
-        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(),
-                block.getType().toString(), (int) block.getData(), result));
+        boolean result = XMaterial.matchXMaterial(block.getType()) == xMaterial && block.getData() == data;
+        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial, block.getType().toString(), (int) block.getData(), result));
         return result;
     }
 

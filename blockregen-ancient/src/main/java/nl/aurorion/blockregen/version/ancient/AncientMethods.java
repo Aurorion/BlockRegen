@@ -2,14 +2,13 @@ package nl.aurorion.blockregen.version.ancient;
 
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-
-import lombok.extern.java.Log;
 
 @Log
 @SuppressWarnings("deprecation")
@@ -27,7 +26,7 @@ public class AncientMethods implements Methods {
          * Avoid using XBlock isSimilar, isType methods. They don't compare raw block
          * data on lower
          * versions.
-         * 
+         *
          * return XBlock.isSimilar(block, xMaterial);
          */
 
@@ -39,8 +38,8 @@ public class AncientMethods implements Methods {
         }
 
         byte data = xMaterial.getData();
-        boolean result = block.getType() == type && block.getData() == data;
-        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial.toString(), block.getType().toString(),
+        boolean result = XMaterial.matchXMaterial(block.getType()) == xMaterial && block.getData() == data;
+        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial, block.getType().toString(),
                 (int) block.getData(), result));
         return result;
     }
