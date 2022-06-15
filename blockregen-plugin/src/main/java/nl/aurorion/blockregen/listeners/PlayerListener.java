@@ -74,6 +74,8 @@ public class PlayerListener implements Listener {
         RegenerationRegion region = plugin.getRegionManager().getRegion(event.getClickedBlock().getLocation());
 
         if (player.hasPermission("blockregen.region") && handMaterial == XMaterial.WOODEN_SHOVEL && region != null) {
+            event.setCancelled(true);
+
             BlockPreset preset = plugin.getPresetManager().getPresetByBlock(event.getClickedBlock()).orElse(null);
 
             if (preset == null) {

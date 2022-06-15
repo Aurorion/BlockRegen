@@ -4,6 +4,7 @@ import com.bekvon.bukkit.residence.api.ResidenceApi;
 import com.bekvon.bukkit.residence.containers.Flags;
 import com.bekvon.bukkit.residence.protection.ClaimedResidence;
 import com.bekvon.bukkit.residence.protection.ResidencePermissions;
+import com.cryptomorin.xseries.XMaterial;
 import com.palmergames.bukkit.towny.TownyAPI;
 import com.palmergames.bukkit.towny.object.TownBlock;
 import lombok.extern.java.Log;
@@ -253,10 +254,17 @@ public class BlockListener implements Listener {
             if (preset.isNaturalBreak()) {
 
                 for (ItemStack drop : vanillaDrops) {
-                    Material mat = drop.getType();
+                    XMaterial mat = XMaterial.matchXMaterial(drop);
                     int amount = drop.getAmount();
 
-                    ItemStack item = new ItemStack(mat, doubleDrops ? amount * 2 : amount);
+                    ItemStack item = mat.parseItem();
+
+                    if (item == null) {
+                        log.severe(String.format("Material %s not supported on this version.", mat));
+                        continue;
+                    }
+
+                    item.setAmount(doubleDrops ? amount * 2 : amount);
 
                     giveItem(item, player, block, preset.isDropNaturally());
                 }
