@@ -8,7 +8,7 @@ Watch a video about how this plugin works [here](https://www.youtube.com/watch?v
 
 ## Supported versions
 
-``1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18`` (as of 3.6.10)
+``1.8, 1.9, 1.10, 1.11, 1.12, 1.13, 1.14, 1.15, 1.16, 1.17, 1.18, 1.19`` (as of 3.6.11)
 
 ### Notes
 
