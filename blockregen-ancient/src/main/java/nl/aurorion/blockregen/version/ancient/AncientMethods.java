@@ -38,9 +38,10 @@ public class AncientMethods implements Methods {
         }
 
         byte data = xMaterial.getData();
-        boolean result = XMaterial.matchXMaterial(block.getType()) == xMaterial && block.getData() == data;
-        log.fine(String.format("Compared %s and (%s, %d), result: %b", xMaterial, block.getType().toString(),
-                (int) block.getData(), result));
+        // Matching normal types ensures logs and planks match.
+        // Add an exception for glowing redstone ore
+        boolean result = block.getType() == type && block.getData() == data || XMaterial.matchXMaterial(block.getType()) == XMaterial.REDSTONE_ORE && xMaterial == XMaterial.REDSTONE_ORE;
+        log.fine(String.format("Compared %s (%s, %d) and (%s, %d), result: %b", xMaterial, type, (int) xMaterial.getData(), block.getType().toString(), (int) block.getData(), result));
         return result;
     }
 
