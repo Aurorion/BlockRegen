@@ -23,7 +23,7 @@ public class LatestNodeData implements NodeData {
 
     private BlockFace rotation;
 
-    private int age;
+    private int age = -1;
 
     private boolean farmland;
 
@@ -68,23 +68,23 @@ public class LatestNodeData implements NodeData {
     public void place(Block block) {
         BlockData blockData = block.getBlockData();
 
-        if (blockData instanceof Directional) {
+        if (blockData instanceof Directional && this.facing != null) {
             ((Directional) blockData).setFacing(this.facing);
         }
 
-        if (blockData instanceof Stairs) {
+        if (blockData instanceof Stairs && this.stairShape != null) {
             ((Stairs) blockData).setShape(this.stairShape);
         }
 
-        if (blockData instanceof Orientable) {
+        if (blockData instanceof Orientable && this.axis != null) {
             ((Orientable) blockData).setAxis(this.axis);
         }
 
-        if (blockData instanceof Rotatable) {
+        if (blockData instanceof Rotatable && this.rotation != null) {
             ((Rotatable) blockData).setRotation(this.rotation);
         }
 
-        if (blockData instanceof Ageable) {
+        if (blockData instanceof Ageable && this.age != -1) {
             ((Ageable) blockData).setAge(this.age);
         }
 

@@ -7,7 +7,6 @@ import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.version.api.NodeData;
-
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -15,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Log
 public class RegenerationManager {
@@ -192,6 +192,10 @@ public class RegenerationManager {
     }
 
     public void save() {
+        save(false);
+    }
+
+    public void save(boolean join) {
         cache.forEach(process -> {
             if (process != null)
                 process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
@@ -203,11 +207,16 @@ public class RegenerationManager {
 
         log.fine("Saving " + finalCache.size() + " regeneration processes..");
 
-        plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
+        CompletableFuture<Void> future = plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
             log.severe("Could not save processes: " + e.getMessage());
             e.printStackTrace();
             return null;
         });
+
+        // Force the future to complete now.
+        if (join) {
+            future.join();
+        }
     }
 
     public void load() {
@@ -225,12 +234,12 @@ public class RegenerationManager {
                             break;
                         }
 
-                if (!process.convertPreset()) {
-                    process.revert();
-                    continue;
-                }
-                log.fine("Prepared regeneration process " + process);
-            }
+                        if (!process.convertPreset()) {
+                            process.revert();
+                            continue;
+                        }
+                        log.fine("Prepared regeneration process " + process);
+                    }
 
                     if (!this.retry) {
                         // Start em

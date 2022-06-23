@@ -298,9 +298,9 @@ public class RegenerationProcess implements Runnable {
                 task == null ? "null" : task.getTaskId(),
                 presetName,
                 block == null ? "null" : LocationUtil.locationToString(block.getLocation()),
-                originalData.toString(),
-                originalMaterial.toString(),
-                regenerateInto.toString(),
+                originalData,
+                originalMaterial,
+                getRegenerateInto(),
                 timeLeft,
                 regenerationTime);
     }

@@ -42,6 +42,7 @@ public class VersionManager {
     @Getter
     private Methods methods;
 
+    @Getter
     private NodeDataProvider nodeProvider;
 
     public VersionManager(BlockRegen plugin) {

@@ -4,10 +4,9 @@ import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import lombok.extern.java.Log;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import lombok.extern.java.Log;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -35,10 +34,15 @@ public class GsonHelper {
 
     private final Gson gson;
 
+    public GsonHelper(GsonBuilder gsonBuilder) {
+        this.gson = gsonBuilder.create();
+    }
+
     public GsonHelper(boolean prettyPrinting) {
         GsonBuilder gsonBuilder = new GsonBuilder();
-        if (prettyPrinting)
+        if (prettyPrinting) {
             gsonBuilder.setPrettyPrinting();
+        }
         this.gson = gsonBuilder.create();
     }
 
