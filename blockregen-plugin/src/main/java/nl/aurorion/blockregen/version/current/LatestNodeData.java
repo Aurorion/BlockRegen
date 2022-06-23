@@ -1,6 +1,7 @@
 package nl.aurorion.blockregen.version.current;
 
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import lombok.extern.java.Log;
 import nl.aurorion.blockregen.version.api.NodeData;
 import org.bukkit.Axis;
@@ -12,6 +13,7 @@ import org.bukkit.block.data.type.Farmland;
 import org.bukkit.block.data.type.Stairs;
 
 @Log
+@ToString
 @NoArgsConstructor
 public class LatestNodeData implements NodeData {
 
@@ -93,16 +95,5 @@ public class LatestNodeData implements NodeData {
         }
 
         block.setBlockData(blockData);
-    }
-
-    @Override
-    public String toString() {
-        return "LatestNodeData{" +
-                "facing=" + facing +
-                ", stairShape=" + stairShape +
-                ", axis=" + axis +
-                ", rotation=" + rotation +
-                ", age=" + age +
-                '}';
     }
 }

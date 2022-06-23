@@ -16,6 +16,7 @@ import nl.aurorion.blockregen.version.current.LatestNodeData;
 import nl.aurorion.blockregen.version.current.LatestWorldEditProvider;
 import nl.aurorion.blockregen.version.current.LatestWorldGuardProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyMethods;
+import nl.aurorion.blockregen.version.legacy.LegacyNodeData;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldEditProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldGuardProvider;
 import org.bukkit.Bukkit;
@@ -68,6 +69,7 @@ public class VersionManager {
                 if (worldGuard != null)
                     useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new AncientMethods();
+                this.nodeProvider = LegacyNodeData::new;
                 break;
             case "v1_9":
             case "v1_10":
@@ -78,6 +80,7 @@ public class VersionManager {
                 if (worldGuard != null)
                     useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new LegacyMethods();
+                this.nodeProvider = LegacyNodeData::new;
                 break;
             case "v1_13":
             case "v1_14":
