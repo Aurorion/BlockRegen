@@ -218,7 +218,7 @@ public class BlockListener implements Listener {
 
         final AtomicInteger expToDrop = new AtomicInteger(event.getExpToDrop());
 
-        if (plugin.getVersionManager().isCurrenAbove("1_8", false))
+        if (plugin.getVersionManager().isCurrentAbove("1.8", false))
             event.setDropItems(false);
 
         event.setExpToDrop(0);
@@ -226,7 +226,7 @@ public class BlockListener implements Listener {
         List<ItemStack> vanillaDrops = new ArrayList<>(
                 block.getDrops(plugin.getVersionManager().getMethods().getItemInMainHand(player)));
 
-        if (plugin.getVersionManager().isCurrentBelow("1_8", true)) {
+        if (plugin.getVersionManager().isCurrentBelow("1.8", true)) {
             block.setType(Material.AIR);
         }
 
@@ -354,7 +354,7 @@ public class BlockListener implements Listener {
             // Particles
             // -------------------------------------------------------------------------------------------
             // TODO: Make particles work on 1.8 with it's effect API.
-            if (preset.getParticle() != null && plugin.getVersionManager().isCurrenAbove("1.8", false))
+            if (preset.getParticle() != null && plugin.getVersionManager().isCurrentAbove("1.8", false))
                 Bukkit.getScheduler().runTask(plugin,
                         () -> plugin.getParticleManager().displayParticle(preset.getParticle(), block));
         });

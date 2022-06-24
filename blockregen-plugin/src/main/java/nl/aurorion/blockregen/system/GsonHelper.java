@@ -162,40 +162,16 @@ public class GsonHelper {
 
         Path path = Paths.get(dataPath);
 
-        AsynchronousFileChannel channel;
-        try {
-            channel = AsynchronousFileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING,
-                    StandardOpenOption.CREATE);
-        } catch (IOException e) {
-            log.severe("Could not open an asynchronous file channel.");
-            e.printStackTrace();
-            return CompletableFuture.supplyAsync(() -> {
-                throw new CompletionException(e);
-            });
-        }
-
         final Type type = map(input.getClass());
 
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        CompletableFuture.runAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             String jsonString = gson.toJson(input, type).trim();
 
-            ByteBuffer buffer = ByteBuffer.allocate(jsonString.getBytes().length);
-            buffer.put(jsonString.getBytes(StandardCharsets.UTF_8));
-            buffer.flip();
-
-            channel.write(buffer, 0, buffer, new CompletionHandler<Integer, ByteBuffer>() {
-                @Override
-                public void completed(Integer result, ByteBuffer attachment) {
-                    future.complete(null);
-                }
-
-                @Override
-                public void failed(Throwable exc, ByteBuffer attachment) {
-                    future.completeExceptionally(exc);
-                }
-            });
+            try {
+                Files.write(path, jsonString.getBytes(StandardCharsets.UTF_8), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         });
-        return future;
     }
 }

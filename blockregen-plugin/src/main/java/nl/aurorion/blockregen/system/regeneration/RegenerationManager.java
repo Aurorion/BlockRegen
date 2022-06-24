@@ -195,7 +195,7 @@ public class RegenerationManager {
         save(false);
     }
 
-    public void save(boolean join) {
+    public void save(boolean sync) {
         cache.forEach(process -> {
             if (process != null)
                 process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
@@ -207,14 +207,14 @@ public class RegenerationManager {
 
         log.fine("Saving " + finalCache.size() + " regeneration processes..");
 
-        CompletableFuture<Void> future = plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
-            log.severe("Could not save processes: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        });
+        CompletableFuture<Void> future = plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json")
+                .exceptionally(e -> {
+                    log.severe("Could not save processes: " + e.getMessage());
+                    e.printStackTrace();
+                    return null;
+                });
 
-        // Force the future to complete now.
-        if (join) {
+        if (sync) {
             future.join();
         }
     }
