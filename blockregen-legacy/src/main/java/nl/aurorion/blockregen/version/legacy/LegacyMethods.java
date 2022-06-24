@@ -3,12 +3,11 @@ package nl.aurorion.blockregen.version.legacy;
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
-
-import nl.aurorion.blockregen.BlockUtil;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.DyeColor;
 import org.bukkit.TreeSpecies;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -17,15 +16,14 @@ import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Colorable;
 import org.bukkit.material.MaterialData;
-import org.bukkit.material.Wood;
-import org.bukkit.material.Wool;
+import org.bukkit.material.Tree;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import lombok.extern.java.Log;
-
 @Log
+@SuppressWarnings("deprecation")
 public class LegacyMethods implements Methods {
 
     @Override
@@ -78,53 +76,31 @@ public class LegacyMethods implements Methods {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material material = xMaterial.parseMaterial();
-
-        if (material == null) {
-            log.severe(String.format("Material %s not supported on this version.", xMaterial.name()));
-            return false;
-        }
-
-        byte blockData = block.getData();
-        
-        log.fine(String.format("Block: %s:%d, Material: %s:%d", block.getType().name(), blockData, xMaterial.name(),
-                xMaterial.getData()));
-
-        if (block.getType() != material) {
-            log.fine("Block type doesn't match.");
-            return false;
-        }
-
+    public XMaterial getType(@NotNull Block block) {
         BlockState state = block.getState();
-        MaterialData materialData = state.getData();
+        MaterialData data = state.getData();
 
-        // We compare these by hand because byte data contains direction as well.
-        
-        // Compare colors
+        byte dataValue;
 
-        // The only block that can be colored on 1.8 should be wool.
-        if (BlockUtil.isWool(xMaterial)) {
-            if (!(materialData instanceof Wool)) {
-                return false;
-            }
+        if (data instanceof Tree) {
+            TreeSpecies species = ((Tree) data).getSpecies();
+            dataValue = species.getData();
+        } else if (data instanceof Colorable) {
+            DyeColor color = ((Colorable) data).getColor();
+            dataValue = color.getWoolData();
+        } else {
+            // Ignore data
+            dataValue = data.getData();
+            log.fine(String.format("Ignoring material data: %s:%d", state.getType(), dataValue));
 
-            return xMaterial.getData() == block.getData();
+            return XMaterial.matchXMaterial(state.getType());
         }
 
-        // Compare wood types
+        XMaterial xMaterial = XMaterial.matchXMaterial(String.format("%s:%d", block.getType().toString(), dataValue)).orElse(null);
 
-        if (BlockUtil.isWood(xMaterial)) {
-            if (!(materialData instanceof Wood)) {
-                return false;
-            }
+        log.fine(String.format("Parsed material %s:%d into %s", state.getType(), dataValue, xMaterial));
 
-            TreeSpecies species = ((Wood) materialData).getSpecies();
-            return xMaterial.getData() == species.getData();
-        }
-
-        return true;
+        return xMaterial;
     }
 
     @Override

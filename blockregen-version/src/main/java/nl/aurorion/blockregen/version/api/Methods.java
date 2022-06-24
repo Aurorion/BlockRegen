@@ -25,7 +25,11 @@ public interface Methods {
 
     void setType(@NotNull Block block, @NotNull XMaterial xMaterial);
 
-    boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial);
+    XMaterial getType(@NotNull Block block) throws IllegalArgumentException;
+
+    default boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
+        return getType(block) == xMaterial;
+    }
 
     ItemStack getItemInMainHand(@NotNull Player player);
 }

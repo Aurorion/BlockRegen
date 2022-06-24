@@ -129,7 +129,9 @@ public class PlayerListener implements Listener {
         if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
 
-            player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));
+            XMaterial material = plugin.getVersionManager().getMethods().getType(event.getClickedBlock());
+
+            player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", material == null ? "Unsupported material" : material.name()));
         }
     }
 
