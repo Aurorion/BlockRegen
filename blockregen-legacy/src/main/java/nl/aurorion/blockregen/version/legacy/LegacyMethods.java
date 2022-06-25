@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Colorable;
 import org.bukkit.material.MaterialData;
-import org.bukkit.material.Tree;
+import org.bukkit.material.Wood;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -82,8 +82,9 @@ public class LegacyMethods implements Methods {
 
         byte dataValue;
 
-        if (data instanceof Tree) {
-            TreeSpecies species = ((Tree) data).getSpecies();
+        // Use Wood to match Leaves & Saplings correctly as well.
+        if (data instanceof Wood) {
+            TreeSpecies species = ((Wood) data).getSpecies();
             dataValue = species.getData();
         } else if (data instanceof Colorable) {
             DyeColor color = ((Colorable) data).getColor();

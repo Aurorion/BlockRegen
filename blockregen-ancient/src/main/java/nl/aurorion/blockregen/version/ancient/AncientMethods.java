@@ -11,6 +11,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Colorable;
+import org.bukkit.material.Leaves;
 import org.bukkit.material.MaterialData;
 import org.bukkit.material.Tree;
 import org.jetbrains.annotations.NotNull;
@@ -35,6 +36,9 @@ public class AncientMethods implements Methods {
 
         if (data instanceof Tree) {
             TreeSpecies species = ((Tree) data).getSpecies();
+            dataValue = species.getData();
+        } else if (data instanceof Leaves) {
+            TreeSpecies species = ((Leaves) data).getSpecies();
             dataValue = species.getData();
         } else if (data instanceof Colorable) {
             DyeColor color = ((Colorable) data).getColor();
