@@ -7,17 +7,23 @@ import lombok.extern.java.Log;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
-import org.bukkit.Material;
+import org.bukkit.DyeColor;
+import org.bukkit.TreeSpecies;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarStyle;
 import org.bukkit.boss.BossBar;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.Colorable;
+import org.bukkit.material.MaterialData;
+import org.bukkit.material.Wood;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 @Log
+@SuppressWarnings("deprecation")
 public class LegacyMethods implements Methods {
 
     @Override
@@ -70,21 +76,32 @@ public class LegacyMethods implements Methods {
     }
 
     @Override
-    @SuppressWarnings("deprecation")
-    public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        Material type = xMaterial.parseMaterial();
+    public XMaterial getType(@NotNull Block block) {
+        BlockState state = block.getState();
+        MaterialData data = state.getData();
 
-        if (type == null) {
-            log.warning("Type " + xMaterial.name() + " is not supported on this version.");
-            return false;
+        byte dataValue;
+
+        // Use Wood to match Leaves & Saplings correctly as well.
+        if (data instanceof Wood) {
+            TreeSpecies species = ((Wood) data).getSpecies();
+            dataValue = species.getData();
+        } else if (data instanceof Colorable) {
+            DyeColor color = ((Colorable) data).getColor();
+            dataValue = color.getWoolData();
+        } else {
+            // Ignore data
+            dataValue = data.getData();
+            log.fine(String.format("Ignoring material data: %s:%d", state.getType(), dataValue));
+
+            return XMaterial.matchXMaterial(state.getType());
         }
 
-        byte data = xMaterial.getData();
-        // Matching normal types ensures logs and planks match.
-        // Add an exception for glowing redstone ore
-        boolean result = block.getType() == type && block.getData() == data || XMaterial.matchXMaterial(block.getType()) == XMaterial.REDSTONE_ORE && xMaterial == XMaterial.REDSTONE_ORE;
-        log.fine(String.format("Compared %s (%s, %d) and (%s, %d), result: %b", xMaterial, type, (int) xMaterial.getData(), block.getType().toString(), (int) block.getData(), result));
-        return result;
+        XMaterial xMaterial = XMaterial.matchXMaterial(String.format("%s:%d", block.getType().toString(), dataValue)).orElse(null);
+
+        log.fine(String.format("Parsed material %s:%d into %s", state.getType(), dataValue, xMaterial));
+
+        return xMaterial;
     }
 
     @Override

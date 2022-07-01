@@ -6,6 +6,7 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.AutoSaveTask;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
+import nl.aurorion.blockregen.version.api.NodeData;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Log
 public class RegenerationManager {
@@ -75,7 +77,8 @@ public class RegenerationManager {
     public RegenerationProcess createProcess(Block block, BlockPreset preset, String... regionName) {
         RegenerationProcess process = createProcess(block, preset);
 
-        if (process == null) return null;
+        if (process == null)
+            return null;
 
         process.setWorldName(block.getWorld().getName());
 
@@ -90,7 +93,11 @@ public class RegenerationManager {
      */
     @Nullable
     public RegenerationProcess createProcess(Block block, BlockPreset preset) {
-        return block == null || preset == null ? null : new RegenerationProcess(block, preset);
+        // Read the original material
+        NodeData nodeData = plugin.getVersionManager().createNodeData();
+        nodeData.load(block);
+
+        return block == null || preset == null ? null : new RegenerationProcess(block, nodeData, preset);
     }
 
     /**
@@ -185,6 +192,10 @@ public class RegenerationManager {
     }
 
     public void save() {
+        save(false);
+    }
+
+    public void save(boolean sync) {
         cache.forEach(process -> {
             if (process != null)
                 process.setTimeLeft(process.getRegenerationTime() - System.currentTimeMillis());
@@ -196,45 +207,52 @@ public class RegenerationManager {
 
         log.fine("Saving " + finalCache.size() + " regeneration processes..");
 
-        plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json").exceptionally(e -> {
-            log.severe("Could not save processes: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        });
+        CompletableFuture<Void> future = plugin.getGsonHelper().save(finalCache, plugin.getDataFolder().getPath() + "/Data.json")
+                .exceptionally(e -> {
+                    log.severe("Could not save processes: " + e.getMessage());
+                    e.printStackTrace();
+                    return null;
+                });
+
+        if (sync) {
+            future.join();
+        }
     }
 
     public void load() {
-        plugin.getGsonHelper().loadListAsync(plugin.getDataFolder().getPath() + "/Data.json", RegenerationProcess.class).thenAcceptAsync(loadedProcesses -> {
-            cache.clear();
+        plugin.getGsonHelper().loadListAsync(plugin.getDataFolder().getPath() + "/Data.json", RegenerationProcess.class)
+                .thenAcceptAsync(loadedProcesses -> {
+                    cache.clear();
 
-            if (loadedProcesses == null)
-                loadedProcesses = new ArrayList<>();
+                    if (loadedProcesses == null)
+                        loadedProcesses = new ArrayList<>();
 
-            for (RegenerationProcess process : loadedProcesses) {
+                    for (RegenerationProcess process : loadedProcesses) {
 
-                if (!process.convertLocation()) {
-                    this.retry = true;
-                    break;
-                }
+                        if (!process.convertLocation()) {
+                            this.retry = true;
+                            break;
+                        }
 
-                if (!process.convertPreset()) {
-                    process.revert();
-                    continue;
-                }
-                log.fine("Prepared regeneration process " + process);
-            }
+                        if (!process.convertPreset()) {
+                            process.revert();
+                            continue;
+                        }
+                        log.fine("Prepared regeneration process " + process);
+                    }
 
-            if (!this.retry) {
-                // Start em
-                loadedProcesses.forEach(RegenerationProcess::start);
-                log.info("Loaded " + this.cache.size() + " regeneration process(es)...");
-            } else
-                log.info("One of the worlds is probably not loaded. Loading after complete server load instead.");
-        }).exceptionally(e -> {
-            log.severe("Could not load processes: " + e.getMessage());
-            e.printStackTrace();
-            return null;
-        });
+                    if (!this.retry) {
+                        // Start em
+                        loadedProcesses.forEach(RegenerationProcess::start);
+                        log.info("Loaded " + this.cache.size() + " regeneration process(es)...");
+                    } else
+                        log.info(
+                                "One of the worlds is probably not loaded. Loading after complete server load instead.");
+                }).exceptionally(e -> {
+                    log.severe("Could not load processes: " + e.getMessage());
+                    e.printStackTrace();
+                    return null;
+                });
     }
 
     public void reattemptLoad() {

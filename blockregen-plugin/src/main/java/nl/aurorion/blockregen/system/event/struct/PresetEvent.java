@@ -76,7 +76,7 @@ public class PresetEvent {
         event.setDoubleDrops(section.getBoolean("double-drops", false));
         event.setDoubleExperience(section.getBoolean("double-exp", false));
 
-        if (BlockRegen.getInstance().getVersionManager().isCurrenAbove("v1_8", false))
+        if (BlockRegen.getInstance().getVersionManager().isCurrentAbove("1.8", false))
             event.setBossBar(EventBossBar.load(section.getConfigurationSection("bossbar"), "&eEvent &6" + displayName + " &eis active!"));
 
         // Load legacy custom item option

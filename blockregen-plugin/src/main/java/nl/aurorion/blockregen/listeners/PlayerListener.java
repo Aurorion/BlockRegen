@@ -29,7 +29,7 @@ public class PlayerListener implements Listener {
         Player player = event.getPlayer();
 
         // Ignore offhand events at 1.9+
-        if (plugin.getVersionManager().isCurrenAbove("1_9", true) && event.getHand() == EquipmentSlot.OFF_HAND) {
+        if (plugin.getVersionManager().isCurrentAbove("1.9", true) && event.getHand() == EquipmentSlot.OFF_HAND) {
             return;
         }
 
@@ -129,7 +129,9 @@ public class PlayerListener implements Listener {
         if (plugin.getRegenerationManager().hasDataCheck(player)) {
             event.setCancelled(true);
 
-            player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", event.getClickedBlock().getType().toString()));
+            XMaterial material = plugin.getVersionManager().getMethods().getType(event.getClickedBlock());
+
+            player.sendMessage(Message.DATA_CHECK.get(player).replace("%block%", material == null ? "Unsupported material" : material.name()));
         }
     }
 

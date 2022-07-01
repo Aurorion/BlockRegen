@@ -2,6 +2,7 @@ package nl.aurorion.blockregen;
 
 import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.api.ResidenceApi;
+import com.google.gson.GsonBuilder;
 import lombok.Getter;
 import lombok.extern.java.Log;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
@@ -20,7 +21,10 @@ import nl.aurorion.blockregen.system.event.EventManager;
 import nl.aurorion.blockregen.system.preset.PresetManager;
 import nl.aurorion.blockregen.system.regeneration.RegenerationManager;
 import nl.aurorion.blockregen.system.region.RegionManager;
+import nl.aurorion.blockregen.version.NodeDataAdapter;
+import nl.aurorion.blockregen.version.NodeDataInstanceCreator;
 import nl.aurorion.blockregen.version.VersionManager;
+import nl.aurorion.blockregen.version.api.NodeData;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -148,7 +152,12 @@ public class BlockRegen extends JavaPlugin {
 
         versionManager.load();
 
-        gsonHelper = new GsonHelper();
+        GsonBuilder gsonBuilder = new GsonBuilder()
+                .registerTypeHierarchyAdapter(NodeData.class, new NodeDataAdapter<>())
+                .registerTypeAdapter(NodeData.class, new NodeDataInstanceCreator(versionManager.getNodeProvider()))
+                .setPrettyPrinting();
+
+        gsonHelper = new GsonHelper(gsonBuilder);
 
         particleManager = new ParticleManager();
 
@@ -243,7 +252,7 @@ public class BlockRegen extends JavaPlugin {
             regenerationManager.getAutoSaveTask().stop();
 
         regenerationManager.revertAll(false);
-        regenerationManager.save();
+        regenerationManager.save(true);
 
         regionManager.save();
 

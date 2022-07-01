@@ -3,7 +3,8 @@ package nl.aurorion.blockregen.version.current;
 import com.cryptomorin.xseries.XBlock;
 import com.cryptomorin.xseries.XMaterial;
 import com.google.common.base.Strings;
-
+import nl.aurorion.blockregen.StringUtil;
+import nl.aurorion.blockregen.version.api.Methods;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.boss.BarColor;
@@ -13,9 +14,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import nl.aurorion.blockregen.StringUtil;
-import nl.aurorion.blockregen.version.api.Methods;
 
 public class LatestMethods implements Methods {
 
@@ -69,8 +67,8 @@ public class LatestMethods implements Methods {
     }
 
     @Override
-    public boolean compareType(@NotNull Block block, @NotNull XMaterial xMaterial) {
-        return XMaterial.matchXMaterial(block.getType()) == xMaterial;
+    public XMaterial getType(@NotNull Block block) {
+        return XMaterial.matchXMaterial(block.getType());
     }
 
     @Override

@@ -8,12 +8,15 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.version.ancient.AncientMethods;
 import nl.aurorion.blockregen.version.api.Methods;
+import nl.aurorion.blockregen.version.api.NodeData;
 import nl.aurorion.blockregen.version.api.WorldEditProvider;
 import nl.aurorion.blockregen.version.api.WorldGuardProvider;
 import nl.aurorion.blockregen.version.current.LatestMethods;
+import nl.aurorion.blockregen.version.current.LatestNodeData;
 import nl.aurorion.blockregen.version.current.LatestWorldEditProvider;
 import nl.aurorion.blockregen.version.current.LatestWorldGuardProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyMethods;
+import nl.aurorion.blockregen.version.legacy.LegacyNodeData;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldEditProvider;
 import nl.aurorion.blockregen.version.legacy.LegacyWorldGuardProvider;
 import org.bukkit.Bukkit;
@@ -40,6 +43,9 @@ public class VersionManager {
     @Getter
     private Methods methods;
 
+    @Getter
+    private NodeDataProvider nodeProvider;
+
     public VersionManager(BlockRegen plugin) {
         this.plugin = plugin;
     }
@@ -56,38 +62,49 @@ public class VersionManager {
          */
         switch (version) {
             // Try to catch 1.7 into ancient. Might work on some occasions.
-            case "v1_7":
-            case "v1_8":
+            case "1.7":
+            case "1.8":
                 if (worldEdit != null)
                     useWorldEdit(new LegacyWorldEditProvider(this.worldEdit));
                 if (worldGuard != null)
                     useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new AncientMethods();
+                this.nodeProvider = LegacyNodeData::new;
                 break;
-            case "v1_9":
-            case "v1_10":
-            case "v1_11":
-            case "v1_12":
+            case "1.9":
+            case "1.10":
+            case "1.11":
+            case "1.12":
                 if (worldEdit != null)
                     useWorldEdit(new LegacyWorldEditProvider(this.worldEdit));
                 if (worldGuard != null)
                     useWorldGuard(new LegacyWorldGuardProvider(this.worldGuard));
                 this.methods = new LegacyMethods();
+                this.nodeProvider = LegacyNodeData::new;
                 break;
-            case "v1_13":
-            case "v1_14":
-            case "v1_15":
-            case "v1_16":
-            case "v1_17":
-            case "v1_18":
+            case "1.13":
+            case "1.14":
+            case "1.15":
+            case "1.16":
+            case "1.17":
+            case "1.18":
             default:
                 if (worldEdit != null)
                     useWorldEdit(new LatestWorldEditProvider(this.worldEdit));
                 if (worldGuard != null)
                     useWorldGuard(new LatestWorldGuardProvider(this.worldGuard));
                 this.methods = new LatestMethods();
+                this.nodeProvider = LatestNodeData::new;
                 break;
         }
+    }
+
+    public NodeData createNodeData() {
+        return this.nodeProvider.provide();
+    }
+
+    public interface NodeDataProvider {
+        NodeData provide();
     }
 
     public void useWorldGuard(WorldGuardProvider provider) {
@@ -106,16 +123,17 @@ public class VersionManager {
         Pattern pattern = Pattern.compile("v\\d+_\\d+");
 
         Matcher matcher = pattern.matcher(Bukkit.getServer().getClass().getPackage().getName());
-        return matcher.find() ? matcher.group() : null;
+        // v1_8 -> 1.8
+        return matcher.find() ? matcher.group().replace("_", ".").substring(1) : null;
     }
 
-    public boolean isCurrenAbove(String versionString, boolean include) {
-        int res = ParseUtil.compareVersions(this.version.replace("v", "").replace("_", "."), versionString, 2);
+    public boolean isCurrentAbove(String versionString, boolean include) {
+        int res = ParseUtil.compareVersions(this.version, versionString, 2);
         return include ? res >= 0 : res > 0;
     }
 
     public boolean isCurrentBelow(String versionString, boolean include) {
-        int res = ParseUtil.compareVersions(this.version.replace("v", "").replace("_", "."), versionString, 2);
+        int res = ParseUtil.compareVersions(this.version, versionString, 2);
         return include ? res <= 0 : res < 0;
     }
 
