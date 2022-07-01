@@ -97,6 +97,7 @@
         <dependency>
             <groupId>com.github.cryptomorin</groupId>
             <artifactId>XSeries</artifactId>
+            <!-- Latest XSeries compiled and deployed under different version to nexus.devport.space, need a fix that's not released yet. -->
             <version>8.8.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>
