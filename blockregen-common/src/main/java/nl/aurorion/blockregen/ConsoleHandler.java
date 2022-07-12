@@ -1,20 +1,18 @@
 package nl.aurorion.blockregen;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
-
 import com.google.common.base.Strings;
-
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
-import lombok.Getter;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 public class ConsoleHandler extends Handler {
     private final static String NORMAL_PATTERN = "%s&r%s: %s";
@@ -41,6 +39,8 @@ public class ConsoleHandler extends Handler {
         String levelName = String.format("&7%s", record.getLevel().getName());
         if (record.getLevel().intValue() < Level.INFO.intValue()) {
             levelName = "&eDEBUG";
+        } else if (record.getLevel().intValue() > Level.INFO.intValue()) {
+            levelName = "&c" + record.getLevel().getName();
         }
 
         // Format the message corresponding to the format.

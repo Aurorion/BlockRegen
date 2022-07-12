@@ -61,19 +61,23 @@ public class BlockListener implements Listener {
 
         BlockPreset preset = plugin.getPresetManager().getPresetByBlock(block).orElse(null);
 
+        RegenerationProcess process = plugin.getRegenerationManager().getProcess(block);
+
         // Check if the block is regenerating already
-        if (plugin.getRegenerationManager().isRegenerating(block)) {
+        if (process != null) {
 
             // Remove the process
             if (hasBypass(player)) {
-                plugin.getRegenerationManager().removeProcess(block);
+                plugin.getRegenerationManager().removeProcess(process);
                 log.fine("Removed process in bypass.");
                 return;
             }
 
-            log.fine("Block is regenerating.");
-            event.setCancelled(true);
-            return;
+            if (process.getRegenerationTime() > System.currentTimeMillis()) {
+                log.fine(String.format("Block is regenerating. Process: %s", process));
+                event.setCancelled(true);
+                return;
+            }
         }
 
         // Check bypass

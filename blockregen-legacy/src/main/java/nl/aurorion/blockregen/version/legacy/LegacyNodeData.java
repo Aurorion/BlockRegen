@@ -58,8 +58,7 @@ public class LegacyNodeData implements NodeData {
             this.farmland = true;
         }
 
-        log.fine("Loaded block data " + this);
-        log.fine(block.getType().toString());
+        log.fine(String.format("Loaded block data %s (%s)", block.getType(), this));
     }
 
     @Override

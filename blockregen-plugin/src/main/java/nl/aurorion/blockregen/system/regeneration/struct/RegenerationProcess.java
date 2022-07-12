@@ -22,8 +22,6 @@ import java.util.Objects;
 @Data
 public class RegenerationProcess implements Runnable {
 
-    // TODO Gson adapter for processes
-
     private SimpleLocation location;
 
     private transient Block block;
@@ -97,6 +95,8 @@ public class RegenerationProcess implements Runnable {
         BlockRegen plugin = BlockRegen.getInstance();
 
         // Register that the process is actually running now
+        // #start() can be called even on a process already in cache due to #contains() checks (which use #equals()) in RegenerationManager.
+        // Two processes with the same location cannot be added.
         plugin.getRegenerationManager().registerProcess(this);
 
         // If timeLeft is -1, generate a new one from preset regen delay.
@@ -120,13 +120,13 @@ public class RegenerationProcess implements Runnable {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 plugin.getVersionManager().getMethods().setType(block, getReplaceMaterial());
                 this.originalData.place(block); // Apply data
-                log.fine("Replaced block with " + replaceMaterial.toString());
+                log.fine("Replaced block for " + this);
             });
         }
 
         // Start the task
         this.task = Bukkit.getScheduler().runTaskLaterAsynchronously(plugin, this, timeLeft / 50);
-        log.fine(String.format("Regenerate %s in %ds", this, timeLeft / 50));
+        log.fine(String.format("Regenerate %s in %ds", this, timeLeft / 1000));
         return true;
     }
 
@@ -174,13 +174,16 @@ public class RegenerationProcess implements Runnable {
 
         // Set type
         XMaterial regenerateInto = getRegenerateInto();
-        if (regenerateInto != null) {
-            Bukkit.getScheduler().runTask(plugin, () -> {
-                plugin.getVersionManager().getMethods().setType(block, regenerateInto);
-                this.originalData.place(block); // Apply data
-                log.fine("Regenerated block " + originalData.toString() + " into " + regenerateInto);
-            });
+        if (regenerateInto == null) {
+            log.fine("Found no regeneration material for " + this);
+            return;
         }
+
+        Bukkit.getScheduler().runTask(plugin, () -> {
+            plugin.getVersionManager().getMethods().setType(block, regenerateInto);
+            this.originalData.place(block); // Apply data
+            log.fine("Regenerated " + this);
+        });
     }
 
     // Revert process to original material.
@@ -294,13 +297,14 @@ public class RegenerationProcess implements Runnable {
 
     @Override
     public String toString() {
-        return String.format("{%s;%s;%s;%s;%s;%s;%d;%d}",
+        return String.format("{task=%s; presetName=%s; block=%s; originalData=%s; originalMaterial=%s; regenerateInto=%s; replaceMaterial=%s; timeLeft=%d; regenerationTime=%d}",
                 task == null ? "null" : task.getTaskId(),
                 presetName,
                 block == null ? "null" : LocationUtil.locationToString(block.getLocation()),
                 originalData,
                 originalMaterial,
                 getRegenerateInto(),
+                getReplaceMaterial(),
                 timeLeft,
                 regenerationTime);
     }
