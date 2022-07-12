@@ -3,6 +3,7 @@ package nl.aurorion.blockregen.system.preset;
 import com.cryptomorin.xseries.XMaterial;
 import com.cryptomorin.xseries.XSound;
 import com.google.common.base.Strings;
+import lombok.extern.java.Log;
 import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
@@ -13,8 +14,6 @@ import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-
-import lombok.extern.java.Log;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -101,7 +100,7 @@ public class PresetManager {
         try {
             preset.setReplaceMaterial(DynamicMaterial.fromString(replaceMaterial));
         } catch (IllegalArgumentException e) {
-            log.severe("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name
+            log.warning("Dynamic material ( " + replaceMaterial + " ) in replace-block material for " + name
                     + " is invalid: " + e.getMessage());
             e.printStackTrace();
             return;
@@ -116,7 +115,7 @@ public class PresetManager {
         try {
             preset.setRegenMaterial(DynamicMaterial.fromString(regenerateInto));
         } catch (IllegalArgumentException e) {
-            log.severe("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name
+            log.warning("Dynamic material ( " + regenerateInto + " ) in regenerate-into material for " + name
                     + " is invalid: " + e.getMessage());
             e.printStackTrace();
             return;

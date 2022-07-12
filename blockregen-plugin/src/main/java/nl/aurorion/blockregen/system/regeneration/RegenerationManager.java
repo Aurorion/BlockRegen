@@ -103,11 +103,14 @@ public class RegenerationManager {
     /**
      * Register the process as running.
      */
-    public void registerProcess(RegenerationProcess process) {
-        if (!cache.contains(process)) {
-            cache.add(process);
-            log.fine("Registered regeneration process " + process.toString());
+    public void registerProcess(@NotNull RegenerationProcess process) {
+        if (cache.contains(process)) {
+            log.fine(String.format("Cache already contains process for location %s", process.getLocation()));
+            return;
         }
+
+        cache.add(process);
+        log.fine("Registered regeneration process " + process);
     }
 
     @Nullable
@@ -129,9 +132,8 @@ public class RegenerationManager {
                 continue;
 
             // Try to start the process again.
-            if (process.getTimeLeft() < 0) {
-                if (!process.start())
-                    return null;
+            if (process.getTimeLeft() < 0 && !process.start()) {
+                return null;
             }
 
             return process;
@@ -140,12 +142,17 @@ public class RegenerationManager {
     }
 
     public boolean isRegenerating(@NotNull Block block) {
-        return getProcess(block) != null;
+        RegenerationProcess process = getProcess(block);
+
+        return process != null && process.getRegenerationTime() > System.currentTimeMillis();
     }
 
     public void removeProcess(RegenerationProcess process) {
-        cache.remove(process);
-        log.fine("Removed process from cache: " + process.toString());
+        if (cache.remove(process)) {
+            log.fine(String.format("Removed process from cache: %s", process));
+        } else {
+            log.fine(String.format("Process %s not found, not removed.", process));
+        }
     }
 
     public void removeProcess(@NotNull Block block) {
