@@ -60,7 +60,7 @@ public enum Message {
     NO_SELECTION("No-Region-Selected", "&cSelect a region with WorldEdit first."),
     DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&7Region &f%region% &7successfully saved!"),
-    REMOVE_REGION("Remove-Region", "&aRegion successfully removed!"),
+    REMOVE_REGION("Remove-Region", "&aRegion successfully deleted!"),
     UNKNOWN_REGION("Unknown-Region", "&cThere is no region with that name!"),
     COULD_NOT_CREATE_REGION("Could-Not-Create-Region", "&cCould not created a region."),
     SELECT_FIRST("Select-First", "&7Set first position to &f%x%, %y%, %z%."),

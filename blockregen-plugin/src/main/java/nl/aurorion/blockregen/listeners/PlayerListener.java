@@ -76,7 +76,7 @@ public class PlayerListener implements Listener {
         if (player.hasPermission("blockregen.region") && handMaterial == XMaterial.WOODEN_SHOVEL && region != null) {
             event.setCancelled(true);
 
-            BlockPreset preset = plugin.getPresetManager().getPresetByBlock(event.getClickedBlock()).orElse(null);
+            BlockPreset preset = plugin.getPresetManager().getPreset(event.getClickedBlock());
 
             if (preset == null) {
 

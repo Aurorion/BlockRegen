@@ -239,6 +239,8 @@ public class BlockRegen extends JavaPlugin {
         files.getBlockList().load();
         presetManager.loadAll();
 
+        regionManager.reload();
+
         if (getConfig().getBoolean("Auto-Save.Enabled", false))
             regenerationManager.reloadAutoSave();
 

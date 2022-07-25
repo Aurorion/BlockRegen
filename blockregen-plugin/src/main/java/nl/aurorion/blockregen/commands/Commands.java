@@ -29,9 +29,13 @@ public class Commands implements CommandExecutor {
             + "\n&3/%label% check &8- &7Check the correct material name to use. Just hit a block."
             + "\n&3/%label% tools &8- &7Gives you tools for regions."
             + "\n&3/%label% regions &8- &7List regions."
-            + "\n&3/%label% region set <name> &8- &7Create a region from your selection."
-            + "\n&3/%label% region all <name> &8- &7Switch 'all presets' mode."
-            + "\n&3/%label% region remove <name> &8- &7Delete a region."
+            + "\n&3/%label% region set <region> &8- &7Create a region from your selection."
+            + "\n&3/%label% region all <region> &8- &7Switch 'all presets' mode."
+            + "\n&3/%label% region add <region> <preset> &8- &7Add a preset to the region."
+            + "\n&3/%label% region remove <region> <preset> &8- &7Remove a preset from region."
+            + "\n&3/%label% region clear <region> &8- &7Clear all presets from the region."
+            + "\n&3/%label% region copy <region-from> <region-to> &8- &7Copy configured presets from one region to another."
+            + "\n&3/%label% region delete <region> &8- &7Delete a region."
             + "\n&3/%label% events &8- &7Event management."
             + "\n&3/%label% discord &8- &7BlockRegen discord invite. Ask for support there.";
 
@@ -179,110 +183,236 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (args[1].equalsIgnoreCase("list")) {
-                    if (args.length > 2) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region list", label)));
-                        return false;
-                    }
-
-                    StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
-                    for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
-
-                        message.append(String.format("&8  - &f%s", region.getName()));
-
-                        if (region.isAll()) {
-                            message.append("&8 (&aall&8)\n");
-                        } else {
-                            if (!region.getPresets().isEmpty()) {
-                                message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
-                            } else {
-                                message.append("&8 (&cnone&8)\n");
-                            }
-                        }
-                    }
-                    sender.sendMessage(StringUtil.color(message.toString()));
-                    return false;
-                } else if (args[1].equalsIgnoreCase("set")) {
-
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region set <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region set <name>", label)));
-                        return false;
-                    }
-
-                    if (plugin.getRegionManager().exists(args[2])) {
-                        Message.DUPLICATED_REGION.send(player);
-                        return false;
-                    }
-
-                    RegionSelection selection;
-
-                    if (plugin.getVersionManager().getWorldEditProvider() != null) {
-                        selection = plugin.getVersionManager().getWorldEditProvider().createSelection(player);
-
-                        if (selection == null) {
-                            Message.NO_SELECTION.send(player);
+                switch (args[1].toLowerCase()) {
+                    case "list": {
+                        if (args.length > 2) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region list", label)));
                             return false;
                         }
-                    } else {
-                        selection = plugin.getRegionManager().getSelection(player);
-                    }
 
-                    if (!plugin.getRegionManager().finishSelection(args[2], selection)) {
-                        sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
+                        for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
+
+                            message.append(String.format("&8  - &f%s", region.getName()));
+
+                            if (region.isAll()) {
+                                message.append("&8 (&aall&8)\n");
+                            } else {
+                                if (!region.getPresets().isEmpty()) {
+                                    message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                                } else {
+                                    message.append("&8 (&cnone&8)\n");
+                                }
+                            }
+                        }
+                        sender.sendMessage(StringUtil.color(message.toString()));
                         return false;
                     }
+                    case "set": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region set <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region set <name>", label)));
+                            return false;
+                        }
 
-                    player.sendMessage(StringUtil.color(Message.SET_REGION.get(player)
-                            .replace("%region%", args[2])));
-                    return false;
-                } else if (args[1].equalsIgnoreCase("remove")) {
+                        if (plugin.getRegionManager().exists(args[2])) {
+                            Message.DUPLICATED_REGION.send(player);
+                            return false;
+                        }
 
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region remove <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region remove <name>", label)));
-                        return false;
-                    }
+                        RegionSelection selection;
 
-                    if (!plugin.getRegionManager().exists(args[2])) {
-                        Message.UNKNOWN_REGION.send(player);
-                        return false;
-                    }
+                        if (plugin.getVersionManager().getWorldEditProvider() != null) {
+                            selection = plugin.getVersionManager().getWorldEditProvider().createSelection(player);
 
-                    plugin.getRegionManager().removeRegion(args[2]);
-                    Message.REMOVE_REGION.send(player);
-                    return false;
-                } else if (args[1].equalsIgnoreCase("all")) {
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region all <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region all <name>", label)));
-                        return false;
-                    }
+                            if (selection == null) {
+                                Message.NO_SELECTION.send(player);
+                                return false;
+                            }
+                        } else {
+                            selection = plugin.getRegionManager().getSelection(player);
+                        }
 
-                    RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+                        if (!plugin.getRegionManager().finishSelection(args[2], selection)) {
+                            sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                            return false;
+                        }
 
-                    if (region == null) {
-                        Message.UNKNOWN_REGION.send(player);
+                        player.sendMessage(StringUtil.color(Message.SET_REGION.get(player)
+                                .replace("%region%", args[2])));
                         return false;
                     }
+                    case "delete": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region delete <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region delete <name>", label)));
+                            return false;
+                        }
 
-                    player.sendMessage(StringUtil.color(String.format(Message.SET_ALL.get(player), region.setAll(!region.isAll()) ? "&aall" : "&cnot all")));
-                    return false;
-                } else {
-                    sendHelp(sender, label);
+                        if (!plugin.getRegionManager().exists(args[2])) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        plugin.getRegionManager().removeRegion(args[2]);
+                        Message.REMOVE_REGION.send(player);
+                        return false;
+                    }
+                    case "all": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region all <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region all <name>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        player.sendMessage(StringUtil.color(String.format(Message.SET_ALL.get(player), region.setAll(!region.isAll()) ? "&aall" : "&cnot all")));
+                        return false;
+                    }
+                    case "add": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region add <name> <preset>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region add <name> <preset>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
+
+                        if (preset == null) {
+                            // TODO: message
+                            player.sendMessage("Invalid preset.");
+                            return false;
+                        }
+
+                        region.addPreset(preset);
+                        // TODO: Message
+                        player.sendMessage("Added preset " + preset.getName() + " to region " + region.getName());
+                        break;
+                    }
+                    case "remove": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region remove <name> <preset>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region remove <name> <preset>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
+
+                        if (preset == null) {
+                            // TODO: message
+                            player.sendMessage("Invalid preset.");
+                            return false;
+                        }
+
+                        if (!region.hasPreset(preset)) {
+                            // TODO: Message
+                            player.sendMessage("Region doesn't have preset " + preset.getName() + " configured.");
+                            return false;
+                        }
+
+                        region.removePreset(preset);
+                        // TODO: Message
+                        player.sendMessage("Removed preset " + preset.getName() + " from region " + region.getName());
+                        break;
+                    }
+                    case "clear": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region clear <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region clear <name>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        region.clearPresets();
+                        // TODO: Message
+                        player.sendMessage("Cleared presets of " + region.getName());
+                        break;
+                    }
+                    case "copy": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region copy <region-from> <region-to>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region copy <region-from> <region-to>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion regionFrom = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (regionFrom == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        RegenerationRegion regionTo = plugin.getRegionManager().getRegion(args[3]);
+
+                        if (regionTo == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        regionTo.clearPresets();
+
+                        regionFrom.getPresets().forEach(regionTo::addPreset);
+                        // TODO: Message
+                        player.sendMessage("Copied presets from region " + regionFrom.getName() + " to region " + regionTo.getName());
+                        break;
+                    }
+                    default:
+                        sendHelp(sender, label);
                 }
                 break;
             }
