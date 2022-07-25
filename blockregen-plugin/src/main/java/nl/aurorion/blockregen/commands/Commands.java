@@ -309,14 +309,22 @@ public class Commands implements CommandExecutor {
                         BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
 
                         if (preset == null) {
-                            // TODO: message
-                            player.sendMessage("Invalid preset.");
+                            player.sendMessage(Message.INVALID_PRESET.get(player)
+                                    .replace("%preset%", args[3]));
+                            return false;
+                        }
+
+                        if (region.hasPreset(preset)) {
+                            player.sendMessage(Message.HAS_PRESET_ALREADY.get(player)
+                                    .replace("%region%", args[2])
+                                    .replace("%preset%", args[3]));
                             return false;
                         }
 
                         region.addPreset(preset);
-                        // TODO: Message
-                        player.sendMessage("Added preset " + preset.getName() + " to region " + region.getName());
+                        player.sendMessage(Message.PRESET_ADDED.get(player)
+                                .replace("%preset%", args[3])
+                                .replace("%region%", args[2]));
                         break;
                     }
                     case "remove": {
@@ -340,20 +348,22 @@ public class Commands implements CommandExecutor {
                         BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
 
                         if (preset == null) {
-                            // TODO: message
-                            player.sendMessage("Invalid preset.");
+                            player.sendMessage(Message.INVALID_PRESET.get(player)
+                                    .replace("%preset%", args[3]));
                             return false;
                         }
 
                         if (!region.hasPreset(preset)) {
-                            // TODO: Message
-                            player.sendMessage("Region doesn't have preset " + preset.getName() + " configured.");
+                            player.sendMessage(Message.DOES_NOT_HAVE_PRESET.get(player)
+                                    .replace("%region%", args[2])
+                                    .replace("%preset%", args[3]));
                             return false;
                         }
 
                         region.removePreset(preset);
-                        // TODO: Message
-                        player.sendMessage("Removed preset " + preset.getName() + " from region " + region.getName());
+                        player.sendMessage(Message.PRESET_REMOVED.get(player)
+                                .replace("%preset%", args[3])
+                                .replace("%region%", args[2]));
                         break;
                     }
                     case "clear": {
@@ -375,8 +385,8 @@ public class Commands implements CommandExecutor {
                         }
 
                         region.clearPresets();
-                        // TODO: Message
-                        player.sendMessage("Cleared presets of " + region.getName());
+                        player.sendMessage(Message.PRESETS_CLEARED.get(player)
+                                .replace("%region%", region.getName()));
                         break;
                     }
                     case "copy": {
@@ -407,8 +417,9 @@ public class Commands implements CommandExecutor {
                         regionTo.clearPresets();
 
                         regionFrom.getPresets().forEach(regionTo::addPreset);
-                        // TODO: Message
-                        player.sendMessage("Copied presets from region " + regionFrom.getName() + " to region " + regionTo.getName());
+                        player.sendMessage(Message.PRESETS_COPIED.get(player)
+                                .replace("%regionFrom%", regionFrom.getName())
+                                .replace("%regionTo%", regionTo.getName()));
                         break;
                     }
                     default:
