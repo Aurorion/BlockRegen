@@ -148,14 +148,14 @@ public class RegionManager {
 
         // Attach presets
         for (String presetName : rawRegion.getBlockPresets()) {
-            Optional<BlockPreset> preset = plugin.getPresetManager().getPreset(presetName);
+            BlockPreset preset = plugin.getPresetManager().getPreset(presetName);
 
-            if (!preset.isPresent()) {
+            if (preset == null) {
                 log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, rawRegion.getName()));
                 continue;
             }
 
-            region.addPreset(preset.get());
+            region.addPreset(preset);
         }
 
         region.setAll(rawRegion.isAll());
@@ -168,35 +168,23 @@ public class RegionManager {
     // Only attempt to reload the presets configured as they could've changed.
     // Reloading whole regions could lead to the regeneration disabling. Could hurt the builds etc.
     public void reload() {
-        plugin.getFiles().getRegions().load();
 
-        FileConfiguration regions = plugin.getFiles().getRegions().getFileConfiguration();
+        for (RegenerationRegion region : this.loadedRegions.values()) {
+            List<String> presets = region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.toList());
 
-        ConfigurationSection parentSection = regions.getConfigurationSection("Regions");
+            region.clearPresets();
 
-        if (parentSection != null) {
-            for (String name : parentSection.getKeys(false)) {
-                RegenerationRegion region = getRegion(name);
+            // Attach presets
+            for (String presetName : presets) {
+                BlockPreset preset = plugin.getPresetManager().getPreset(presetName);
 
-                // The region is not loaded but in file, just dodge this bullet.
-                if (region == null) {
+                if (preset == null) {
+                    log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, region.getName()));
                     continue;
                 }
 
-                List<String> presets = parentSection.getStringList(name + ".Presets");
-
-                // Attach presets
-                for (String presetName : presets) {
-                    Optional<BlockPreset> preset = plugin.getPresetManager().getPreset(presetName);
-
-                    if (!preset.isPresent()) {
-                        log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, name));
-                        continue;
-                    }
-
-                    region.addPreset(preset.get());
-                    log.fine("Reloaded region " + region.getName());
-                }
+                region.addPreset(preset);
+                log.fine("Reloaded region " + region.getName());
             }
         }
 
