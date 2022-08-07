@@ -34,8 +34,8 @@ public class PresetManager {
         this.plugin = plugin;
     }
 
-    public Optional<BlockPreset> getPreset(String name) {
-        return Optional.ofNullable(presets.getOrDefault(name, null));
+    public BlockPreset getPreset(@Nullable String name) {
+        return presets.get(name);
     }
 
     @Nullable

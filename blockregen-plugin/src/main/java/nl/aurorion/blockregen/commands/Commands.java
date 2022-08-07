@@ -7,6 +7,7 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
 import org.bukkit.command.Command;
@@ -17,6 +18,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -306,7 +311,7 @@ public class Commands implements CommandExecutor {
                             return false;
                         }
 
-                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]);
 
                         if (preset == null) {
                             player.sendMessage(Message.INVALID_PRESET.get(player)
@@ -345,7 +350,7 @@ public class Commands implements CommandExecutor {
                             return false;
                         }
 
-                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]).orElse(null);
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]);
 
                         if (preset == null) {
                             player.sendMessage(Message.INVALID_PRESET.get(player)
@@ -425,6 +430,49 @@ public class Commands implements CommandExecutor {
                     default:
                         sendHelp(sender, label);
                 }
+                break;
+            }
+            case "regen": {
+                // /blockregen regen -p preset -w world -r region
+
+                String[] workArgs = Arrays.copyOfRange(args, 1, args.length);
+
+                BlockPreset preset = null;
+                String worldName = null;
+                RegenerationRegion region = null;
+
+                Iterator<String> it = Arrays.stream(workArgs).iterator();
+
+                while (it.hasNext()) {
+                    String arg = it.next();
+
+                    if (arg.equalsIgnoreCase("-p") && it.hasNext()) {
+                        preset = plugin.getPresetManager().getPreset(it.next());
+                    } else if (arg.equalsIgnoreCase("-r") && it.hasNext()) {
+                        region = plugin.getRegionManager().getRegion(it.next());
+                    } else if (arg.equalsIgnoreCase("-w") && it.hasNext()) {
+                        worldName = it.next();
+                    } else {
+                        // TODO: Message
+                        sender.sendMessage("Unknown argument.");
+                        return false;
+                    }
+                }
+
+                Set<RegenerationProcess> toRegen = new HashSet<>();
+
+                for (RegenerationProcess process : plugin.getRegenerationManager().getCache()) {
+                    if ((preset == null || preset.equals(process.getPreset())) &&
+                            (region == null || region.getName().equalsIgnoreCase(process.getRegionName())) &&
+                            (worldName == null || worldName.equalsIgnoreCase(process.getWorldName()))) {
+                        toRegen.add(process);
+                    }
+                }
+
+                toRegen.forEach(p -> p.regenerate());
+
+                // TODO: Message
+                sender.sendMessage("Regenerated " + toRegen.size() + " process(es)...");
                 break;
             }
             case "debug":
