@@ -33,6 +33,7 @@ public enum Message {
     RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
 
     TOOLS("Tools", "&7Gave you the tools."),
+    UNKNOWN_ARGUMENT("Unknown-Argument", "&cUnknown argument."),
 
     /**
      * Bypass
@@ -74,6 +75,7 @@ public enum Message {
     PRESET_REMOVED("Preset-Removed", "&7Removed preset &f%preset% &7from region &f%region%."),
     PRESETS_CLEARED("Presets-Cleared", "&7Presets cleared from region &f%region%."),
     PRESETS_COPIED("Presets-Copied", "&7Copied presets from &f%regionFrom% &7to &f%regionTo%."),
+    REGENERATED_PROCESSES("Regenerated-Processes", "&7Regenerated &f%count% &7process(es)."),
 
     /**
      * Events

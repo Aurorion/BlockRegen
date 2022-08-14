@@ -453,8 +453,7 @@ public class Commands implements CommandExecutor {
                     } else if (arg.equalsIgnoreCase("-w") && it.hasNext()) {
                         worldName = it.next();
                     } else {
-                        // TODO: Message
-                        sender.sendMessage("Unknown argument.");
+                        sender.sendMessage(Message.UNKNOWN_ARGUMENT.get());
                         return false;
                     }
                 }
@@ -469,10 +468,10 @@ public class Commands implements CommandExecutor {
                     }
                 }
 
-                toRegen.forEach(p -> p.regenerate());
+                toRegen.forEach(RegenerationProcess::regenerate);
 
-                // TODO: Message
-                sender.sendMessage("Regenerated " + toRegen.size() + " process(es)...");
+                sender.sendMessage(Message.REGENERATED_PROCESSES.get()
+                        .replace("%count%", String.valueOf(toRegen.size())));
                 break;
             }
             case "debug":
