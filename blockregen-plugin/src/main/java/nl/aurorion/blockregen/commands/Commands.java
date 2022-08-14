@@ -41,6 +41,7 @@ public class Commands implements CommandExecutor {
             + "\n&3/%label% region clear <region> &8- &7Clear all presets from the region."
             + "\n&3/%label% region copy <region-from> <region-to> &8- &7Copy configured presets from one region to another."
             + "\n&3/%label% region delete <region> &8- &7Delete a region."
+            + "\n&3/%label% regen (-p <preset>) (-r <region>) (-w <world>) &8- &7Regenerate presets based on argument switches."
             + "\n&3/%label% events &8- &7Event management."
             + "\n&3/%label% discord &8- &7BlockRegen discord invite. Ask for support there.";
 
