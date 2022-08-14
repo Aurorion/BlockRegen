@@ -59,7 +59,17 @@ public class BlockListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        BlockPreset preset = plugin.getPresetManager().getPresetByBlock(block).orElse(null);
+        boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
+
+        BlockPreset preset;
+
+        RegenerationRegion region = plugin.getRegionManager().getRegion(block.getLocation());
+
+        if (useRegions && region != null) {
+            preset = plugin.getPresetManager().getPreset(block, region);
+        } else {
+            preset = plugin.getPresetManager().getPreset(block);
+        }
 
         RegenerationProcess process = plugin.getRegenerationManager().getProcess(block);
 
@@ -143,14 +153,8 @@ public class BlockListener implements Listener {
 
         boolean isInWorld = plugin.getConfig().getStringList("Worlds-Enabled").contains(world.getName());
 
-        boolean useRegions = plugin.getConfig().getBoolean("Use-Regions", false);
-
         if (useRegions) {
-            RegenerationRegion region = plugin.getRegionManager().getRegion(block.getLocation());
-
-            boolean isInRegion = region != null;
-
-            if (isInRegion) {
+            if (region != null) {
                 if (preset != null && region.hasPreset(preset)) {
                     process(plugin.getRegenerationManager().createProcess(block, preset, region.getName()), preset,
                             event);

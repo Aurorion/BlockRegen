@@ -4,6 +4,7 @@ import com.cryptomorin.xseries.XMaterial;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.java.Log;
+import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.preset.struct.Amount;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
@@ -56,12 +57,28 @@ public class ItemDrop {
     @Setter
     private ExperienceDrop experienceDrop;
 
+    @Getter
+    @Setter
+    private Amount chance;
+
     public ItemDrop(XMaterial material) {
         this.material = material;
     }
 
     @Nullable
     public ItemStack toItemStack(Player player) {
+
+        // x/100% chance to drop
+        if (chance != null) {
+            int threshold = chance.getInt();
+            int roll = BlockRegen.getInstance().getRandom().nextInt(101);
+
+            if (roll > threshold) {
+                log.fine(String.format("Drop %s failed chance roll, %d > %d", this, roll, threshold));
+                return null;
+            }
+        }
+
         int amount = this.amount.getInt();
 
         if (amount <= 0) return null;
@@ -124,6 +141,7 @@ public class ItemDrop {
         drop.setDropNaturally(section.getBoolean("drop-naturally", preset.isDropNaturally()));
 
         drop.setExperienceDrop(ExperienceDrop.load(section.getConfigurationSection("exp"), drop));
+        drop.setChance(Amount.load(section, "chance", 100));
 
         return drop;
     }

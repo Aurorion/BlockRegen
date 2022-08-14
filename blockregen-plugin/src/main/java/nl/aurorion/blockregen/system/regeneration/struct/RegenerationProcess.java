@@ -250,7 +250,7 @@ public class RegenerationProcess implements Runnable {
     public boolean convertPreset() {
         BlockRegen plugin = BlockRegen.getInstance();
 
-        BlockPreset preset = plugin.getPresetManager().getPreset(presetName).orElse(null);
+        BlockPreset preset = plugin.getPresetManager().getPreset(presetName);
 
         if (preset == null) {
             log.severe("Could not load process " + this + ", it's preset '" + presetName + "' is invalid.");

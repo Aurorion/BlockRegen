@@ -11,9 +11,12 @@ import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
 import nl.aurorion.blockregen.system.preset.struct.PresetConditions;
 import nl.aurorion.blockregen.system.preset.struct.PresetRewards;
 import nl.aurorion.blockregen.system.preset.struct.material.DynamicMaterial;
+import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import org.bukkit.block.Block;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -31,15 +34,28 @@ public class PresetManager {
         this.plugin = plugin;
     }
 
-    public Optional<BlockPreset> getPreset(String name) {
-        return Optional.ofNullable(presets.getOrDefault(name, null));
+    public BlockPreset getPreset(@Nullable String name) {
+        return presets.get(name);
     }
 
-    public Optional<BlockPreset> getPresetByBlock(Block block) {
-        return presets.values().stream()
-                .filter(preset -> plugin.getVersionManager().getMethods().compareType(block,
-                        preset.getTargetMaterial()))
-                .findAny();
+    @Nullable
+    public BlockPreset getPreset(@NotNull Block block) {
+        for (BlockPreset preset : this.presets.values()) {
+            if (plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial())) {
+                return preset;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    public BlockPreset getPreset(@NotNull Block block, @NotNull RegenerationRegion region) {
+        for (BlockPreset preset : this.presets.values()) {
+            if (plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial()) && region.hasPreset(preset)) {
+                return preset;
+            }
+        }
+        return null;
     }
 
     public Map<String, BlockPreset> getPresets() {

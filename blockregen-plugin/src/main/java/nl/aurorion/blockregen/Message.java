@@ -33,6 +33,7 @@ public enum Message {
     RELOAD("Reload", "&aSuccessfully reloaded Settings.yml, Messages.yml, Blocklist.yml & re-filled the events!"),
 
     TOOLS("Tools", "&7Gave you the tools."),
+    UNKNOWN_ARGUMENT("Unknown-Argument", "&cUnknown argument."),
 
     /**
      * Bypass
@@ -60,17 +61,21 @@ public enum Message {
     NO_SELECTION("No-Region-Selected", "&cSelect a region with WorldEdit first."),
     DUPLICATED_REGION("Duplicated-Region", "&cThere is already a region with that name!"),
     SET_REGION("Set-Region", "&7Region &f%region% &7successfully saved!"),
-    REMOVE_REGION("Remove-Region", "&aRegion successfully removed!"),
+    REMOVE_REGION("Remove-Region", "&aRegion successfully deleted!"),
     UNKNOWN_REGION("Unknown-Region", "&cThere is no region with that name!"),
     COULD_NOT_CREATE_REGION("Could-Not-Create-Region", "&cCould not created a region."),
     SELECT_FIRST("Select-First", "&7Set first position to &f%x%, %y%, %z%."),
     SELECT_SECOND("Select-Second", "&7Set second position to &f%x%, %y%, %z%."),
     SET_ALL("Set-All", "&7Region set to %s &7presets."),
+    INVALID_PRESET("Invalid-Preset", "&cPreset %preset% does not exist."),
 
     HAS_PRESET_ALREADY("Has-Preset-Already", "&7Region &f%region% &7has preset &f%preset% &7already."),
     DOES_NOT_HAVE_PRESET("Does-Not-Have-Preset", "&7Region &f%region% &7does not have preset &f%preset%."),
     PRESET_ADDED("Preset-Added", "&7Added preset &f%preset% &7to region &f%region%."),
     PRESET_REMOVED("Preset-Removed", "&7Removed preset &f%preset% &7from region &f%region%."),
+    PRESETS_CLEARED("Presets-Cleared", "&7Presets cleared from region &f%region%."),
+    PRESETS_COPIED("Presets-Copied", "&7Copied presets from &f%regionFrom% &7to &f%regionTo%."),
+    REGENERATED_PROCESSES("Regenerated-Processes", "&7Regenerated &f%count% &7process(es)."),
 
     /**
      * Events

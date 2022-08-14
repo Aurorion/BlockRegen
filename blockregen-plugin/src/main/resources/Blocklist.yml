@@ -136,7 +136,6 @@ Blocks:
         - 'say Hello from the event.'
 
       custom-item:
-        enabled: false
         amount: 1
         material: LEATHER_BOOTS
         name: "&6Fancy shoes"

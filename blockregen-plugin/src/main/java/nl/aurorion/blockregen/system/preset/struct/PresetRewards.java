@@ -1,18 +1,6 @@
 package nl.aurorion.blockregen.system.preset.struct;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import com.cryptomorin.xseries.XMaterial;
-import com.google.common.base.Strings;
-
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.entity.Player;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,6 +9,15 @@ import nl.aurorion.blockregen.BlockRegen;
 import nl.aurorion.blockregen.system.preset.struct.drop.ItemDrop;
 import nl.aurorion.blockregen.util.ParseUtil;
 import nl.aurorion.blockregen.util.TextUtil;
+import org.bukkit.Bukkit;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.entity.Player;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Log
 @NoArgsConstructor
@@ -31,10 +28,10 @@ public class PresetRewards {
     private Amount money;
 
     @Getter
-    private List<String> consoleCommands;
+    private List<Command> consoleCommands;
 
     @Getter
-    private List<String> playerCommands;
+    private List<Command> playerCommands;
 
     @Getter
     private List<ItemDrop> drops = new ArrayList<>();
@@ -47,9 +44,9 @@ public class PresetRewards {
 
         PresetRewards rewards = new PresetRewards();
 
-        rewards.setConsoleCommands(
+        rewards.parseConsoleCommands(
                 getStringOrList(section, "console-commands", "console-command", "commands", "command"));
-        rewards.setPlayerCommands(getStringOrList(section, "player-commands", "player-command"));
+        rewards.parsePlayerCommands(getStringOrList(section, "player-commands", "player-command"));
         rewards.setMoney(Amount.load(section, "money", 0));
 
         ConfigurationSection dropSection = section.getConfigurationSection("drop-item");
@@ -79,14 +76,17 @@ public class PresetRewards {
         return rewards;
     }
 
-    @Nullable
+    @NotNull
     private static List<String> getStringOrList(ConfigurationSection section, String... keys) {
         for (String key : keys) {
-            if (section.isList(key))
+            if (section.isList(key)) {
                 return section.getStringList(key);
-            return Collections.singletonList(section.getString(key));
+            } else {
+                String str = section.getString(key);
+                return str == null ? new ArrayList<>() : Collections.singletonList(str);
+            }
         }
-        return null;
+        return new ArrayList<>();
     }
 
     public void give(Player player) {
@@ -99,24 +99,49 @@ public class PresetRewards {
 
         // Sync commands
         Bukkit.getScheduler().runTask(BlockRegen.getInstance(), () -> {
-            playerCommands.forEach(command -> {
-                if (!Strings.isNullOrEmpty(command))
-                    Bukkit.dispatchCommand(player, TextUtil.parse(command, player));
-            });
-
-            consoleCommands.forEach(command -> {
-                if (!Strings.isNullOrEmpty(command))
-                    Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TextUtil.parse(command, player));
-            });
+            playerCommands.stream().filter(Command::shouldExecute).forEach(command -> Bukkit.dispatchCommand(player, TextUtil.parse(command.getCommand(), player)));
+            consoleCommands.stream().filter(Command::shouldExecute).forEach(command -> Bukkit.dispatchCommand(Bukkit.getConsoleSender(), TextUtil.parse(command.getCommand(), player)));
         });
     }
 
-    public void setConsoleCommands(List<String> consoleCommands) {
-        this.consoleCommands = consoleCommands == null ? new ArrayList<>() : consoleCommands;
+    public void parseConsoleCommands(@NotNull List<String> consoleCommands) {
+        this.consoleCommands = this.parseCommands(consoleCommands);
     }
 
-    public void setPlayerCommands(List<String> playerCommands) {
-        this.playerCommands = playerCommands == null ? new ArrayList<>() : playerCommands;
+    public void parsePlayerCommands(@NotNull List<String> playerCommands) {
+        this.playerCommands = this.parseCommands(playerCommands);
+    }
+
+    private List<Command> parseCommands(@NotNull List<String> strCommands) {
+        List<Command> commands = new ArrayList<>();
+        // Parse the input.
+        for (String strCmd : strCommands) {
+            if (strCmd.contains(";")) {
+                String[] args = strCmd.split(";");
+
+                int chance;
+
+                try {
+                    chance = Integer.parseInt(args[0]);
+                } catch (NumberFormatException e) {
+                    log.warning(String.format("Invalid number format for input %s in command %s", args[0], strCmd));
+                    continue;
+                }
+
+                if (args[1].trim().isEmpty()) {
+                    continue;
+                }
+
+                commands.add(new Command(args[1], chance));
+            } else {
+                if (strCmd.trim().isEmpty()) {
+                    continue;
+                }
+
+                commands.add(new Command(strCmd, 100));
+            }
+        }
+        return commands;
     }
 
     public void setDrops(List<ItemDrop> drops) {

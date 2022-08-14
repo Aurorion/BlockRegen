@@ -7,6 +7,7 @@ import nl.aurorion.blockregen.Message;
 import nl.aurorion.blockregen.StringUtil;
 import nl.aurorion.blockregen.system.event.struct.PresetEvent;
 import nl.aurorion.blockregen.system.preset.struct.BlockPreset;
+import nl.aurorion.blockregen.system.regeneration.struct.RegenerationProcess;
 import nl.aurorion.blockregen.system.region.struct.RegenerationRegion;
 import nl.aurorion.blockregen.system.region.struct.RegionSelection;
 import org.bukkit.command.Command;
@@ -17,6 +18,10 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
 
@@ -29,9 +34,13 @@ public class Commands implements CommandExecutor {
             + "\n&3/%label% check &8- &7Check the correct material name to use. Just hit a block."
             + "\n&3/%label% tools &8- &7Gives you tools for regions."
             + "\n&3/%label% regions &8- &7List regions."
-            + "\n&3/%label% region set <name> &8- &7Create a region from your selection."
-            + "\n&3/%label% region all <name> &8- &7Switch 'all presets' mode."
-            + "\n&3/%label% region remove <name> &8- &7Delete a region."
+            + "\n&3/%label% region set <region> &8- &7Create a region from your selection."
+            + "\n&3/%label% region all <region> &8- &7Switch 'all presets' mode."
+            + "\n&3/%label% region add <region> <preset> &8- &7Add a preset to the region."
+            + "\n&3/%label% region remove <region> <preset> &8- &7Remove a preset from region."
+            + "\n&3/%label% region clear <region> &8- &7Clear all presets from the region."
+            + "\n&3/%label% region copy <region-from> <region-to> &8- &7Copy configured presets from one region to another."
+            + "\n&3/%label% region delete <region> &8- &7Delete a region."
             + "\n&3/%label% events &8- &7Event management."
             + "\n&3/%label% discord &8- &7BlockRegen discord invite. Ask for support there.";
 
@@ -179,111 +188,290 @@ public class Commands implements CommandExecutor {
                     return false;
                 }
 
-                if (args[1].equalsIgnoreCase("list")) {
-                    if (args.length > 2) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region list", label)));
-                        return false;
-                    }
-
-                    StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
-                    for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
-
-                        message.append(String.format("&8  - &f%s", region.getName()));
-
-                        if (region.isAll()) {
-                            message.append("&8 (&aall&8)\n");
-                        } else {
-                            if (!region.getPresets().isEmpty()) {
-                                message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
-                            } else {
-                                message.append("&8 (&cnone&8)\n");
-                            }
-                        }
-                    }
-                    sender.sendMessage(StringUtil.color(message.toString()));
-                    return false;
-                } else if (args[1].equalsIgnoreCase("set")) {
-
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region set <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region set <name>", label)));
-                        return false;
-                    }
-
-                    if (plugin.getRegionManager().exists(args[2])) {
-                        Message.DUPLICATED_REGION.send(player);
-                        return false;
-                    }
-
-                    RegionSelection selection;
-
-                    if (plugin.getVersionManager().getWorldEditProvider() != null) {
-                        selection = plugin.getVersionManager().getWorldEditProvider().createSelection(player);
-
-                        if (selection == null) {
-                            Message.NO_SELECTION.send(player);
+                switch (args[1].toLowerCase()) {
+                    case "list": {
+                        if (args.length > 2) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region list", label)));
                             return false;
                         }
-                    } else {
-                        selection = plugin.getRegionManager().getSelection(player);
-                    }
 
-                    if (!plugin.getRegionManager().finishSelection(args[2], selection)) {
-                        sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                        StringBuilder message = new StringBuilder("&8&m    &3 BlockRegen Regions &8&m    &r\n");
+                        for (RegenerationRegion region : plugin.getRegionManager().getLoadedRegions().values()) {
+
+                            message.append(String.format("&8  - &f%s", region.getName()));
+
+                            if (region.isAll()) {
+                                message.append("&8 (&aall&8)\n");
+                            } else {
+                                if (!region.getPresets().isEmpty()) {
+                                    message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                                } else {
+                                    message.append("&8 (&cnone&8)\n");
+                                }
+                            }
+                        }
+                        sender.sendMessage(StringUtil.color(message.toString()));
                         return false;
                     }
+                    case "set": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region set <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region set <name>", label)));
+                            return false;
+                        }
 
-                    player.sendMessage(StringUtil.color(Message.SET_REGION.get(player)
-                            .replace("%region%", args[2])));
-                    return false;
-                } else if (args[1].equalsIgnoreCase("remove")) {
+                        if (plugin.getRegionManager().exists(args[2])) {
+                            Message.DUPLICATED_REGION.send(player);
+                            return false;
+                        }
 
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region remove <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region remove <name>", label)));
-                        return false;
-                    }
+                        RegionSelection selection;
 
-                    if (!plugin.getRegionManager().exists(args[2])) {
-                        Message.UNKNOWN_REGION.send(player);
-                        return false;
-                    }
+                        if (plugin.getVersionManager().getWorldEditProvider() != null) {
+                            selection = plugin.getVersionManager().getWorldEditProvider().createSelection(player);
 
-                    plugin.getRegionManager().removeRegion(args[2]);
-                    Message.REMOVE_REGION.send(player);
-                    return false;
-                } else if (args[1].equalsIgnoreCase("all")) {
-                    if (args.length > 3) {
-                        sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region all <name>", label)));
-                        return false;
-                    } else if (args.length < 3) {
-                        sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
-                                .replace("%help%", String.format("/%s region all <name>", label)));
-                        return false;
-                    }
+                            if (selection == null) {
+                                Message.NO_SELECTION.send(player);
+                                return false;
+                            }
+                        } else {
+                            selection = plugin.getRegionManager().getSelection(player);
+                        }
 
-                    RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+                        if (!plugin.getRegionManager().finishSelection(args[2], selection)) {
+                            sender.sendMessage(Message.COULD_NOT_CREATE_REGION.get(player));
+                            return false;
+                        }
 
-                    if (region == null) {
-                        Message.UNKNOWN_REGION.send(player);
+                        player.sendMessage(StringUtil.color(Message.SET_REGION.get(player)
+                                .replace("%region%", args[2])));
                         return false;
                     }
+                    case "delete": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region delete <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region delete <name>", label)));
+                            return false;
+                        }
 
-                    player.sendMessage(StringUtil.color(String.format(Message.SET_ALL.get(player), region.setAll(!region.isAll()) ? "&aall" : "&cnot all")));
-                    return false;
-                } else {
-                    sendHelp(sender, label);
+                        if (!plugin.getRegionManager().exists(args[2])) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        plugin.getRegionManager().removeRegion(args[2]);
+                        Message.REMOVE_REGION.send(player);
+                        return false;
+                    }
+                    case "all": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region all <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region all <name>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        player.sendMessage(StringUtil.color(String.format(Message.SET_ALL.get(player), region.setAll(!region.isAll()) ? "&aall" : "&cnot all")));
+                        return false;
+                    }
+                    case "add": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region add <name> <preset>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region add <name> <preset>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]);
+
+                        if (preset == null) {
+                            player.sendMessage(Message.INVALID_PRESET.get(player)
+                                    .replace("%preset%", args[3]));
+                            return false;
+                        }
+
+                        if (region.hasPreset(preset)) {
+                            player.sendMessage(Message.HAS_PRESET_ALREADY.get(player)
+                                    .replace("%region%", args[2])
+                                    .replace("%preset%", args[3]));
+                            return false;
+                        }
+
+                        region.addPreset(preset);
+                        player.sendMessage(Message.PRESET_ADDED.get(player)
+                                .replace("%preset%", args[3])
+                                .replace("%region%", args[2]));
+                        break;
+                    }
+                    case "remove": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region remove <name> <preset>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region remove <name> <preset>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        BlockPreset preset = plugin.getPresetManager().getPreset(args[3]);
+
+                        if (preset == null) {
+                            player.sendMessage(Message.INVALID_PRESET.get(player)
+                                    .replace("%preset%", args[3]));
+                            return false;
+                        }
+
+                        if (!region.hasPreset(preset)) {
+                            player.sendMessage(Message.DOES_NOT_HAVE_PRESET.get(player)
+                                    .replace("%region%", args[2])
+                                    .replace("%preset%", args[3]));
+                            return false;
+                        }
+
+                        region.removePreset(preset);
+                        player.sendMessage(Message.PRESET_REMOVED.get(player)
+                                .replace("%preset%", args[3])
+                                .replace("%region%", args[2]));
+                        break;
+                    }
+                    case "clear": {
+                        if (args.length > 3) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region clear <name>", label)));
+                            return false;
+                        } else if (args.length < 3) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region clear <name>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion region = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (region == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        region.clearPresets();
+                        player.sendMessage(Message.PRESETS_CLEARED.get(player)
+                                .replace("%region%", region.getName()));
+                        break;
+                    }
+                    case "copy": {
+                        if (args.length > 4) {
+                            sender.sendMessage(Message.TOO_MANY_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region copy <region-from> <region-to>", label)));
+                            return false;
+                        } else if (args.length < 4) {
+                            sender.sendMessage(Message.NOT_ENOUGH_ARGS.get(player)
+                                    .replace("%help%", String.format("/%s region copy <region-from> <region-to>", label)));
+                            return false;
+                        }
+
+                        RegenerationRegion regionFrom = plugin.getRegionManager().getRegion(args[2]);
+
+                        if (regionFrom == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        RegenerationRegion regionTo = plugin.getRegionManager().getRegion(args[3]);
+
+                        if (regionTo == null) {
+                            Message.UNKNOWN_REGION.send(player);
+                            return false;
+                        }
+
+                        regionTo.clearPresets();
+
+                        regionFrom.getPresets().forEach(regionTo::addPreset);
+                        player.sendMessage(Message.PRESETS_COPIED.get(player)
+                                .replace("%regionFrom%", regionFrom.getName())
+                                .replace("%regionTo%", regionTo.getName()));
+                        break;
+                    }
+                    default:
+                        sendHelp(sender, label);
                 }
+                break;
+            }
+            case "regen": {
+                // /blockregen regen -p preset -w world -r region
+
+                String[] workArgs = Arrays.copyOfRange(args, 1, args.length);
+
+                BlockPreset preset = null;
+                String worldName = null;
+                RegenerationRegion region = null;
+
+                Iterator<String> it = Arrays.stream(workArgs).iterator();
+
+                while (it.hasNext()) {
+                    String arg = it.next();
+
+                    if (arg.equalsIgnoreCase("-p") && it.hasNext()) {
+                        preset = plugin.getPresetManager().getPreset(it.next());
+                    } else if (arg.equalsIgnoreCase("-r") && it.hasNext()) {
+                        region = plugin.getRegionManager().getRegion(it.next());
+                    } else if (arg.equalsIgnoreCase("-w") && it.hasNext()) {
+                        worldName = it.next();
+                    } else {
+                        sender.sendMessage(Message.UNKNOWN_ARGUMENT.get());
+                        return false;
+                    }
+                }
+
+                Set<RegenerationProcess> toRegen = new HashSet<>();
+
+                for (RegenerationProcess process : plugin.getRegenerationManager().getCache()) {
+                    if ((preset == null || preset.equals(process.getPreset())) &&
+                            (region == null || region.getName().equalsIgnoreCase(process.getRegionName())) &&
+                            (worldName == null || worldName.equalsIgnoreCase(process.getWorldName()))) {
+                        toRegen.add(process);
+                    }
+                }
+
+                toRegen.forEach(RegenerationProcess::regenerate);
+
+                sender.sendMessage(Message.REGENERATED_PROCESSES.get()
+                        .replace("%count%", String.valueOf(toRegen.size())));
                 break;
             }
             case "debug":

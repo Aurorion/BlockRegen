@@ -42,7 +42,7 @@ public class Amount {
     // Load Amount from yaml
     public static Amount load(ConfigurationSection root, String path, double defaultValue) {
 
-        if (root == null)
+        if (root == null || root.get(path) == null)
             return new Amount(defaultValue);
 
         // low & high section syntax
