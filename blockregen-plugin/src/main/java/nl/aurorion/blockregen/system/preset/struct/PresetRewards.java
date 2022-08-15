@@ -79,11 +79,16 @@ public class PresetRewards {
     @NotNull
     private static List<String> getStringOrList(ConfigurationSection section, String... keys) {
         for (String key : keys) {
+
+            if (section.get(key) == null) {
+                continue;
+            }
+
             if (section.isList(key)) {
                 return section.getStringList(key);
-            } else {
+            } else if (section.isString(key)) {
                 String str = section.getString(key);
-                return str == null ? new ArrayList<>() : Collections.singletonList(str);
+                return Collections.singletonList(str);
             }
         }
         return new ArrayList<>();
