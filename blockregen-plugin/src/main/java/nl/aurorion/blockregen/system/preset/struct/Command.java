@@ -16,7 +16,7 @@ public class Command {
     }
 
     protected boolean shouldExecute() {
-        return random.nextDouble(0.0, 100.0) <= chance;
+        return random.nextDouble() * 100.0 <= chance;
     }
 
     public String getCommand() {
