@@ -124,10 +124,10 @@ public class PresetRewards {
             if (strCmd.contains(";")) {
                 String[] args = strCmd.split(";");
 
-                int chance;
+                double chance;
 
                 try {
-                    chance = Integer.parseInt(args[0]);
+                    chance = Double.parseDouble(args[0]);
                 } catch (NumberFormatException e) {
                     log.warning(String.format("Invalid number format for input %s in command %s", args[0], strCmd));
                     continue;
