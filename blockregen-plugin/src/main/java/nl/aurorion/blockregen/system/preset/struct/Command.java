@@ -8,22 +8,22 @@ public class Command {
 
     private final String command;
 
-    private final int chance;
+    private final double chance;
 
-    public Command(String command, int chance) {
+    public Command(String command, double chance) {
         this.command = command;
         this.chance = chance;
     }
 
     protected boolean shouldExecute() {
-        return random.nextInt(101) <= this.chance;
+        return random.nextDouble(0.0, 100.0) <= chance;
     }
 
     public String getCommand() {
         return command;
     }
 
-    public int getChance() {
+    public double getChance() {
         return chance;
     }
 

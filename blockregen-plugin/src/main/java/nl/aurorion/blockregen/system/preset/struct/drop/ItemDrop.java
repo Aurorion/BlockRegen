@@ -70,11 +70,11 @@ public class ItemDrop {
 
         // x/100% chance to drop
         if (chance != null) {
-            int threshold = chance.getInt();
-            int roll = BlockRegen.getInstance().getRandom().nextInt(101);
+            double threshold = chance.getDouble();
+            double roll = BlockRegen.getInstance().getRandom().nextDouble(0.0,100.0);
 
             if (roll > threshold) {
-                log.fine(String.format("Drop %s failed chance roll, %d > %d", this, roll, threshold));
+                log.fine(String.format("Drop %s failed chance roll, %.2f > %.2f", this, roll, threshold));
                 return null;
             }
         }
