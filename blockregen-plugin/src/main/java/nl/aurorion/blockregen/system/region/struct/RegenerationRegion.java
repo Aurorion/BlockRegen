@@ -20,7 +20,7 @@ public class RegenerationRegion {
     @Getter
     private final Location max;
 
-    private final Set<BlockPreset> presets = new HashSet<>();
+    private final Set<String> presets = new HashSet<>();
 
     @Getter
     private boolean all = true;
@@ -35,15 +35,15 @@ public class RegenerationRegion {
         return this.all = all;
     }
 
-    public boolean hasPreset(@Nullable BlockPreset preset) {
+    public boolean hasPreset(@Nullable String preset) {
         return all || (preset != null && this.presets.contains(preset));
     }
 
-    public void addPreset(@NotNull BlockPreset preset) {
+    public void addPreset(@NotNull String preset) {
         this.presets.add(preset);
     }
 
-    public void removePreset(@NotNull BlockPreset preset) {
+    public void removePreset(@NotNull String preset) {
         this.presets.remove(preset);
     }
 
@@ -51,7 +51,7 @@ public class RegenerationRegion {
         this.presets.clear();
     }
 
-    public Set<BlockPreset> getPresets() {
+    public Set<String> getPresets() {
         return Collections.unmodifiableSet(this.presets);
     }
 

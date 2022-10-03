@@ -163,7 +163,7 @@ public class Commands implements CommandExecutor {
                         message.append("&8 (&aall&8)\n");
                     } else {
                         if (!region.getPresets().isEmpty()) {
-                            message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                            message.append(String.format("&8 (&r%s&8)\n", region.getPresets()));
                         } else {
                             message.append("&8 (&cnone&8)\n");
                         }
@@ -206,7 +206,7 @@ public class Commands implements CommandExecutor {
                                 message.append("&8 (&aall&8)\n");
                             } else {
                                 if (!region.getPresets().isEmpty()) {
-                                    message.append(String.format("&8 (&r%s&8)\n", region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.joining(", "))));
+                                    message.append(String.format("&8 (&r%s&8)\n", region.getPresets()));
                                 } else {
                                     message.append("&8 (&cnone&8)\n");
                                 }
@@ -320,14 +320,14 @@ public class Commands implements CommandExecutor {
                             return false;
                         }
 
-                        if (region.hasPreset(preset)) {
+                        if (region.hasPreset(preset.getName())) {
                             player.sendMessage(Message.HAS_PRESET_ALREADY.get(player)
                                     .replace("%region%", args[2])
                                     .replace("%preset%", args[3]));
                             return false;
                         }
 
-                        region.addPreset(preset);
+                        region.addPreset(preset.getName());
                         player.sendMessage(Message.PRESET_ADDED.get(player)
                                 .replace("%preset%", args[3])
                                 .replace("%region%", args[2]));
@@ -359,14 +359,14 @@ public class Commands implements CommandExecutor {
                             return false;
                         }
 
-                        if (!region.hasPreset(preset)) {
+                        if (!region.hasPreset(preset.getName())) {
                             player.sendMessage(Message.DOES_NOT_HAVE_PRESET.get(player)
                                     .replace("%region%", args[2])
                                     .replace("%preset%", args[3]));
                             return false;
                         }
 
-                        region.removePreset(preset);
+                        region.removePreset(preset.getName());
                         player.sendMessage(Message.PRESET_REMOVED.get(player)
                                 .replace("%preset%", args[3])
                                 .replace("%region%", args[2]));

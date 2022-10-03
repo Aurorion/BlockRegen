@@ -92,14 +92,14 @@ public class PlayerListener implements Listener {
             if (event.getAction() == Action.LEFT_CLICK_BLOCK) {
                 // Add a block
 
-                if (region.hasPreset(preset)) {
+                if (region.hasPreset(preset.getName())) {
                     player.sendMessage(Message.HAS_PRESET_ALREADY.get(player)
                             .replace("%region%", region.getName())
                             .replace("%preset%", preset.getName()));
                     return;
                 }
 
-                region.addPreset(preset);
+                region.addPreset(preset.getName());
 
                 player.sendMessage(Message.PRESET_ADDED.get(player)
                         .replace("%region%", region.getName())
@@ -107,14 +107,14 @@ public class PlayerListener implements Listener {
             } else {
                 // Remove a block
 
-                if (!region.hasPreset(preset)) {
+                if (!region.hasPreset(preset.getName())) {
                     player.sendMessage(Message.DOES_NOT_HAVE_PRESET.get(player)
                             .replace("%region%", region.getName())
                             .replace("%preset%", preset.getName()));
                     return;
                 }
 
-                region.removePreset(preset);
+                region.removePreset(preset.getName());
 
                 player.sendMessage(Message.PRESET_REMOVED.get(player)
                         .replace("%region%", region.getName())

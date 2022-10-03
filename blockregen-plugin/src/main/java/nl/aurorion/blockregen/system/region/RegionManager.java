@@ -152,10 +152,9 @@ public class RegionManager {
 
             if (preset == null) {
                 log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, rawRegion.getName()));
-                continue;
             }
 
-            region.addPreset(preset);
+            region.addPreset(presetName);
         }
 
         region.setAll(rawRegion.isAll());
@@ -167,12 +166,11 @@ public class RegionManager {
 
     // Only attempt to reload the presets configured as they could've changed.
     // Reloading whole regions could lead to the regeneration disabling. Could hurt the builds etc.
+    // -- Changed to preset names for regions, no need to reload, just print a warning when a preset is not loaded.
     public void reload() {
 
         for (RegenerationRegion region : this.loadedRegions.values()) {
-            List<String> presets = region.getPresets().stream().map(BlockPreset::getName).collect(Collectors.toList());
-
-            region.clearPresets();
+            Set<String> presets = region.getPresets();
 
             // Attach presets
             for (String presetName : presets) {
@@ -180,11 +178,7 @@ public class RegionManager {
 
                 if (preset == null) {
                     log.warning(String.format("Preset %s isn't loaded, but is included in region %s.", presetName, region.getName()));
-                    continue;
                 }
-
-                region.addPreset(preset);
-                log.fine("Reloaded region " + region.getName());
             }
         }
 
@@ -215,9 +209,7 @@ public class RegionManager {
             regionSection.set("Max", LocationUtil.locationToString(regenerationRegion.getMax()));
 
             regionSection.set("All", regenerationRegion.isAll());
-            regionSection.set("Presets", regenerationRegion.getPresets().stream()
-                    .map(BlockPreset::getName)
-                    .collect(Collectors.toList()));
+            regionSection.set("Presets", new ArrayList<>(regenerationRegion.getPresets()));
         }
 
         plugin.getFiles().getRegions().save();

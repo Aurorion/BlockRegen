@@ -155,12 +155,12 @@ public class BlockListener implements Listener {
 
         if (useRegions) {
             if (region != null) {
-                if (preset != null && region.hasPreset(preset)) {
+                if (preset != null && region.hasPreset(preset.getName())) {
                     process(plugin.getRegenerationManager().createProcess(block, preset, region.getName()), preset,
                             event);
                 } else {
-                    if (!region.hasPreset(preset)) {
-                        log.fine(String.format("Region %s doesn't have preset %s added.", region.getName(), preset != null ? preset.getName() : "null"));
+                    if (preset != null && !region.hasPreset(preset.getName())) {
+                        log.fine(String.format("Region %s doesn't have preset %s added.", region.getName(), preset.getName()));
                     }
 
                     if (plugin.getConfig().getBoolean("Disable-Other-Break-Region")) {

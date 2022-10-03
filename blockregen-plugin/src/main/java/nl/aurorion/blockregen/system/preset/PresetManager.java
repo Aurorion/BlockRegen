@@ -51,7 +51,7 @@ public class PresetManager {
     @Nullable
     public BlockPreset getPreset(@NotNull Block block, @NotNull RegenerationRegion region) {
         for (BlockPreset preset : this.presets.values()) {
-            if (plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial()) && region.hasPreset(preset)) {
+            if (plugin.getVersionManager().getMethods().compareType(block, preset.getTargetMaterial()) && region.hasPreset(preset.getName())) {
                 return preset;
             }
         }
